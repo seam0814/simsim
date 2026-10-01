@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://seam0814.github.io/simsim/sitemap.xml

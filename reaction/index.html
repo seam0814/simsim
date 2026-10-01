@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반응속도 테스트 — 내 반응속도는 몇 ms? (무료)</title>
+<meta name="description" content="초록색으로 바뀌면 최대한 빨리 클릭! 내 반응속도(ms)를 측정하고 등급·점수를 친구와 공유하세요. 무료 미니게임.">
+<link rel="canonical" href="https://seam0814.github.io/simsim/reaction/">
+<link rel="stylesheet" href="../style.css">
+<style>
+  #pad{height:260px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-family:var(--head);font-size:1.4rem;text-align:center;user-select:none;transition:background .05s}
+  .wait{background:#e5484d}.go{background:#1aa86a}.ready{background:#8a8f98}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <h1>⚡ 반응속도 테스트</h1>
+  <p class="sub">초록색으로 바뀌는 순간, 최대한 빨리 클릭(또는 탭)하세요!</p>
+  <div class="card">
+    <div id="pad" class="ready">여기를 눌러 시작</div>
+    <div id="result" style="text-align:center;margin-top:14px"></div>
+    <button class="btn sec" id="share" style="display:none">📸 결과 공유</button>
+  </div>
+  <div class="copy">
+    <h2>등급 기준</h2>
+    <p>~200ms 세계급 ⚡ / ~250ms 매우 빠름 / ~300ms 평균 / ~400ms 보통 / 그 이상은 느긋 😌. 평균 사람은 보통 250~300ms예요. 5번 정도 해서 best를 노려보세요!</p>
+    <details><summary>너무 빨리 눌렀다고 나와요</summary><p>초록색이 되기 전에 누르면 반칙이에요. 색이 바뀐 걸 보고 눌러야 측정됩니다.</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var pad=document.getElementById("pad"),res=document.getElementById("result"),shareBtn=document.getElementById("share");
+  var state="ready",t0=0,timeout=null,best=parseInt(store.get("react_best","0"))||0;
+  function grade(ms){return ms<=200?"세계급 ⚡":ms<=250?"매우 빠름 🔥":ms<=300?"평균 이상 👍":ms<=400?"보통 🙂":"느긋 😌"}
+  function showBest(){res.innerHTML+=best?('<div style="color:var(--muted);margin-top:6px">최고 기록: '+best+'ms</div>'):""}
+  function arm(){state="wait";pad.className="pad wait";pad.textContent="초록색이 되면 클릭!";
+    timeout=setTimeout(function(){state="go";t0=performance.now();pad.className="pad go";pad.textContent="지금 클릭!";},900+Math.random()*2600);}
+  pad.addEventListener("click",function(){
+    if(state==="ready"){res.innerHTML="";shareBtn.style.display="none";arm();return}
+    if(state==="wait"){clearTimeout(timeout);state="ready";pad.className="pad ready";pad.textContent="너무 빨라요! 다시 하려면 클릭";return}
+    if(state==="go"){var ms=Math.round(performance.now()-t0);state="ready";pad.className="pad ready";pad.textContent="다시 하려면 클릭";
+      var isBest=!best||ms<best;if(isBest){best=ms;store.set("react_best",best)}
+      res.innerHTML='<div style="font-size:2.2rem;font-family:var(--head);color:var(--accent)">'+ms+'ms</div><div>'+grade(ms)+(isBest?' · 신기록! 🎉':'')+'</div>';showBest();
+      track("reaction",{ms:ms});shareBtn.style.display="block";shareBtn.onclick=function(){shareCard({emoji:"⚡",title:ms+"ms",lines:[grade(ms),"반응속도 테스트"],share:"내 반응속도 "+ms+"ms ("+grade(ms)+")! 너도 해봐"})};
+    }
+  });
+})();
+</script>
+</body>
+</html>
