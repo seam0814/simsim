@@ -45,4 +45,25 @@
     c.toBlob(function(b){if(!b)return;var f=null;try{f=new File([b],"simsim.png",{type:"image/png"})}catch(e){}
       if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],text:o.share||"내 결과 ✨"}).then(function(){track("card_share")}).catch(function(){})}
       else{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="심심풀이.png";a.click();setTimeout(function(){URL.revokeObjectURL(u)},1000);track("card_download")}},"image/png")};
+
+  /* ===== 엑셀 위장 크롬 + 공통 보스키(Esc/blur) ===== */
+  (function(){
+    var bar=document.createElement("div");bar.className="xlchrome";
+    bar.innerHTML='<div class="xltitle">통합 문서1 - Excel<span style="float:right">— ☐ ✕</span></div>'
+      +'<div class="xlribbon"><b>파일</b> &nbsp;홈 &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
+      +'<div class="xlformbar"><span class="nb">A1</span><span>fx</span><span>=SHEET()</span></div>';
+    document.body.insertBefore(bar,document.body.firstChild);
+    var boss=document.createElement("div");boss.id="bossv";
+    var rows=[["항목","1월","2월","3월","합계"],["매출","1,240","1,310","1,455","4,005"],["매출원가","720","760","810","2,290"],["판관비","310","325","330","965"],["영업이익","210","225","315","750"]];
+    var tb="<table><tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th></tr>";
+    rows.forEach(function(r,i){tb+="<tr><th>"+(i+1)+"</th>"+r.map(function(x){return "<td>"+x+"</td>"}).join("")+"</tr>"});tb+="</table>";
+    boss.innerHTML='<div class="xltitle" style="background:#217346;color:#fff;padding:6px 12px">분기보고서_최종_v4.xlsx - Excel<span style="float:right">— ☐ ✕</span></div>'
+      +'<div class="xlribbon" style="background:#f3f3f3;border-bottom:1px solid #d4d4d4;padding:6px 12px;color:#555"><b>파일</b> 홈 삽입 수식 데이터 검토</div>'
+      +tb+'<div class="bosshint">아무 키나 누르면 돌아갑니다…</div>';
+    document.body.appendChild(boss);
+    function bshow(v){boss.classList.toggle("show",v)}
+    window.addEventListener("keydown",function(e){if(e.key==="Escape"){bshow(!boss.classList.contains("show"));e.preventDefault();return}if(boss.classList.contains("show"))bshow(false)});
+    window.addEventListener("blur",function(){bshow(true)});
+    document.addEventListener("visibilitychange",function(){if(document.hidden)bshow(true)});
+  })();
 })();
