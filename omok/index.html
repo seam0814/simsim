@@ -24,10 +24,17 @@
   td.f-hd{background:#f7f7f7;color:#555;font-weight:600;text-align:center}
   td.f-lbl{color:#333;text-align:left}
   td.f-num{text-align:right;color:#333}
-  td.gc{cursor:pointer}
+  td.gc{cursor:pointer;background:#f4faf4}
+  td.gc:hover{background:#e3f1e3}
   td.gc.s1{background:#2e7d32}
   td.gc.s2{background:#c0504d}
+  td.gc.s1:hover{background:#2e7d32}
+  td.gc.s2:hover{background:#c0504d}
   td.gc.last{outline:2px solid #ffd400;outline-offset:-2px}
+  td.gc.et{border-top:2px solid #2e7d32}
+  td.gc.eb{border-bottom:2px solid #2e7d32}
+  td.gc.el{border-left:2px solid #2e7d32}
+  td.gc.er{border-right:2px solid #2e7d32}
   td.dis{cursor:default}
 </style>
 </head>
@@ -85,6 +92,7 @@
       for(var c=0;c<SC;c++){if(skip>0){skip--;continue;}
         if(r>=GR0&&r<GR0+N&&c>=GC0&&c<GC0+N){var gr=r-GR0,gc=c-GC0,v=g[gr][gc],cls="gc"+(v===1?" s1":v===2?" s2":"");
           if(last&&last[0]===gr&&last[1]===gc)cls+=" last";if(over)cls+=" dis";
+          if(gr===0)cls+=" et";if(gr===N-1)cls+=" eb";if(gc===0)cls+=" el";if(gc===N-1)cls+=" er";
           h+="<td class='"+cls+"' data-r='"+gr+"' data-c='"+gc+"'></td>";
         }else{var f=FAKE[r+","+c];if(f){var sp=f.span||1;skip=sp-1;h+="<td class='"+f.cls+"'"+(sp>1?" colspan='"+sp+"'":"")+">"+f.t+"</td>";}else h+="<td></td>";}
       }h+="</tr>";}
