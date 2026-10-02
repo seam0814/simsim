@@ -17,6 +17,10 @@
   .bgsheet td.title{background:#dfeedf;color:#1b5e20;font-weight:700;text-align:left}
   .bgsheet tr.alt td{background:#fafbfa}
   .bgsheet td.pos{color:#1565c0}.bgsheet td.neg{color:#c62828}
+  .bgsheet td.cf1{background:#2e7d32;color:#fff}.bgsheet td.cf2{background:#a5d6a7}
+  .bgsheet td.cf3{background:#fff3cd}.bgsheet td.cf4{background:#f6c6c6}
+  .bgsheet td.tot{background:#e9f0e9;font-weight:700;color:#1b5e20}
+  .bgsheet td.sub{background:#fff;color:#999;font-size:11px;text-align:left}
   /* 떠있는 오목 창 */
   #panel{position:fixed;z-index:60;background:#fff;border:1px solid #777;box-shadow:0 8px 30px rgba(0,0,0,.25);border-radius:4px;overflow:hidden}
   #phead{background:#217346;color:#fff;padding:6px 10px;font-size:12px;cursor:move;display:flex;justify-content:space-between;align-items:center;user-select:none}
@@ -61,21 +65,29 @@
   /* 배경 데이터 시트 */
   (function(){
     var depts=["영업1팀","영업2팀","생산1팀","생산2팀","품질팀","물류팀","구매팀","R&D센터","경영지원","마케팅팀","CS팀","해외영업","기획팀","재무팀","인사팀","총무팀"];
-    var cols=[["부서",120,"l"],["목표",74,"n"],["1월",72,"n"],["2월",72,"n"],["3월",72,"n"],["1Q합계",84,"n"],["달성률",72,"n"],["전년비",72,"n"],["비고",100,"l"]];
-    var notes=["양호","검토요망","초과달성","정상","주의","우수","승인"];
+    var months=["1월","2월","3월","4월","5월","6월"];
+    var cols=[["부서",108,"l"],["목표",62,"n"]];months.forEach(function(m){cols.push([m,52,"n"])});
+    cols.push(["상반기",74,"n"],["달성률",66,"n"],["전년비",60,"n"],["비고",92,"l"]);
+    var notes=["양호","검토요망","초과달성","정상","주의","우수","승인","재검토"];
     function r(a,b){return Math.floor(a+Math.random()*(b-a))}
+    function cf(rate){return rate>=105?"cf1":rate>=100?"cf2":rate>=95?"cf3":"cf4"}
+    var nC=cols.length;
     var cg="<colgroup><col style='width:30px'>"+cols.map(function(x){return "<col style='width:"+x[1]+"px'>"}).join("")+"</colgroup>";
-    var h="<tr><th class='rn'></th>";for(var c=0;c<cols.length;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
-    h+="<tr><th class='rn'>1</th><td class='title' colspan='"+cols.length+"'>2026년 부서별 실적 집계표 (단위: 백만원)</td></tr>";
-    h+="<tr><th class='rn'>2</th>"+cols.map(function(x){return "<td class='hd'>"+x[0]+"</td>"}).join("")+"</tr>";
-    for(var i=0;i<depts.length;i++){var t=r(90,140)*10,m1=r(25,48)*10,m2=r(25,48)*10,m3=r(25,48)*10,sum=m1+m2+m3,rate=Math.round(sum/t*100),yoy=r(-6,13);
+    var h="<tr><th class='rn'></th>";for(var c=0;c<nC;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
+    h+="<tr><th class='rn'>1</th><td class='title' colspan='"+nC+"'>2026년 상반기 부서별 실적 집계표 (단위: 백만원)</td></tr>";
+    h+="<tr><th class='rn'>2</th><td class='sub' colspan='"+nC+"'>조회기준: 2026-06-30 · 작성: 경영기획팀 · 상태: 결재 완료</td></tr>";
+    h+="<tr><th class='rn'>3</th>"+cols.map(function(x){return "<td class='hd'>"+x[0]+"</td>"}).join("")+"</tr>";
+    var tg=0,tm=[0,0,0,0,0,0],ts=0;
+    for(var i=0;i<depts.length;i++){var tgt=r(40,60)*10,sum=0,cells="";
+      for(var mi=0;mi<6;mi++){var v=r(35,64)*10;sum+=v;tm[mi]+=v;cells+="<td class='n'>"+v.toLocaleString()+"</td>"}
+      var rate=Math.round(sum/(tgt*6)*100),yoy=r(-7,14);tg+=tgt*6;ts+=sum;
       var alt=i%2?" class='alt'":"";
-      h+="<tr"+alt+"><th class='rn'>"+(i+3)+"</th>"
-        +"<td class='l'>"+depts[i]+"</td><td class='n'>"+t.toLocaleString()+"</td><td class='n'>"+m1.toLocaleString()+"</td><td class='n'>"+m2.toLocaleString()+"</td><td class='n'>"+m3.toLocaleString()+"</td>"
-        +"<td class='n'>"+sum.toLocaleString()+"</td><td class='n'>"+rate+"%</td>"
+      h+="<tr"+alt+"><th class='rn'>"+(i+4)+"</th><td class='l'>"+depts[i]+"</td><td class='n'>"+(tgt*6).toLocaleString()+"</td>"+cells
+        +"<td class='n'>"+sum.toLocaleString()+"</td><td class='n "+cf(rate)+"'>"+rate+"%</td>"
         +"<td class='n "+(yoy>=0?"pos":"neg")+"'>"+(yoy>=0?"+":"")+yoy+"%</td><td class='l'>"+notes[r(0,notes.length)]+"</td></tr>";}
-    // 합계 행
-    h+="<tr class='alt'><th class='rn'>"+(depts.length+3)+"</th><td class='l' style='font-weight:600'>합계</td><td class='hd' colspan='"+(cols.length-1)+"' style='text-align:left;background:#eef3ee'>자동 합계 (SUM) 적용됨</td></tr>";
+    var tcells="";for(var mi=0;mi<6;mi++)tcells+="<td class='tot n'>"+tm[mi].toLocaleString()+"</td>";
+    h+="<tr><th class='rn'>"+(depts.length+4)+"</th><td class='tot l'>합계</td><td class='tot n'>"+tg.toLocaleString()+"</td>"+tcells
+      +"<td class='tot n'>"+ts.toLocaleString()+"</td><td class='tot n'>"+Math.round(ts/tg*100)+"%</td><td class='tot n'>—</td><td class='tot l'>SUM</td></tr>";
     $("#bg").innerHTML="<table class='bgsheet'>"+cg+h+"</table>";
   })();
 
