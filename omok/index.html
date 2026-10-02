@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통합 문서5 - Excel</title>
+<meta name="description" content="엑셀풍 오목(5목) — 컴퓨터(AI)와 대국. 난이도 3단계, 서버 없이 브라우저에서. 보스키(Esc)로 즉시 업무화면. 무료.">
+<link rel="canonical" href="https://seam0814.github.io/simsim/omok/">
+<link rel="stylesheet" href="../style.css">
+<style>
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 8px;font-size:12px;color:#555}
+  .toolbar b{color:#1b5e20}
+  .lv button{font:inherit;border:1px solid #d4d4d4;background:#f8f8f8;padding:4px 9px;border-radius:3px;cursor:pointer;margin-right:5px;color:#217346;font-size:12px}
+  .lv button.on{background:#217346;color:#fff;border-color:#217346}
+  .mini{border:1px solid #d4d4d4;background:#f8f8f8;padding:4px 9px;border-radius:3px;cursor:pointer;color:#555;font-size:12px}
+  .msscroll{overflow:auto;border:1px solid #c6c6c6;background:#fff;display:inline-block;max-width:100%}
+  table.ob{border-collapse:collapse;table-layout:fixed}
+  table.ob th{background:#f3f3f3;color:#999;font-size:10px;border:1px solid #d4d4d4;width:24px;height:20px;text-align:center;font-weight:600}
+  table.ob th.rn{width:24px}
+  table.ob td{border:1px solid #dcdcdc;width:24px;height:24px;text-align:center;font-size:17px;line-height:1;cursor:pointer;background:#fff;user-select:none;padding:0}
+  table.ob td.last{background:#fff7d6}
+  table.ob td.b{color:#222}
+  table.ob td.w{color:#666}
+  table.ob td.dis{cursor:default}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-header"></div>
+  <div class="toolbar">
+    <span class="lv" id="lv"><button data-d="1">쉬움</button><button data-d="2" class="on">보통</button><button data-d="3">어려움</button></span>
+    <span>상태: <b id="state">내 차례 (흑 ●)</b></span>
+    <button class="mini" id="restart">새 대국</button>
+  </div>
+  <div class="msscroll"><table class="ob" id="board"></table></div>
+  <div class="copy">
+    <h2>오목 (5목) 안내</h2>
+    <p>가로·세로·대각선으로 <b>내 돌(흑 ●) 5개</b>를 먼저 이으면 승리! 컴퓨터는 백(○)이에요. 칸을 클릭해서 두세요. 난이도는 쉬움·보통·어려움 3단계, AI는 전부 <b>내 브라우저에서</b> 계산해서 서버 비용이 없어요. <b>Esc=업무화면</b>.</p>
+    <details><summary>상대방이랑 같이 두는 건요?</summary><p>초대 링크로 둘이 두는 "대전" 모드는 백엔드(실시간 서버)가 필요해서 다음 단계예요. 지금은 AI 대국 먼저!</p></details>
+  </div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var N=15,g,turn,over,last,level=2,thinking=false;
+  var DIRS=[[0,1],[1,0],[1,1],[1,-1]];
+  function inb(r,c){return r>=0&&r<N&&c>=0&&c<N}
+  function letter(i){return String.fromCharCode(65+i)}
+  function dirInfo(r,c,p,dr,dc){var len=1,i=1;while(inb(r+dr*i,c+dc*i)&&g[r+dr*i][c+dc*i]===p){len++;i++}
+    var oF=inb(r+dr*i,c+dc*i)&&g[r+dr*i][c+dc*i]===0?1:0;var j=1;while(inb(r-dr*j,c-dc*j)&&g[r-dr*j][c-dc*j]===p){len++;j++}
+    var oB=inb(r-dr*j,c-dc*j)&&g[r-dr*j][c-dc*j]===0?1:0;return{len:len,open:oF+oB}}
+  function win(r,c,p){for(var d=0;d<4;d++)if(dirInfo(r,c,p,DIRS[d][0],DIRS[d][1]).len>=5)return true;return false}
+  function pat(len,open){if(len>=5)return 100000;if(len===4)return open>=2?50000:open===1?6000:0;if(len===3)return open>=2?5000:open===1?600:0;if(len===2)return open>=2?500:open===1?60:0;return open>=2?8:2}
+  function evalCell(r,c,p){g[r][c]=p;var s=0;for(var d=0;d<4;d++){var i=dirInfo(r,c,p,DIRS[d][0],DIRS[d][1]);s+=pat(i.len,i.open)}g[r][c]=0;return s}
+  function hasNeighbor(r,c){for(var dr=-2;dr<=2;dr++)for(var dc=-2;dc<=2;dc++){if(!dr&&!dc)continue;var nr=r+dr,nc=c+dc;if(inb(nr,nc)&&g[nr][nc])return true}return false}
+  function aiMove(){
+    var W=level===1?0.5:level===2?0.95:1.05, jit=level===1?4000:level===2?400:40;
+    var any=false;for(var r=0;r<N&&!any;r++)for(var c=0;c<N;c++)if(g[r][c]){any=true;break}
+    if(!any)return[7,7];
+    var best=null,bv=-1;
+    for(var r=0;r<N;r++)for(var c=0;c<N;c++){if(g[r][c]||!hasNeighbor(r,c))continue;
+      var atk=evalCell(r,c,2),def=evalCell(r,c,1),tot=atk+def*W+Math.random()*jit;
+      if(tot>bv){bv=tot;best=[r,c]}}
+    return best||[7,7]}
+  function render(){
+    var h="<tr><th class='rn'></th>";for(var c=0;c<N;c++)h+="<th>"+letter(c)+"</th>";h+="</tr>";
+    for(var r=0;r<N;r++){h+="<tr><th class='rn'>"+(r+1)+"</th>";for(var c=0;c<N;c++){
+      var v=g[r][c],cls=v===1?"b":v===2?"w":"",txt=v===1?"●":v===2?"○":"";
+      if(last&&last[0]===r&&last[1]===c)cls+=" last";if(over)cls+=" dis";
+      h+="<td class='"+cls+"' data-r='"+r+"' data-c='"+c+"'>"+txt+"</td>"}h+="</tr>"}
+    $("#board").innerHTML=h}
+  function setState(t){$("#state").textContent=t}
+  function place(r,c,p){g[r][c]=p;last=[r,c]}
+  function playerMove(r,c){if(over||thinking||g[r][c])return;
+    place(r,c,1);
+    if(win(r,c,1)){over=true;render();setState("결재 승인 — 승리! 🎉".replace(" 🎉",""));return}
+    if(full()){over=true;render();setState("보류 — 무승부");return}
+    render();setState("상대 발언 중… (AI)");thinking=true;
+    setTimeout(function(){var m=aiMove();place(m[0],m[1],2);thinking=false;
+      if(win(m[0],m[1],2)){over=true;render();setState("반려 — 패배");return}
+      if(full()){over=true;render();setState("보류 — 무승부");return}
+      render();setState("내 차례 (흑 ●)")},160)}
+  function full(){for(var r=0;r<N;r++)for(var c=0;c<N;c++)if(!g[r][c])return false;return true}
+  function init(){g=[];for(var r=0;r<N;r++){g[r]=[];for(var c=0;c<N;c++)g[r][c]=0}over=false;last=null;thinking=false;setState("내 차례 (흑 ●)");render()}
+  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(td&&td.dataset.r)playerMove(+td.dataset.r,+td.dataset.c)});
+  $("#lv").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;[].forEach.call(this.children,function(x){x.classList.remove("on")});b.classList.add("on");level=+b.dataset.d;init()});
+  $("#restart").addEventListener("click",init);
+  init();
+})();
+</script>
+</body>
+</html>
