@@ -8,11 +8,10 @@
 <link rel="canonical" href="https://seam0814.github.io/simsim/omok/">
 <link rel="stylesheet" href="../style.css">
 <style>
-  body{background:#fff;background-image:none}
   .bgsheet{border-collapse:collapse;table-layout:fixed}
   .bgsheet th{background:#f3f3f3;color:#888;font-size:11px;border:1px solid #d4d4d4;height:22px;text-align:center;font-weight:600}
   .bgsheet th.rn{width:30px}
-  .bgsheet td{border:1px solid #e3e3e3;height:23px;padding:2px 10px;font-size:12px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bgsheet td{border:1px solid #e3e3e3;height:23px;padding:2px 10px;font-size:12px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#fff}
   .bgsheet td.l{text-align:left}.bgsheet td.n{text-align:right;font-variant-numeric:tabular-nums}
   .bgsheet td.hd{background:#eef3ee;font-weight:600;color:#4a4a4a;text-align:center}
   .bgsheet td.title{background:#dfeedf;color:#1b5e20;font-weight:700;text-align:left}
@@ -53,6 +52,7 @@
       <span class="lv" id="lv"><button data-d="1">쉬움</button><button data-d="2" class="on">보통</button><button data-d="3">어려움</button></span>
       <span id="state">내 차례</span>
       <button class="mini" id="restart">새 대국</button>
+      <select id="bgsel" class="mini" style="padding:2px 4px"><option value="office">배경:일반사무</option><option value="sales">배경:영업</option><option value="dev">배경:개발/IT</option><option value="finance">배경:회계</option></select>
     </div>
     <table class="ob" id="board"></table>
     <div style="font-size:10px;color:#999;margin-top:5px">제목줄을 끌어 이동 · Esc=업무화면</div>
@@ -64,33 +64,47 @@
 (function(){
   var $=function(s){return document.querySelector(s)};
   /* 배경 데이터 시트 */
-  (function(){
-    var depts=["영업1팀","영업2팀","생산1팀","생산2팀","품질팀","물류팀","구매팀","R&D센터","경영지원","마케팅팀","CS팀","해외영업","기획팀","재무팀","인사팀","총무팀"];
-    var months=["1월","2월","3월","4월","5월","6월"];
-    var cols=[["부서",108,"l"],["목표",62,"n"]];months.forEach(function(m){cols.push([m,52,"n"])});
-    cols.push(["상반기",74,"n"],["달성률",66,"n"],["전년비",60,"n"],["비고",92,"l"]);
-    var notes=["양호","검토요망","초과달성","정상","주의","우수","승인","재검토"];
-    function r(a,b){return Math.floor(a+Math.random()*(b-a))}
-    function cf(rate){return rate>=105?"cf1":rate>=100?"cf2":rate>=95?"cf3":"cf4"}
-    var nC=cols.length;
-    var cg="<colgroup><col style='width:30px'>"+cols.map(function(x){return "<col style='width:"+x[1]+"px'>"}).join("")+"</colgroup>";
-    var h="<tr><th class='rn'></th>";for(var c=0;c<nC;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
-    h+="<tr><th class='rn'>1</th><td class='title' colspan='"+nC+"'>2026년 상반기 부서별 실적 집계표 (단위: 백만원)</td></tr>";
-    h+="<tr><th class='rn'>2</th><td class='sub' colspan='"+nC+"'>조회기준: 2026-06-30 · 작성: 경영기획팀 · 상태: 결재 완료</td></tr>";
-    h+="<tr><th class='rn'>3</th>"+cols.map(function(x){return "<td class='hd'>"+x[0]+"</td>"}).join("")+"</tr>";
-    var tg=0,tm=[0,0,0,0,0,0],ts=0;
-    for(var i=0;i<depts.length;i++){var tgt=r(40,60)*10,sum=0,cells="";
-      for(var mi=0;mi<6;mi++){var v=r(35,64)*10;sum+=v;tm[mi]+=v;cells+="<td class='n'>"+v.toLocaleString()+"</td>"}
-      var rate=Math.round(sum/(tgt*6)*100),yoy=r(-7,14);tg+=tgt*6;ts+=sum;
-      var alt=i%2?" class='alt'":"";
-      h+="<tr"+alt+"><th class='rn'>"+(i+4)+"</th><td class='l'>"+depts[i]+"</td><td class='n'>"+(tgt*6).toLocaleString()+"</td>"+cells
-        +"<td class='n'>"+sum.toLocaleString()+"</td><td class='n "+cf(rate)+"'>"+rate+"%</td>"
-        +"<td class='n "+(yoy>=0?"pos":"neg")+"'>"+(yoy>=0?"+":"")+yoy+"%</td><td class='l'>"+notes[r(0,notes.length)]+"</td></tr>";}
-    var tcells="";for(var mi=0;mi<6;mi++)tcells+="<td class='tot n'>"+tm[mi].toLocaleString()+"</td>";
-    h+="<tr><th class='rn'>"+(depts.length+4)+"</th><td class='tot l'>합계</td><td class='tot n'>"+tg.toLocaleString()+"</td>"+tcells
-      +"<td class='tot n'>"+ts.toLocaleString()+"</td><td class='tot n'>"+Math.round(ts/tg*100)+"%</td><td class='tot n'>—</td><td class='tot l'>SUM</td></tr>";
-    $("#bg").innerHTML="<table class='bgsheet'>"+cg+h+"</table>";
-  })();
+  /* 배경 데이터 시트 (업종별 템플릿) */
+  function rr(a,b){return Math.floor(a+Math.random()*(b-a))}
+  var FNAME=["김","이","박","최","정","강","조","윤","장","임","한","오"];
+  function rname(){return FNAME[rr(0,FNAME.length)]+["대리","과장","사원","주임","차장","팀장"][rr(0,6)]}
+  function cfr(v){return v>=105?"cf1":v>=100?"cf2":v>=95?"cf3":"cf4"}
+  var TPL={
+    office:{t:"2026년 상반기 부서별 실적 집계표 (단위: 백만원)",s:"조회기준 2026-06-30 · 작성: 경영기획팀 · 결재 완료",
+      items:["영업1팀","영업2팀","생산1팀","생산2팀","품질팀","물류팀","구매팀","R&D센터","경영지원","마케팅팀","CS팀","해외영업","기획팀","재무팀","인사팀","총무팀"],
+      cols:[{l:"부서",w:108,k:"item"},{l:"목표",w:66,k:"num",a:200,b:360},{l:"실적",w:66,k:"num",a:190,b:380},{l:"1분기",w:62,k:"num",a:90,b:190},{l:"2분기",w:62,k:"num",a:90,b:190},{l:"달성률",w:66,k:"pct",a:86,b:118,cf:1},{l:"전년비",w:60,k:"yoy"},{l:"비고",w:92,k:"pick",p:["양호","검토요망","초과달성","정상","주의","우수","승인"]}]},
+    sales:{t:"거래처별 매출·수금 현황 (단위: 천원, VAT 별도)",s:"조회기준 2026-06-30 · 영업관리팀",
+      items:["가온테크","나래상사","다온물산","라온전자","마루ENG","바다무역","사랑유통","아름산업","자연상회","하늘코퍼","두리상사","세움테크","온누리","미래상사","정음물산","해든무역"],
+      cols:[{l:"거래처",w:120,k:"item"},{l:"담당",w:62,k:"name"},{l:"계약액",w:80,k:"num",a:300,b:900},{l:"수금액",w:80,k:"num",a:200,b:850},{l:"미수금",w:76,k:"num",a:0,b:150},{l:"수금률",w:64,k:"pct",a:70,b:100,cf:1},{l:"등급",w:48,k:"pick",p:["A","B","C","A","B"]},{l:"최근접촉",w:76,k:"date"}]},
+    dev:{t:"이슈 트래커 — 2026 Sprint 14 보드",s:"업데이트 2026-06-30 10:24 · 프로젝트: WMS-2.0",count:16,
+      cols:[{l:"이슈",w:72,k:"issue"},{l:"제목",w:176,k:"pick",p:["로그인 세션 만료 처리","리스트 페이지네이션 버그","CSV 내보내기 인코딩","결제 콜백 타임아웃","대시보드 차트 렌더링","권한 체크 누락","알림 중복 발송","캐시 무효화 이슈","모바일 레이아웃 깨짐","API 응답 지연 개선"]},{l:"담당",w:60,k:"name"},{l:"상태",w:64,k:"pick",p:["진행중","검토","완료","대기","QA"]},{l:"우선",w:54,k:"pick",p:["높음","보통","낮음","긴급"]},{l:"SP",w:42,k:"num",a:1,b:8},{l:"수정",w:70,k:"date"}]},
+    finance:{t:"계정별 잔액 시산표 (2026년 6월)",s:"작성 2026-06-30 · 재무회계팀",
+      items:["현금","보통예금","외상매출금","미수금","상품","비품","차량운반구","외상매입금","미지급금","예수금","단기차입금","자본금","매출","매출원가","급여","지급수수료"],
+      cols:[{l:"코드",w:64,k:"code"},{l:"계정과목",w:120,k:"item"},{l:"차변",w:88,k:"num",a:100,b:900},{l:"대변",w:88,k:"num",a:100,b:900},{l:"잔액",w:92,k:"num",a:0,b:500},{l:"비고",w:90,k:"pick",p:["","확인","이월","조정","검토"]}]}
+  };
+  function cellVal(col,i,items){
+    if(col.k==="item")return{t:items[i],c:"l"};
+    if(col.k==="name")return{t:rname(),c:"l"};
+    if(col.k==="num")return{t:rr(col.a,col.b).toLocaleString(),c:"n"};
+    if(col.k==="pct"){var v=rr(col.a,col.b);return{t:v+"%",c:"n"+(col.cf?" "+cfr(v):"")};}
+    if(col.k==="yoy"){var y=rr(-7,14);return{t:(y>=0?"+":"")+y+"%",c:"n "+(y>=0?"pos":"neg")};}
+    if(col.k==="pick")return{t:col.p[rr(0,col.p.length)],c:"l"};
+    if(col.k==="date")return{t:"06/"+("0"+rr(1,28)).slice(-2),c:"l"};
+    if(col.k==="issue")return{t:"ISS-"+(1040+rr(1,900)),c:"l"};
+    if(col.k==="code")return{t:String(rr(101,899)),c:"n"};
+    return{t:"",c:""};
+  }
+  function renderBg(key){var tp=TPL[key]||TPL.office,cols=tp.cols,n=cols.length,rows=tp.items?tp.items.length:tp.count;
+    var cg="<colgroup><col style='width:30px'>"+cols.map(function(x){return "<col style='width:"+x.w+"px'>"}).join("")+"</colgroup>";
+    var h="<tr><th class='rn'></th>";for(var c=0;c<n;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
+    h+="<tr><th class='rn'>1</th><td class='title' colspan='"+n+"'>"+tp.t+"</td></tr>";
+    h+="<tr><th class='rn'>2</th><td class='sub' colspan='"+n+"'>"+tp.s+"</td></tr>";
+    h+="<tr><th class='rn'>3</th>"+cols.map(function(x){return "<td class='hd'>"+x.l+"</td>"}).join("")+"</tr>";
+    for(var i=0;i<rows;i++){var alt=i%2?" class='alt'":"",row="";for(var c=0;c<n;c++){var v=cellVal(cols[c],i,tp.items);row+="<td class='"+v.c+"'>"+v.t+"</td>";}h+="<tr"+alt+"><th class='rn'>"+(i+4)+"</th>"+row+"</tr>";}
+    for(var e=0;e<8;e++){h+="<tr><th class='rn'>"+(rows+4+e)+"</th>";for(var c=0;c<n;c++)h+="<td></td>";h+="</tr>";}
+    $("#bg").innerHTML="<table class='bgsheet'>"+cg+h+"</table>";}
+  var curBg=store.get("bgtpl","office");renderBg(curBg);
+  (function(){var sel=$("#bgsel");if(sel){sel.value=curBg;sel.addEventListener("change",function(){store.set("bgtpl",sel.value);renderBg(sel.value)})}})();
 
   /* 오목 */
   var N=15,g,over,last,level=2,thinking=false,DIRS=[[0,1],[1,0],[1,1],[1,-1]];
