@@ -8,17 +8,21 @@
 <link rel="canonical" href="https://seam0814.github.io/simsim/omok/">
 <link rel="stylesheet" href="../style.css">
 <style>
-  .bgsheet{border-collapse:collapse;table-layout:fixed;width:100%;min-width:900px}
-  .bgsheet th{background:#f3f3f3;color:#999;font-size:11px;border:1px solid #d4d4d4;height:22px;text-align:center;font-weight:600}
-  .bgsheet th.rn{width:28px}
-  .bgsheet td{border:1px solid #e0e0e0;height:22px;padding:1px 8px;font-size:12px;color:#333;white-space:nowrap;overflow:hidden}
-  .bgsheet td.l{text-align:left}.bgsheet td.n{text-align:right}
-  .bgsheet td.hd{background:#f7f7f7;font-weight:600;color:#555;text-align:center}
-  .bgsheet tr:first-child td.title{background:#eef6ef;color:#1b5e20;font-weight:700;text-align:left}
+  .bgsheet{border-collapse:collapse;table-layout:fixed}
+  .bgsheet th{background:#f3f3f3;color:#888;font-size:11px;border:1px solid #d4d4d4;height:22px;text-align:center;font-weight:600}
+  .bgsheet th.rn{width:30px}
+  .bgsheet td{border:1px solid #e3e3e3;height:23px;padding:2px 10px;font-size:12px;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bgsheet td.l{text-align:left}.bgsheet td.n{text-align:right;font-variant-numeric:tabular-nums}
+  .bgsheet td.hd{background:#eef3ee;font-weight:600;color:#4a4a4a;text-align:center}
+  .bgsheet td.title{background:#dfeedf;color:#1b5e20;font-weight:700;text-align:left}
+  .bgsheet tr.alt td{background:#fafbfa}
+  .bgsheet td.pos{color:#1565c0}.bgsheet td.neg{color:#c62828}
   /* 떠있는 오목 창 */
   #panel{position:fixed;z-index:60;background:#fff;border:1px solid #777;box-shadow:0 8px 30px rgba(0,0,0,.25);border-radius:4px;overflow:hidden}
   #phead{background:#217346;color:#fff;padding:6px 10px;font-size:12px;cursor:move;display:flex;justify-content:space-between;align-items:center;user-select:none}
-  #phead .btns span{cursor:pointer;margin-left:10px}
+  #phead .btns span{cursor:pointer;margin-left:8px;border:1px solid rgba(255,255,255,.55);border-radius:3px;padding:0 7px;font-weight:700;line-height:18px;display:inline-block}
+  #phead .btns span:hover{background:rgba(255,255,255,.2)}
+  #pbody.min{display:none}
   #pbody{padding:8px}
   #pbody.min{display:none}
   .otoolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11px;color:#555;margin-bottom:6px}
@@ -38,7 +42,7 @@
   <div id="bg"></div>
 </div>
 <div id="panel">
-  <div id="phead"><span id="ptitle">데이터 검증 도구</span><span class="btns"><span id="pmin">─</span></span></div>
+  <div id="phead"><span id="ptitle">데이터 유효성 검사</span><span class="btns"><span id="pmin" title="접기/펴기">─</span></span></div>
   <div id="pbody">
     <div class="otoolbar">
       <span class="lv" id="lv"><button data-d="1">쉬움</button><button data-d="2" class="on">보통</button><button data-d="3">어려움</button></span>
@@ -57,16 +61,22 @@
   /* 배경 데이터 시트 */
   (function(){
     var depts=["영업1팀","영업2팀","생산1팀","생산2팀","품질팀","물류팀","구매팀","R&D센터","경영지원","마케팅팀","CS팀","해외영업","기획팀","재무팀","인사팀","총무팀"];
-    var cols=["부서","목표","1월","2월","3월","1Q합계","달성률","전년비","비고"];
-    var notes=["양호","검토요망","초과달성","정상","주의","우수",""];
+    var cols=[["부서",120,"l"],["목표",74,"n"],["1월",72,"n"],["2월",72,"n"],["3월",72,"n"],["1Q합계",84,"n"],["달성률",72,"n"],["전년비",72,"n"],["비고",100,"l"]];
+    var notes=["양호","검토요망","초과달성","정상","주의","우수","승인"];
     function r(a,b){return Math.floor(a+Math.random()*(b-a))}
-    var h="<tr><th class='rn'></th>";for(var c=0;c<cols.length+2;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
-    h+="<tr><th class='rn'>1</th><td class='title' colspan='"+(cols.length+2)+"'>2026년 부서별 실적 집계표 (단위: 백만원)</td></tr>";
-    h+="<tr><th class='rn'>2</th>"+cols.map(function(x){return "<td class='hd'>"+x+"</td>"}).join("")+"<td class='hd'></td><td class='hd'></td></tr>";
-    for(var i=0;i<depts.length;i++){var t=r(80,140)*10,a=r(75,145)*10,m1=r(20,50)*10,m2=r(20,50)*10,m3=r(20,50)*10,sum=m1+m2+m3;
-      h+="<tr><th class='rn'>"+(i+3)+"</th><td class='l'>"+depts[i]+"</td><td class='n'>"+t.toLocaleString()+"</td><td class='n'>"+m1.toLocaleString()+"</td><td class='n'>"+m2.toLocaleString()+"</td><td class='n'>"+m3.toLocaleString()+"</td><td class='n'>"+sum.toLocaleString()+"</td><td class='n'>"+Math.round(sum/t*100)+"%</td><td class='n'>"+(r(0,2)?"+":"-")+r(1,12)+"%</td><td class='l'>"+notes[r(0,notes.length)]+"</td><td></td><td></td></tr>";}
-    for(var k=0;k<6;k++){h+="<tr><th class='rn'>"+(depts.length+3+k)+"</th>";for(var c=0;c<cols.length+2;c++)h+="<td></td>";h+="</tr>";}
-    $("#bg").innerHTML="<table class='bgsheet'>"+h+"</table>";
+    var cg="<colgroup><col style='width:30px'>"+cols.map(function(x){return "<col style='width:"+x[1]+"px'>"}).join("")+"</colgroup>";
+    var h="<tr><th class='rn'></th>";for(var c=0;c<cols.length;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
+    h+="<tr><th class='rn'>1</th><td class='title' colspan='"+cols.length+"'>2026년 부서별 실적 집계표 (단위: 백만원)</td></tr>";
+    h+="<tr><th class='rn'>2</th>"+cols.map(function(x){return "<td class='hd'>"+x[0]+"</td>"}).join("")+"</tr>";
+    for(var i=0;i<depts.length;i++){var t=r(90,140)*10,m1=r(25,48)*10,m2=r(25,48)*10,m3=r(25,48)*10,sum=m1+m2+m3,rate=Math.round(sum/t*100),yoy=r(-6,13);
+      var alt=i%2?" class='alt'":"";
+      h+="<tr"+alt+"><th class='rn'>"+(i+3)+"</th>"
+        +"<td class='l'>"+depts[i]+"</td><td class='n'>"+t.toLocaleString()+"</td><td class='n'>"+m1.toLocaleString()+"</td><td class='n'>"+m2.toLocaleString()+"</td><td class='n'>"+m3.toLocaleString()+"</td>"
+        +"<td class='n'>"+sum.toLocaleString()+"</td><td class='n'>"+rate+"%</td>"
+        +"<td class='n "+(yoy>=0?"pos":"neg")+"'>"+(yoy>=0?"+":"")+yoy+"%</td><td class='l'>"+notes[r(0,notes.length)]+"</td></tr>";}
+    // 합계 행
+    h+="<tr class='alt'><th class='rn'>"+(depts.length+3)+"</th><td class='l' style='font-weight:600'>합계</td><td class='hd' colspan='"+(cols.length-1)+"' style='text-align:left;background:#eef3ee'>자동 합계 (SUM) 적용됨</td></tr>";
+    $("#bg").innerHTML="<table class='bgsheet'>"+cg+h+"</table>";
   })();
 
   /* 오목 */
