@@ -4,65 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>통합 문서4 - Excel</title>
-<meta name="description" content="고전 지뢰찾기를 스프레드시트처럼. 왼쪽 클릭으로 열고 우클릭(모바일 길게 눌러)으로 깃발. 초급·중급 난이도. 무료, 설치 없이.">
+<meta name="description" content="스프레드시트형 지뢰찾기. 데이터 검증 영역 칸을 열어 지뢰를 피하세요. 왼쪽 클릭=열기, 우클릭(모바일 길게)=깃발. 무료.">
 <link rel="canonical" href="https://seam0814.github.io/simsim/minesweeper/">
 <link rel="stylesheet" href="../style.css">
 <style>
-  .msbar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:6px 0 10px;font-size:13px;color:#444}
-  .msbar b{color:#1b5e20}
-  .diff button{font:inherit;border:1px solid var(--line,#d4d4d4);background:#f8f8f8;padding:5px 10px;border-radius:4px;cursor:pointer;margin-right:6px;color:#217346}
-  .diff button.on{background:#217346;color:#fff;border-color:#217346}
-  .msscroll{overflow:auto}
-  table.ms{border-collapse:collapse;margin-top:8px}
-  table.ms th{background:#f3f3f3;color:#999;font-weight:600;font-size:11px;min-width:24px;height:22px;border:1px solid #d4d4d4;text-align:center}
-  table.ms td{width:26px;height:26px;min-width:26px;border:1px solid #c6c6c6;text-align:center;font-weight:700;font-size:14px;cursor:pointer;user-select:none;background:#e4e4e4}
-  table.ms td:hover{background:#dceedd}
-  table.ms td.rev{background:#fff;cursor:default}
-  table.ms td.rev:hover{background:#fff}
-  table.ms td.flag{background:#ffe0e0;color:#c62828}
-  table.ms td.mine{background:#333;color:#fff}
-  table.ms td.boom{background:#c62828;color:#fff}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 8px;font-size:12px;color:#555}
+  .toolbar b{color:#1b5e20}
+  .toolbar .diff button{font:inherit;border:1px solid #d4d4d4;background:#f8f8f8;padding:4px 9px;border-radius:3px;cursor:pointer;margin-right:5px;color:#217346;font-size:12px}
+  .toolbar .diff button.on{background:#217346;color:#fff;border-color:#217346}
+  .toolbar .mini{border:1px solid #d4d4d4;background:#f8f8f8;padding:4px 9px;border-radius:3px;cursor:pointer;color:#555;font-size:12px}
+  .msscroll{overflow:auto;border:1px solid #c6c6c6;background:#fff}
+  table.sheet{border-collapse:collapse;table-layout:fixed}
+  table.sheet th{background:#f3f3f3;color:#999;font-size:11px;border:1px solid #d4d4d4;height:22px;text-align:center;font-weight:600}
+  table.sheet th.cn{width:60px;min-width:60px}
+  table.sheet th.rn{width:30px;min-width:30px}
+  table.sheet td{border:1px solid #dcdcdc;height:22px;width:60px;max-width:60px;padding:1px 6px;font-size:13px;background:#fff;overflow:hidden;white-space:nowrap;text-overflow:clip}
+  td.f-title{font-weight:700;color:#1b5e20;background:#eef6ef;text-align:left;overflow:visible}
+  td.f-hd{background:#f7f7f7;color:#555;font-weight:600;text-align:center}
+  td.f-lbl{color:#333;text-align:left}
+  td.f-num{text-align:right;color:#333}
+  td.g{cursor:pointer;text-align:center;font-weight:700;background:#e7e7e7;user-select:none}
+  td.g:hover{background:#dceedd}
+  td.grev{background:#fff;text-align:center;font-weight:700;cursor:default}
+  td.gflag{background:#ffe0e0;color:#c62828;text-align:center;cursor:pointer;font-weight:700}
+  td.gmine{background:#333;color:#fff;text-align:center}
+  td.gboom{background:#c62828;color:#fff;text-align:center}
   .n1{color:#1565c0}.n2{color:#2e7d32}.n3{color:#c62828}.n4{color:#6a1b9a}.n5{color:#8d6e63}.n6{color:#00838f}.n7{color:#333}.n8{color:#777}
-  table.fakedata{border-collapse:collapse;margin:4px 0 14px;font-size:12px;color:#444;width:100%}
-  table.fakedata th,table.fakedata td{border:1px solid #d4d4d4;padding:4px 8px;text-align:right}
-  table.fakedata th{background:#f3f3f3;color:#777;text-align:center;font-weight:600}
-  table.fakedata td.l{text-align:left;color:#333}
-  .sheetnote{font-size:11px;color:#aaa;margin:2px 0 8px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div id="site-header"></div>
-  <h1 style="font-size:1.1rem;color:#1b5e20">2026년 3분기 영업 실적 현황</h1>
-  <table class="fakedata">
-    <tr><th></th><th>품목</th><th>1월</th><th>2월</th><th>3월</th><th>분기 합계</th><th>전분기比</th></tr>
-    <tr><td class="l">1</td><td class="l">A형 모듈</td><td>1,240</td><td>1,310</td><td>1,455</td><td>4,005</td><td>+8.2%</td></tr>
-    <tr><td class="l">2</td><td class="l">B형 모듈</td><td>980</td><td>1,020</td><td>1,105</td><td>3,105</td><td>+5.1%</td></tr>
-    <tr><td class="l">3</td><td class="l">부속 자재</td><td>430</td><td>455</td><td>470</td><td>1,355</td><td>+3.4%</td></tr>
-    <tr><td class="l">4</td><td class="l">유지보수</td><td>310</td><td>298</td><td>325</td><td>933</td><td>-1.2%</td></tr>
-    <tr><td class="l">5</td><td class="l">합계</td><td>2,960</td><td>3,083</td><td>3,355</td><td>9,398</td><td>+5.9%</td></tr>
-  </table>
-  <p class="sheetnote">※ 하단 데이터 검증 영역 (클릭하여 확인) · Esc=요약 보기</p>
-  <div class="card">
-    <div class="diff" id="diff">
-      <button data-w="9" data-h="9" data-m="10" class="on">초급 9×9</button>
-      <button data-w="16" data-h="16" data-m="40">중급 16×16</button>
-      <button data-w="24" data-h="16" data-m="70">고급 24×16</button>
-    </div>
-    <div class="msbar">
-      <span>남은 지뢰: <b id="mines">0</b></span>
-      <span>시간: <b id="time">0</b>초</span>
-      <span>상태: <b id="state">진행 중</b></span>
-      <button class="btn sec" id="restart" style="width:auto;margin:0;padding:6px 12px">새 게임</button>
-    </div>
-    <div class="msscroll"><table class="ms" id="board"></table></div>
+  <div class="toolbar">
+    <span class="diff" id="diff"><button data-w="9" data-h="9" data-m="10" class="on">초급</button><button data-w="16" data-h="16" data-m="40">중급</button><button data-w="20" data-h="14" data-m="55">고급</button></span>
+    <span>남은: <b id="mines">0</b></span><span>시간: <b id="time">0</b></span><span>상태: <b id="state">진행 중</b></span>
+    <button class="mini" id="restart">새로고침</button>
   </div>
+  <div class="msscroll"><table class="sheet" id="board"></table></div>
   <div class="copy">
-    <h2>규칙</h2>
-    <p>칸을 열어 지뢰를 피하세요. 열린 칸의 숫자는 주변 8칸에 있는 지뢰 개수예요. 숫자를 보고 지뢰 위치를 추리해 깃발을 꽂고, 지뢰 아닌 칸을 모두 열면 성공! 첫 클릭은 절대 지뢰가 아니에요.</p>
-    <details><summary>깃발은 어떻게 꽂나요?</summary><p>PC는 우클릭, 모바일은 칸을 길게 누르면 깃발(!)이 꽂혀요. 한 번 더 하면 해제.</p></details>
+    <h2>안내</h2>
+    <p>위쪽은 요약 데이터, 아래 "검증 영역"이 지뢰찾기 판이에요. 칸을 열어 지뢰를 피하고(열린 칸 숫자 = 주변 8칸 지뢰 수), 지뢰 아닌 칸을 모두 열면 성공. 첫 클릭은 안전해요. <b>왼쪽 클릭=열기, 우클릭(모바일은 길게 누르기)=깃발, Esc=요약만 보기.</b></p>
   </div>
-  <div id="lounge-skip"></div>
   <div id="site-footer"></div>
 </div>
 <script>window.SITE_ROOT="../";</script>
@@ -71,39 +53,53 @@
 (function(){
   var $=function(s){return document.querySelector(s)};
   var W,H,M,bd,started,over,flags,revCount,secs,timer;
+  var GC0=1,GR0=9,SC,SR,FAKE;
   function letter(i){var s="";i++;while(i>0){var r=(i-1)%26;s=String.fromCharCode(65+r)+s;i=Math.floor((i-1)/26)}return s}
-  function init(w,h,m){W=w;H=h;M=m;bd=[];for(var r=0;r<H;r++){bd[r]=[];for(var c=0;c<W;c++)bd[r][c]={mine:false,rev:false,flag:false,adj:0}}
+  function layout(){
+    SC=Math.max(W+GC0+2,8);SR=GR0+H+2;FAKE={};
+    function F(r,c,t,cls,span){FAKE[r+","+c]={t:t,cls:cls||"f-lbl",span:span||1}}
+    F(0,0,"2026년 3분기 영업 실적 현황 (단위: 백만원)","f-title",Math.min(SC,7));
+    F(2,0,"품목","f-hd");F(2,1,"1월","f-hd");F(2,2,"2월","f-hd");F(2,3,"3월","f-hd");F(2,4,"합계","f-hd");
+    F(3,0,"모듈A","f-lbl");F(3,1,"1,240","f-num");F(3,2,"1,310","f-num");F(3,3,"1,455","f-num");F(3,4,"4,005","f-num");
+    F(4,0,"모듈B","f-lbl");F(4,1,"980","f-num");F(4,2,"1,020","f-num");F(4,3,"1,105","f-num");F(4,4,"3,105","f-num");
+    F(5,0,"부자재","f-lbl");F(5,1,"430","f-num");F(5,2,"455","f-num");F(5,3,"470","f-num");F(5,4,"1,355","f-num");
+    F(6,0,"합계","f-lbl");F(6,1,"2,650","f-num");F(6,2,"2,785","f-num");F(6,3,"3,030","f-num");F(6,4,"8,465","f-num");
+    F(8,0,"데이터 검증 영역 (하단 셀 확인)","f-title",Math.min(SC,6));
+  }
+  function init(w,h,m){W=w;H=h;M=m;layout();bd=[];for(var r=0;r<H;r++){bd[r]=[];for(var c=0;c<W;c++)bd[r][c]={mine:false,rev:false,flag:false,adj:0,boom:false}}
     started=false;over=false;flags=0;revCount=0;secs=0;clearInterval(timer);$("#time").textContent=0;$("#state").textContent="진행 중";$("#mines").textContent=M;render()}
-  function place(sr,sc){var spots=[];for(var r=0;r<H;r++)for(var c=0;c<W;c++){if(Math.abs(r-sr)<=1&&Math.abs(c-sc)<=1)continue;spots.push([r,c])}
-    for(var i=spots.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=spots[i];spots[i]=spots[j];spots[j]=t}
-    for(var k=0;k<M&&k<spots.length;k++)bd[spots[k][0]][spots[k][1]].mine=true;
+  function place(sr,sc){var sp=[];for(var r=0;r<H;r++)for(var c=0;c<W;c++){if(Math.abs(r-sr)<=1&&Math.abs(c-sc)<=1)continue;sp.push([r,c])}
+    for(var i=sp.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=sp[i];sp[i]=sp[j];sp[j]=t}
+    for(var k=0;k<M&&k<sp.length;k++)bd[sp[k][0]][sp[k][1]].mine=true;
     for(var r=0;r<H;r++)for(var c=0;c<W;c++){var n=0;for(var dr=-1;dr<=1;dr++)for(var dc=-1;dc<=1;dc++){var nr=r+dr,nc=c+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&bd[nr][nc].mine)n++}bd[r][c].adj=n}}
-  function startTimer(){timer=setInterval(function(){secs++;$("#time").textContent=secs},1000)}
-  function reveal(r,c){if(over)return;var cell=bd[r][c];if(cell.rev||cell.flag)return;
-    if(!started){started=true;place(r,c);startTimer()}
-    if(cell.mine){over=true;cell.boom=true;clearInterval(timer);revealAllMines();$("#state").textContent="실패";render();return}
-    var stack=[[r,c]];while(stack.length){var p=stack.pop(),cr=p[0],cc=p[1],cl=bd[cr][cc];if(cl.rev||cl.flag||cl.mine)continue;cl.rev=true;revCount++;
-      if(cl.adj===0){for(var dr=-1;dr<=1;dr++)for(var dc=-1;dc<=1;dc++){var nr=cr+dr,nc=cc+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&!bd[nr][nc].rev)stack.push([nr,nc])}}}
-    if(revCount===W*H-M){over=true;clearInterval(timer);$("#state").textContent="성공! 🎉".replace(" 🎉","");render();return}
+  function reveal(gr,gc){if(over)return;var cell=bd[gr][gc];if(cell.rev||cell.flag)return;
+    if(!started){started=true;place(gr,gc);timer=setInterval(function(){secs++;$("#time").textContent=secs},1000)}
+    if(cell.mine){over=true;cell.boom=true;clearInterval(timer);for(var r=0;r<H;r++)for(var c=0;c<W;c++)if(bd[r][c].mine)bd[r][c].rev=true;$("#state").textContent="실패";render();return}
+    var st=[[gr,gc]];while(st.length){var p=st.pop(),cr=p[0],cc=p[1],cl=bd[cr][cc];if(cl.rev||cl.flag||cl.mine)continue;cl.rev=true;revCount++;
+      if(cl.adj===0)for(var dr=-1;dr<=1;dr++)for(var dc=-1;dc<=1;dc++){var nr=cr+dr,nc=cc+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&!bd[nr][nc].rev)st.push([nr,nc])}}
+    if(revCount===W*H-M){over=true;clearInterval(timer);$("#state").textContent="성공";}
     render()}
-  function revealAllMines(){for(var r=0;r<H;r++)for(var c=0;c<W;c++)if(bd[r][c].mine)bd[r][c].rev=true}
-  function toggleFlag(r,c){if(over)return;var cell=bd[r][c];if(cell.rev)return;cell.flag=!cell.flag;flags+=cell.flag?1:-1;$("#mines").textContent=M-flags;render()}
+  function toggleFlag(gr,gc){if(over)return;var cell=bd[gr][gc];if(cell.rev)return;cell.flag=!cell.flag;flags+=cell.flag?1:-1;$("#mines").textContent=M-flags;render()}
   function render(){
-    var h="<tr><th></th>";for(var c=0;c<W;c++)h+="<th>"+letter(c)+"</th>";h+="</tr>";
-    for(var r=0;r<H;r++){h+="<tr><th>"+(r+1)+"</th>";for(var c=0;c<W;c++){var cl=bd[r][c],cls="",txt="";
-      if(cl.flag&&!cl.rev){cls="flag";txt="!"}
-      else if(cl.rev){if(cl.mine){cls=cl.boom?"mine boom":"mine";txt="●"}else{cls="rev"+(cl.adj?" n"+cl.adj:"");txt=cl.adj?cl.adj:""}}
-      h+="<td class='"+cls+"' data-r='"+r+"' data-c='"+c+"'>"+txt+"</td>"}h+="</tr>"}
-    $("#board").innerHTML=h}
-  // events
-  var longTimer=null,longed=false;
-  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(!td||!td.dataset.r)return;if(longed){longed=false;return}reveal(+td.dataset.r,+td.dataset.c)});
-  $("#board").addEventListener("contextmenu",function(e){var td=e.target.closest("td");if(td&&td.dataset.r){e.preventDefault();toggleFlag(+td.dataset.r,+td.dataset.c)}});
-  $("#board").addEventListener("touchstart",function(e){var td=e.target.closest("td");if(!td||!td.dataset.r)return;longed=false;longTimer=setTimeout(function(){longed=true;toggleFlag(+td.dataset.r,+td.dataset.c)},420)},{passive:true});
-  $("#board").addEventListener("touchend",function(){clearTimeout(longTimer)});
-  $("#diff").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;
-    [].forEach.call(this.children,function(x){x.classList.remove("on")});b.classList.add("on");
-    init(+b.dataset.w,+b.dataset.h,+b.dataset.m)});
+    var h="<tr><th class='rn'></th>";for(var c=0;c<SC;c++)h+="<th class='cn'>"+letter(c)+"</th>";h+="</tr>";
+    for(var r=0;r<SR;r++){h+="<tr><th class='rn'>"+(r+1)+"</th>";var skip=0;
+      for(var c=0;c<SC;c++){if(skip>0){skip--;continue;}
+        if(r>=GR0&&r<GR0+H&&c>=GC0&&c<GC0+W){var gr=r-GR0,gc=c-GC0,cl=bd[gr][gc],cls="g",txt="";
+          if(cl.flag&&!cl.rev){cls="gflag";txt="!";}
+          else if(cl.rev){if(cl.mine){cls=cl.boom?"gboom":"gmine";txt="●";}else{cls="grev"+(cl.adj?" n"+cl.adj:"");txt=cl.adj||"";}}
+          h+="<td class='"+cls+"' data-gr='"+gr+"' data-gc='"+gc+"'>"+txt+"</td>";
+        } else {var f=FAKE[r+","+c];
+          if(f){var sp=f.span||1;skip=sp-1;h+="<td class='"+f.cls+"'"+(sp>1?" colspan='"+sp+"'":"")+">"+f.t+"</td>";}
+          else h+="<td></td>";
+        }
+      }h+="</tr>";
+    }$("#board").innerHTML=h}
+  var lt=null,longed=false;
+  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(!td||td.dataset.gr===undefined)return;if(longed){longed=false;return}reveal(+td.dataset.gr,+td.dataset.gc)});
+  $("#board").addEventListener("contextmenu",function(e){var td=e.target.closest("td");if(td&&td.dataset.gr!==undefined){e.preventDefault();toggleFlag(+td.dataset.gr,+td.dataset.gc)}});
+  $("#board").addEventListener("touchstart",function(e){var td=e.target.closest("td");if(!td||td.dataset.gr===undefined)return;longed=false;lt=setTimeout(function(){longed=true;toggleFlag(+td.dataset.gr,+td.dataset.gc)},420)},{passive:true});
+  $("#board").addEventListener("touchend",function(){clearTimeout(lt)});
+  $("#diff").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;[].forEach.call(this.children,function(x){x.classList.remove("on")});b.classList.add("on");init(+b.dataset.w,+b.dataset.h,+b.dataset.m)});
   $("#restart").addEventListener("click",function(){init(W,H,M)});
   init(9,9,10);
 })();
