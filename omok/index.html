@@ -26,10 +26,11 @@
   .lv button.on{background:#217346;color:#fff;border-color:#217346}
   .mini{border:1px solid #d4d4d4;background:#f8f8f8;padding:3px 7px;border-radius:3px;cursor:pointer;color:#555;font-size:11px}
   table.ob{border-collapse:collapse}
-  table.ob td{width:22px;height:22px;border:1px solid #cdb98a;background:#f3e2b8;text-align:center;cursor:pointer;padding:0}
-  table.ob td.last{background:#ffe9a8}
-  .st{display:inline-block;width:15px;height:15px;border-radius:50%;vertical-align:middle}
-  .st.b{background:#1b1b1b}.st.w{background:#fafafa;border:1px solid #666}
+  table.ob th{background:#f3f3f3;color:#999;font-size:9px;border:1px solid #d4d4d4;width:22px;height:18px;text-align:center;font-weight:600}
+  table.ob td{width:22px;height:22px;border:1px solid #dcdcdc;background:#fff;cursor:pointer;padding:0}
+  table.ob td.s1{background:#2e7d32}
+  table.ob td.s2{background:#c0504d}
+  table.ob td.last{outline:2px solid #ffd400;outline-offset:-2px}
 </style>
 </head>
 <body>
@@ -83,9 +84,10 @@
     if(!any)return[7,7];var best=[7,7],bv=-1;
     for(var r=0;r<N;r++)for(var c=0;c<N;c++){if(g[r][c]||!hasN(r,c))continue;var tot=evalCell(r,c,2)+evalCell(r,c,1)*W+Math.random()*jit;if(tot>bv){bv=tot;best=[r,c]}}
     return best}
-  function render(){var h="";for(var r=0;r<N;r++){h+="<tr>";for(var c=0;c<N;c++){var v=g[r][c],cls=(last&&last[0]===r&&last[1]===c)?"last":"";
-    var st=v===1?"<span class='st b'></span>":v===2?"<span class='st w'></span>":"";
-    h+="<td class='"+cls+"' data-r='"+r+"' data-c='"+c+"'>"+st+"</td>"}h+="</tr>"}$("#board").innerHTML=h}
+  function render(){var h="<tr><th></th>";for(var c=0;c<N;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
+    for(var r=0;r<N;r++){h+="<tr><th>"+(r+1)+"</th>";for(var c=0;c<N;c++){var v=g[r][c],cls=v===1?"s1":v===2?"s2":"";
+      if(last&&last[0]===r&&last[1]===c)cls+=" last";
+      h+="<td class='"+cls+"' data-r='"+r+"' data-c='"+c+"'></td>"}h+="</tr>"}$("#board").innerHTML=h}
   function setState(t){$("#state").textContent=t}
   function full(){for(var r=0;r<N;r++)for(var c=0;c<N;c++)if(!g[r][c])return false;return true}
   function playerMove(r,c){if(over||thinking||g[r][c])return;g[r][c]=1;last=[r,c];
