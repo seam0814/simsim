@@ -21,6 +21,10 @@
   .bgsheet td.cf3{background:#fff3cd}.bgsheet td.cf4{background:#f6c6c6}
   .bgsheet td.tot{background:#e9f0e9;font-weight:700;color:#1b5e20}
   .bgsheet td.sub{background:#fff;color:#999;font-size:11px;text-align:left}
+  #bg{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+  .bgsheet.aux{height:fit-content}
+  .memo{border:1px solid #d4d4d4;background:#fffdf3;padding:10px 14px;font-size:12px;color:#555;min-width:210px;line-height:1.9;height:fit-content}
+  .memo .mt{font-weight:700;color:#1b5e20;margin-bottom:4px}
   /* 떠있는 오목 창 */
   #panel{position:fixed;z-index:60;background:#fff;border:1px solid #777;box-shadow:0 8px 30px rgba(0,0,0,.25);border-radius:4px;overflow:hidden}
   #phead{background:#217346;color:#fff;padding:6px 10px;font-size:12px;cursor:move;display:flex;justify-content:space-between;align-items:center;user-select:none}
@@ -94,6 +98,18 @@
     if(col.k==="code")return{t:String(rr(101,899)),c:"n"};
     return{t:"",c:""};
   }
+  function auxBlocks(){var a="";
+    a+="<table class='bgsheet aux'><colgroup><col style='width:30px'><col style='width:96px'><col style='width:86px'></colgroup>";
+    a+="<tr><th class='rn'></th><th>A</th><th>B</th></tr><tr><th class='rn'>1</th><td class='title' colspan='2'>요약</td></tr><tr><th class='rn'>2</th><td class='hd'>구분</td><td class='hd'>값</td></tr>";
+    var sm=[["총계",rr(8000,15000)],["평균",rr(400,900)],["최대",rr(900,1400)],["최소",rr(50,200)],["건수",rr(80,200)],["목표달성",rr(88,118)+"%"]];
+    sm.forEach(function(x,i){a+="<tr"+(i%2?" class='alt'":"")+"><th class='rn'>"+(i+3)+"</th><td class='l'>"+x[0]+"</td><td class='n'>"+(typeof x[1]=="number"?x[1].toLocaleString():x[1])+"</td></tr>";});
+    a+="</table>";
+    a+="<table class='bgsheet aux'><colgroup><col style='width:30px'><col style='width:52px'><col style='width:74px'><col style='width:60px'></colgroup>";
+    a+="<tr><th class='rn'></th><th>A</th><th>B</th><th>C</th></tr><tr><th class='rn'>1</th><td class='title' colspan='3'>월별 추이</td></tr><tr><th class='rn'>2</th><td class='hd'>월</td><td class='hd'>실적</td><td class='hd'>증감</td></tr>";
+    for(var m=1;m<=6;m++){var y=rr(-8,15);a+="<tr"+(m%2?" class='alt'":"")+"><th class='rn'>"+(m+2)+"</th><td class='l'>"+m+"월</td><td class='n'>"+(rr(200,500)*10).toLocaleString()+"</td><td class='n "+(y>=0?"pos":"neg")+"'>"+(y>=0?"+":"")+y+"%</td></tr>";}
+    a+="</table>";
+    a+="<div class='memo'><div class='mt'>업무 메모</div>- 월말 마감 자료 취합 (D-2)<br>- 거래처 미수금 확인 요청<br>- 분기 보고서 초안 공유<br>- 비품 구매 품의 결재<br>- 정기 회의 14:00 B동 302호</div>";
+    return a}
   function renderBg(key){var tp=TPL[key]||TPL.office,cols=tp.cols,n=cols.length,rows=tp.items?tp.items.length:tp.count;
     var cg="<colgroup><col style='width:30px'>"+cols.map(function(x){return "<col style='width:"+x.w+"px'>"}).join("")+"</colgroup>";
     var h="<tr><th class='rn'></th>";for(var c=0;c<n;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
@@ -101,8 +117,8 @@
     h+="<tr><th class='rn'>2</th><td class='sub' colspan='"+n+"'>"+tp.s+"</td></tr>";
     h+="<tr><th class='rn'>3</th>"+cols.map(function(x){return "<td class='hd'>"+x.l+"</td>"}).join("")+"</tr>";
     for(var i=0;i<rows;i++){var alt=i%2?" class='alt'":"",row="";for(var c=0;c<n;c++){var v=cellVal(cols[c],i,tp.items);row+="<td class='"+v.c+"'>"+v.t+"</td>";}h+="<tr"+alt+"><th class='rn'>"+(i+4)+"</th>"+row+"</tr>";}
-    for(var e=0;e<8;e++){h+="<tr><th class='rn'>"+(rows+4+e)+"</th>";for(var c=0;c<n;c++)h+="<td></td>";h+="</tr>";}
-    $("#bg").innerHTML="<table class='bgsheet'>"+cg+h+"</table>";}
+    for(var e=0;e<3;e++){h+="<tr><th class='rn'>"+(rows+4+e)+"</th>";for(var c=0;c<n;c++)h+="<td></td>";h+="</tr>";}
+    $("#bg").innerHTML="<table class='bgsheet'>"+cg+h+"</table>"+auxBlocks();}
   var curBg=store.get("bgtpl","office");renderBg(curBg);
   (function(){var sel=$("#bgsel");if(sel){sel.value=curBg;sel.addEventListener("change",function(){store.set("bgtpl",sel.value);renderBg(sel.value)})}})();
 
