@@ -23,13 +23,26 @@
   table.ms td.mine{background:#333;color:#fff}
   table.ms td.boom{background:#c62828;color:#fff}
   .n1{color:#1565c0}.n2{color:#2e7d32}.n3{color:#c62828}.n4{color:#6a1b9a}.n5{color:#8d6e63}.n6{color:#00838f}.n7{color:#333}.n8{color:#777}
+  table.fakedata{border-collapse:collapse;margin:4px 0 14px;font-size:12px;color:#444;width:100%}
+  table.fakedata th,table.fakedata td{border:1px solid #d4d4d4;padding:4px 8px;text-align:right}
+  table.fakedata th{background:#f3f3f3;color:#777;text-align:center;font-weight:600}
+  table.fakedata td.l{text-align:left;color:#333}
+  .sheetnote{font-size:11px;color:#aaa;margin:2px 0 8px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div id="site-header"></div>
-  <h1>지뢰찾기</h1>
-  <p class="sub">왼쪽 클릭=열기 · 우클릭(모바일은 길게 누르기)=깃발 · Esc=업무화면</p>
+  <h1 style="font-size:1.1rem;color:#1b5e20">2026년 3분기 영업 실적 현황</h1>
+  <table class="fakedata">
+    <tr><th></th><th>품목</th><th>1월</th><th>2월</th><th>3월</th><th>분기 합계</th><th>전분기比</th></tr>
+    <tr><td class="l">1</td><td class="l">A형 모듈</td><td>1,240</td><td>1,310</td><td>1,455</td><td>4,005</td><td>+8.2%</td></tr>
+    <tr><td class="l">2</td><td class="l">B형 모듈</td><td>980</td><td>1,020</td><td>1,105</td><td>3,105</td><td>+5.1%</td></tr>
+    <tr><td class="l">3</td><td class="l">부속 자재</td><td>430</td><td>455</td><td>470</td><td>1,355</td><td>+3.4%</td></tr>
+    <tr><td class="l">4</td><td class="l">유지보수</td><td>310</td><td>298</td><td>325</td><td>933</td><td>-1.2%</td></tr>
+    <tr><td class="l">5</td><td class="l">합계</td><td>2,960</td><td>3,083</td><td>3,355</td><td>9,398</td><td>+5.9%</td></tr>
+  </table>
+  <p class="sheetnote">※ 하단 데이터 검증 영역 (클릭하여 확인) · Esc=요약 보기</p>
   <div class="card">
     <div class="diff" id="diff">
       <button data-w="9" data-h="9" data-m="10" class="on">초급 9×9</button>
