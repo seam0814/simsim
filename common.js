@@ -46,6 +46,37 @@
       if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],text:o.share||"내 결과 ✨"}).then(function(){track("card_share")}).catch(function(){})}
       else{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="심심풀이.png";a.click();setTimeout(function(){URL.revokeObjectURL(u)},1000);track("card_download")}},"image/png")};
 
+  /* ===== 휴게실 채팅 (익명·최근50 보존, Firebase. config 넣으면 활성화) ===== */
+  var FIREBASE_CONFIG={}; // 집에서 firebaseConfig 붙여넣기
+  function esc(t){return String(t).replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
+  var BAD=["씨발","시발","개새끼","병신","좆","지랄","fuck","shit"];
+  function clean(t){BAD.forEach(function(w){t=t.split(w).join(new Array(w.length+1).join("*"))});return t}
+  var loungeEl=document.getElementById("lounge");
+  if(loungeEl){
+    if(FIREBASE_CONFIG.apiKey){
+      var s1=document.createElement("script");s1.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js";
+      s1.onload=function(){var s2=document.createElement("script");s2.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js";
+        s2.onload=function(){try{firebase.initializeApp(FIREBASE_CONFIG);lounge(firebase.firestore())}catch(e){}};document.head.appendChild(s2)};
+      document.head.appendChild(s1);
+    }else{loungeEl.innerHTML='<div class="cat">💬 사무실 휴게실</div><p class="disc" style="text-align:left">채팅은 곧 열려요 (운영자 준비 중).</p>';}
+  }
+  function lounge(db){
+    var nick=store.get("nick","")||("익명"+Math.floor(Math.random()*9999));store.set("nick",nick);
+    loungeEl.innerHTML='<div class="cat">💬 사무실 휴게실 <span style="font-weight:400;color:var(--muted);font-size:.8rem">(익명·누구나)</span></div>'
+      +'<div class="chatbox" id="cbox"></div>'
+      +'<form id="cform" class="chatform"><input id="cnick" maxlength="12" value="'+esc(nick)+'"><input id="cmsg" maxlength="200" placeholder="메시지 입력"><button class="btn" type="submit">전송</button></form>';
+    db.collection("lounge").orderBy("createdAt").limitToLast(50).onSnapshot(function(q){
+      var h="";q.forEach(function(d){var m=d.data();h+='<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+'</div>'});
+      var box=document.getElementById("cbox");if(box){box.innerHTML=h||'<p class="disc">첫 메시지를 남겨보세요 ✨</p>';box.scrollTop=box.scrollHeight}
+    },function(){});
+    document.getElementById("cform").addEventListener("submit",function(e){e.preventDefault();
+      var msg=(document.getElementById("cmsg").value||"").trim();if(!msg)return;
+      var nm=(document.getElementById("cnick").value||"익명").trim().slice(0,12)||"익명";store.set("nick",nm);
+      db.collection("lounge").add({name:nm,text:clean(msg).slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+      document.getElementById("cmsg").value="";track("lounge_msg");
+    });
+  }
+
   /* ===== 엑셀 위장 크롬 + 공통 보스키(Esc/blur) ===== */
   (function(){
     var bar=document.createElement("div");bar.className="xlchrome";

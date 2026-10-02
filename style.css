@@ -40,3 +40,11 @@ details p{color:var(--muted);margin:.5em 0 0}
 .sitefoot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
 .sitefoot .fnav{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:8px}
 .sitefoot a{color:var(--muted);text-decoration:none}.sitefoot a:hover{color:var(--sel)}
+.chatbox{max-height:240px;overflow-y:auto;background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px 12px;margin-top:6px}
+.cmsg{padding:4px 0;font-size:.92rem;border-bottom:1px solid #f0f0f0}
+.cmsg:last-child{border-bottom:none}
+.cmsg b{color:var(--sel);margin-right:6px;font-size:.85rem}
+.chatform{display:flex;gap:6px;margin-top:8px}
+.chatform input{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:5px}
+.chatform input#cnick{flex:0 0 88px}
+.chatform .btn{width:auto;margin:0;padding:10px 14px}
