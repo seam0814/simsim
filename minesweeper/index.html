@@ -37,7 +37,7 @@
   <div id="site-header"></div>
   <div class="toolbar">
     <span class="diff" id="diff"><button data-w="9" data-h="9" data-m="10" class="on">초급</button><button data-w="16" data-h="16" data-m="40">중급</button><button data-w="20" data-h="14" data-m="55">고급</button></span>
-    <span>남은: <b id="mines">0</b></span><span>시간: <b id="time">0</b></span><span>상태: <b id="state">진행 중</b></span>
+    <span>판: <b id="size">9×9</b></span><span>지뢰: <b id="total">10</b></span><span>남은: <b id="mines">0</b></span><span>시간: <b id="time">0</b></span><span>상태: <b id="state">진행 중</b></span>
     <button class="mini" id="restart">새로고침</button>
   </div>
   <div class="msscroll"><table class="sheet" id="board"></table></div>
@@ -56,7 +56,7 @@
   var GC0=1,GR0=9,SC,SR,FAKE;
   function letter(i){var s="";i++;while(i>0){var r=(i-1)%26;s=String.fromCharCode(65+r)+s;i=Math.floor((i-1)/26)}return s}
   function layout(){
-    SC=Math.max(W+GC0+2,8);SR=GR0+H+2;FAKE={};
+    SC=Math.max(W+GC0+6,13);SR=GR0+H+3;FAKE={};
     function F(r,c,t,cls,span){FAKE[r+","+c]={t:t,cls:cls||"f-lbl",span:span||1}}
     F(0,0,"2026년 3분기 영업 실적 현황 (단위: 백만원)","f-title",Math.min(SC,7));
     F(2,0,"품목","f-hd");F(2,1,"1월","f-hd");F(2,2,"2월","f-hd");F(2,3,"3월","f-hd");F(2,4,"합계","f-hd");
@@ -65,9 +65,20 @@
     F(5,0,"부자재","f-lbl");F(5,1,"430","f-num");F(5,2,"455","f-num");F(5,3,"470","f-num");F(5,4,"1,355","f-num");
     F(6,0,"합계","f-lbl");F(6,1,"2,650","f-num");F(6,2,"2,785","f-num");F(6,3,"3,030","f-num");F(6,4,"8,465","f-num");
     F(8,0,"데이터 검증 영역 (하단 셀 확인)","f-title",Math.min(SC,6));
+    var rc=W+2;
+    F(2,rc,"비중","f-hd");F(2,rc+1,"전년比","f-hd");
+    F(3,rc,"34%","f-num");F(3,rc+1,"+8%","f-num");
+    F(4,rc,"26%","f-num");F(4,rc+1,"+5%","f-num");
+    F(5,rc,"12%","f-num");F(5,rc+1,"+3%","f-num");
+    F(6,rc,"72%","f-num");F(6,rc+1,"+6%","f-num");
+    F(GR0+H+1,0,"※ 검증 상태: 진행 중 — 전 항목 확인 요망","f-lbl",Math.min(SC,8));
   }
   function init(w,h,m){W=w;H=h;M=m;layout();bd=[];for(var r=0;r<H;r++){bd[r]=[];for(var c=0;c<W;c++)bd[r][c]={mine:false,rev:false,flag:false,adj:0,boom:false}}
-    started=false;over=false;flags=0;revCount=0;secs=0;clearInterval(timer);$("#time").textContent=0;$("#state").textContent="진행 중";$("#mines").textContent=M;render()}
+    started=false;over=false;flags=0;revCount=0;secs=0;clearInterval(timer);$("#time").textContent=0;$("#state").textContent="진행 중";$("#mines").textContent=M;$("#size").textContent=W+"×"+H;$("#total").textContent=M;render()}
+  function chord(gr,gc){if(over)return;var cell=bd[gr][gc];if(!cell.rev||cell.adj===0)return;
+    var fl=0,dr,dc,nr,nc;for(dr=-1;dr<=1;dr++)for(dc=-1;dc<=1;dc++){nr=gr+dr;nc=gc+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&bd[nr][nc].flag)fl++}
+    if(fl!==cell.adj)return;
+    for(dr=-1;dr<=1;dr++)for(dc=-1;dc<=1;dc++){nr=gr+dr;nc=gc+dc;if(nr>=0&&nr<H&&nc>=0&&nc<W&&!bd[nr][nc].flag&&!bd[nr][nc].rev)reveal(nr,nc)}}
   function place(sr,sc){var sp=[];for(var r=0;r<H;r++)for(var c=0;c<W;c++){if(Math.abs(r-sr)<=1&&Math.abs(c-sc)<=1)continue;sp.push([r,c])}
     for(var i=sp.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=sp[i];sp[i]=sp[j];sp[j]=t}
     for(var k=0;k<M&&k<sp.length;k++)bd[sp[k][0]][sp[k][1]].mine=true;
@@ -95,7 +106,10 @@
       }h+="</tr>";
     }$("#board").innerHTML=h}
   var lt=null,longed=false;
-  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(!td||td.dataset.gr===undefined)return;if(longed){longed=false;return}reveal(+td.dataset.gr,+td.dataset.gc)});
+  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(!td||td.dataset.gr===undefined)return;if(longed){longed=false;return}
+    var gr=+td.dataset.gr,gc=+td.dataset.gc,cl=bd[gr][gc];
+    if(cl.rev&&cl.adj>0)chord(gr,gc);else reveal(gr,gc)});
+  $("#board").addEventListener("mousedown",function(e){if(e.buttons===3){var td=e.target.closest("td");if(td&&td.dataset.gr!==undefined){e.preventDefault();chord(+td.dataset.gr,+td.dataset.gc)}}});
   $("#board").addEventListener("contextmenu",function(e){var td=e.target.closest("td");if(td&&td.dataset.gr!==undefined){e.preventDefault();toggleFlag(+td.dataset.gr,+td.dataset.gc)}});
   $("#board").addEventListener("touchstart",function(e){var td=e.target.closest("td");if(!td||td.dataset.gr===undefined)return;longed=false;lt=setTimeout(function(){longed=true;toggleFlag(+td.dataset.gr,+td.dataset.gc)},420)},{passive:true});
   $("#board").addEventListener("touchend",function(){clearTimeout(lt)});
