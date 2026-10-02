@@ -94,7 +94,6 @@
     document.body.appendChild(boss);
     function bshow(v){boss.classList.toggle("show",v)}
     window.addEventListener("keydown",function(e){if(e.key==="Escape"){bshow(!boss.classList.contains("show"));e.preventDefault();return}if(boss.classList.contains("show"))bshow(false)});
-    window.addEventListener("blur",function(){bshow(true)});
-    document.addEventListener("visibilitychange",function(){if(document.hidden)bshow(true)});
+    boss.addEventListener("click",function(){bshow(false)});
   })();
 })();
