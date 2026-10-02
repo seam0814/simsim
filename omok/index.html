@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://seam0814.github.io/simsim/omok/">
 <link rel="stylesheet" href="../style.css">
 <style>
+  body{background:#fff;background-image:none}
   .bgsheet{border-collapse:collapse;table-layout:fixed}
   .bgsheet th{background:#f3f3f3;color:#888;font-size:11px;border:1px solid #d4d4d4;height:22px;text-align:center;font-weight:600}
   .bgsheet th.rn{width:30px}
@@ -106,6 +107,22 @@
     if(!any)return[7,7];var best=[7,7],bv=-1;
     for(var r=0;r<N;r++)for(var c=0;c<N;c++){if(g[r][c]||!hasN(r,c))continue;var tot=evalCell(r,c,2)+evalCell(r,c,1)*W+Math.random()*jit;if(tot>bv){bv=tot;best=[r,c]}}
     return best}
+  function genCands(){var a=[];for(var r=0;r<N;r++)for(var c=0;c<N;c++)if(!g[r][c]&&hasN(r,c))a.push([r,c]);if(!a.length)a.push([7,7]);return a}
+  function scored(){return genCands().map(function(p){return[p[0],p[1],evalCell(p[0],p[1],2)+evalCell(p[0],p[1],1)]}).sort(function(x,y){return y[2]-x[2]})}
+  function evalBoard(p){var s=0;for(var r=0;r<N;r++)for(var c=0;c<N;c++){if(g[r][c]!==p)continue;for(var d=0;d<4;d++){var dr=DIRS[d][0],dc=DIRS[d][1];if(inb(r-dr,c-dc)&&g[r-dr][c-dc]===p)continue;var len=0,i=0;while(inb(r+dr*i,c+dc*i)&&g[r+dr*i][c+dc*i]===p){len++;i++}var o1=inb(r-dr,c-dc)&&g[r-dr][c-dc]===0?1:0,o2=inb(r+dr*len,c+dc*len)&&g[r+dr*len][c+dc*len]===0?1:0;s+=pat(len,o1+o2)}}return s}
+  function aiHard(){var cs=genCands(),k;
+    for(k=0;k<cs.length;k++)if(evalCell(cs[k][0],cs[k][1],2)>=100000)return cs[k];   // 내가 이기는 수
+    for(k=0;k<cs.length;k++)if(evalCell(cs[k][0],cs[k][1],1)>=100000)return cs[k];   // 상대 이기는 수 차단
+    var top=scored().slice(0,12),best=top[0]||[7,7],alpha=-1e18;
+    for(k=0;k<top.length;k++){var cd=top[k];g[cd[0]][cd[1]]=2;
+      var otop=scored().slice(0,10),minv=1e18,j;
+      for(j=0;j<otop.length;j++){var od=otop[j];
+        if(evalCell(od[0],od[1],1)>=100000){minv=-1e18;break;}  // 이 수 두면 상대가 이김 → 회피
+        g[od[0]][od[1]]=1;var val=evalBoard(2)-evalBoard(1)*1.1;g[od[0]][od[1]]=0;
+        if(val<minv)minv=val;}
+      g[cd[0]][cd[1]]=0;
+      if(minv>alpha){alpha=minv;best=cd;}}
+    return [best[0],best[1]]}
   function render(){var h="<tr><th></th>";for(var c=0;c<N;c++)h+="<th>"+String.fromCharCode(65+c)+"</th>";h+="</tr>";
     for(var r=0;r<N;r++){h+="<tr><th>"+(r+1)+"</th>";for(var c=0;c<N;c++){var v=g[r][c],cls=v===1?"s1":v===2?"s2":"";
       if(last&&last[0]===r&&last[1]===c)cls+=" last";
@@ -115,7 +132,7 @@
   function playerMove(r,c){if(over||thinking||g[r][c])return;g[r][c]=1;last=[r,c];
     if(win(r,c,1)){over=true;render();setState("결재 승인 — 승리!");return}if(full()){over=true;render();setState("보류 — 무승부");return}
     render();setState("상대 발언 중…");thinking=true;
-    setTimeout(function(){var m=aiMove();g[m[0]][m[1]]=2;last=m;thinking=false;
+    setTimeout(function(){var m=(level===3?aiHard():aiMove());g[m[0]][m[1]]=2;last=m;thinking=false;
       if(win(m[0],m[1],2)){over=true;render();setState("반려 — 패배");return}if(full()){over=true;render();setState("보류");return}
       render();setState("내 차례")},160)}
   function init(){g=[];for(var r=0;r<N;r++){g[r]=[];for(var c=0;c<N;c++)g[r][c]=0}over=false;last=null;thinking=false;setState("내 차례");render()}
