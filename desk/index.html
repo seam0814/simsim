@@ -144,7 +144,7 @@
 <script src="../common.js"></script>
 <script>
 (function(){
-  var RSS_KEY="";
+  var RSS_KEY="gawccsmmuxgykm6dhtefr8jhu2dhk1tbrr71jd2k";
   function fmt(n){return Math.round(n).toLocaleString("en-US")}
   var MON=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
   /* 열/행 머리글 */
@@ -224,7 +224,7 @@
   function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
   function viaR(u){var k=RSS_KEY?("&api_key="+RSS_KEY):"";return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=14"+k).then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate,desc:x.description}})})}
   function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
-  function get(u){return viaA(u).catch(function(){return viaR(u)})}
+  function get(u){return viaR(u).catch(function(){return viaA(u)})}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
   function load(){get(FEED).then(function(list){DATA=list;
       var top=splitSrc(list[0].title||""),isNew=lastTop&&list[0].link!==lastTop;
