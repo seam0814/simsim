@@ -108,6 +108,11 @@
   .cmt .clk{float:right;border:1px solid var(--line);background:#fff;color:#c0392b;font-size:11px;padding:1px 7px;cursor:pointer}
   .cmt.best{background:#fffaf0;border-left:3px solid #e0a800;padding-left:8px}
   .besttag{display:inline-block;background:#e0a800;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;margin-right:6px;vertical-align:middle}
+  .wrez::after{content:"";position:absolute;top:50%;height:46px;width:3px;margin-top:-23px;background:#b7b7b7;border-radius:2px}
+  .col.left .wrez::after{left:2px}.col.right .wrez::after{left:3px}
+  .hrez{flex:0 0 10px}
+  .hrez::after{content:"";display:block;width:46px;height:3px;margin:3px auto;background:#b7b7b7;border-radius:2px}
+  .wrez:hover::after,.hrez:hover::after{background:#217346}
 </style>
 </head>
 <body>
