@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>통합 문서 - Excel</title>
-<meta name="description" content="한 화면에서 실시간 뉴스·미니게임·익명 채팅을 동시에. 스프레드시트처럼 보이는 올인원. Esc로 업무화면 전환.">
+<meta name="description" content="한 화면에서 실시간 뉴스·미니게임·익명 채팅. 시트 탭으로 실적 시트 전환까지. Esc·Alt+숫자로 업무화면 위장.">
 <link rel="canonical" href="https://seam0814.github.io/simsim/desk/">
 <link rel="stylesheet" href="../style.css">
 <style>
@@ -16,11 +16,15 @@
   .srow{flex:1;display:flex;min-height:0;overflow:hidden}
   .rowhdr{flex:0 0 34px;background:var(--head);border-right:1px solid var(--line);overflow:hidden}
   .rowhdr .r{height:22px;line-height:22px;text-align:center;font-size:11px;color:#8a8a8a;border-bottom:1px solid var(--line)}
-  .content{flex:1;display:flex;gap:4px;min-height:0;padding:4px;position:relative;background:#fff}
+  .content{flex:1;min-height:0;position:relative;background:#fff;overflow:hidden}
   .gridbg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
     background-image:linear-gradient(#ededed 1px,transparent 1px),linear-gradient(90deg,#ededed 1px,transparent 1px);background-size:64px 22px}
   .gridbg span{position:absolute;height:22px;line-height:22px;padding:0 4px;font-size:10px;color:#d6d6d6;overflow:hidden;white-space:nowrap}
-  .panel{background:#fff;border:1px solid #b7b7b7;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1;box-shadow:1px 1px 0 rgba(0,0,0,.04)}
+  .view{display:none;position:absolute;inset:4px;z-index:1}
+  .view.on{display:flex}
+  .v-dash{gap:4px}
+  .v-sales.on,.v-q.on,.v-s3.on{display:block;overflow:auto;background:#fff;border:1px solid #b7b7b7}
+  .panel{background:#fff;border:1px solid #b7b7b7;display:flex;flex-direction:column;min-height:0;position:relative;box-shadow:1px 1px 0 rgba(0,0,0,.04)}
   .ph{background:var(--head);color:#1b5e20;border-bottom:1px solid var(--line);font-weight:700;font-size:12px;padding:5px 9px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex:0 0 auto}
   .ph .ctl{font-weight:400}
   .pb{flex:1;min-height:0;overflow:auto;background:#fff;background-image:linear-gradient(#f4f4f4 1px,transparent 1px);background-size:100% 26px}
@@ -42,13 +46,24 @@
   .right #lounge .cat{margin:9px 0 6px;border-left:3px solid var(--sel)}
   .right #lounge .chatbox{max-height:none;flex:1;min-height:0;border-radius:0}
   .right #lounge .chatform input,.right #lounge .chatform .btn{border-radius:0}
+  /* 데이터 시트 */
+  .dsheet{padding:2px 0 24px}
+  .dsheet h2{font-size:13px;color:#1b5e20;margin:12px 12px 8px;font-weight:700}
+  .xtable{border-collapse:collapse;font-size:12px;margin:0 12px 22px}
+  .xtable th,.xtable td{border:1px solid var(--line);padding:3px 8px;white-space:nowrap;height:22px}
+  .xtable th{background:var(--head);color:#555;font-weight:600;position:sticky;top:0;z-index:2}
+  .xtable td.lbl{background:#fafafa;font-weight:600;color:#333;text-align:left;position:sticky;left:0}
+  .xtable td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .xtable tr.total td{font-weight:700;border-top:2px solid #999;background:#f0f6f0}
+  /* 시트 탭 */
   .tabs{flex:0 0 26px;display:flex;align-items:stretch;background:var(--head);border-top:1px solid var(--line);font-size:12px;overflow:hidden}
   .tabs .nav{color:#999;padding:0 8px;display:flex;align-items:center;border-right:1px solid var(--line)}
-  .tabs .t{padding:0 14px;display:flex;align-items:center;border-right:1px solid var(--line);color:#555}
+  .tabs .t{padding:0 14px;display:flex;align-items:center;border-right:1px solid var(--line);color:#555;cursor:pointer}
+  .tabs .t:hover{background:#eee}
   .tabs .t.on{background:#fff;color:#1b5e20;font-weight:700;border-top:2px solid var(--sel);margin-top:-1px}
   .tabs .plus{padding:0 10px;display:flex;align-items:center;color:#999}
   .tabs .status{margin-left:auto;padding:0 12px;display:flex;align-items:center;color:#999;font-size:11px}
-  /* 엑셀풍 미리보기(셀 메모 창) */
+  /* 미리보기 */
   .reader{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9998;display:none;align-items:center;justify-content:center;padding:16px}
   .reader.on{display:flex}
   .rwin{background:#fff;border:1px solid #888;max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:3px 3px 10px rgba(0,0,0,.25)}
@@ -64,7 +79,8 @@
   .rnote{font-size:11px;color:#aaa;margin-top:10px}
   @media(max-width:860px){
     .sheet{height:auto}.srow{flex-direction:column}.rowhdr{display:none}
-    .content{flex-direction:column}.left,.right,.center{flex:none}
+    .content{overflow:visible}.view{position:static;inset:auto}
+    .v-dash.on{flex-direction:column}.left,.right,.center{flex:none}
     .center{height:470px}.left{max-height:340px}.right{min-height:360px}
     .right #lounge .chatbox{min-height:200px}.colhdr .c:nth-child(n+8){display:none}
   }
@@ -77,25 +93,34 @@
     <div class="rowhdr" id="rowh"></div>
     <div class="content">
       <div class="gridbg" id="gridbg"></div>
-      <div class="panel left">
-        <div class="ph"><span>A : 실시간 뉴스</span><button id="nref" class="ctl">새로고침</button></div>
-        <div class="sokbar" id="sok">속보 불러오는 중…</div>
-        <div class="pb" id="news"><div class="nloading">불러오는 중…</div></div>
+      <div class="view v-dash on">
+        <div class="panel left">
+          <div class="ph"><span>A : 실시간 뉴스</span><button id="nref" class="ctl">새로고침</button></div>
+          <div class="sokbar" id="sok">속보 불러오는 중…</div>
+          <div class="pb" id="news"><div class="nloading">불러오는 중…</div></div>
+        </div>
+        <div class="panel center">
+          <div class="ph"><span>작업 영역</span><select id="gsel" class="ctl"></select></div>
+          <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe></div>
+        </div>
+        <div class="panel right">
+          <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">익명</span></div>
+          <div class="pb"><div id="lounge"></div></div>
+        </div>
       </div>
-      <div class="panel center">
-        <div class="ph"><span>작업 영역</span><select id="gsel" class="ctl"></select></div>
-        <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe></div>
-      </div>
-      <div class="panel right">
-        <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">익명</span></div>
-        <div class="pb"><div id="lounge"></div></div>
-      </div>
+      <div class="view v-sales" id="vSales"></div>
+      <div class="view v-q" id="vQ"></div>
+      <div class="view v-s3" id="vS3"></div>
     </div>
   </div>
-  <div class="tabs">
-    <span class="nav">◀ ▶</span><span class="t on">대시보드</span><span class="t">매출실적</span>
-    <span class="t">분기요약</span><span class="t">Sheet3</span><span class="plus">＋</span>
-    <span class="status">준비  ·  평균: 0  ·  합계: 0</span>
+  <div class="tabs" id="tabs">
+    <span class="nav">◀ ▶</span>
+    <span class="t on" data-v="dash">대시보드</span>
+    <span class="t" data-v="sales">매출실적</span>
+    <span class="t" data-v="q">분기요약</span>
+    <span class="t" data-v="s3">Sheet3</span>
+    <span class="plus">＋</span>
+    <span class="status" id="status">준비</span>
   </div>
 </div>
 <div class="reader" id="reader"><div class="rwin">
@@ -113,26 +138,72 @@
 <script src="../common.js"></script>
 <script>
 (function(){
-  var RSS_KEY=""; /* rss2json 무료 키 (받으면 여기에) */
+  var RSS_KEY="";
+  function fmt(n){return Math.round(n).toLocaleString("en-US")}
+  var MON=["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
   /* 열/행 머리글 */
   function colName(n){var s="";n++;while(n>0){var m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s}
   var CH=document.getElementById("colh");for(var i=0;i<40;i++){var d=document.createElement("div");d.className="c";d.textContent=colName(i);CH.appendChild(d)}
   var RH=document.getElementById("rowh");for(var j=1;j<=80;j++){var r=document.createElement("div");r.className="r";r.textContent=j;RH.appendChild(r)}
-  /* 가짜 엑셀 데이터 배경 */
-  function fillBg(){
-    var bg=document.getElementById("gridbg");var w=bg.offsetWidth,h=bg.offsetHeight;if(!w)return;
+  /* 가짜 데이터 배경 */
+  function fillBg(){var bg=document.getElementById("gridbg"),w=bg.offsetWidth,h=bg.offsetHeight;if(!w)return;
     var cols=Math.ceil(w/64),rows=Math.ceil(h/22);
     var tpl=[["항목","1월","2월","3월","4월","5월","6월","상반기"],["매출액","1,240","1,310","1,455","1,388","1,520","1,610","8,523"],
       ["매출원가","720","760","810","775","848","902","4,815"],["매출총이익","520","550","645","613","672","708","3,708"],
       ["판관비","310","325","330","318","340","352","1,975"],["영업이익","210","225","315","295","332","356","1,733"],
-      ["영업이익률","16.9%","17.2%","21.6%","21.3%","21.8%","22.1%","20.3%"]];
-    var html="",blk=tpl.length+3;
-    for(var rr=0;rr<rows;rr++){var tr=tpl[rr%blk];if(!tr)continue;
-      for(var c=0;c<cols&&c<tr.length;c++){
-        html+='<span style="left:'+(c*64)+'px;top:'+(rr*22)+'px;width:60px;'+(c===0?'text-align:left':'text-align:right')+'">'+tr[c]+'</span>';}}
-    bg.innerHTML=html;
-  }
+      ["영업이익률","16.9%","17.2%","21.6%","21.3%","21.8%","22.1%","20.3%"]],blk=tpl.length+3,html="";
+    for(var rr=0;rr<rows;rr++){var tr=tpl[rr%blk];if(!tr)continue;for(var c=0;c<cols&&c<tr.length;c++){
+      html+='<span style="left:'+(c*64)+'px;top:'+(rr*22)+'px;width:60px;'+(c===0?"text-align:left":"text-align:right")+'">'+tr[c]+'</span>';}}
+    bg.innerHTML=html;}
   fillBg();window.addEventListener("resize",fillBg);
+  /* ===== 데이터 시트 생성 ===== */
+  function buildSales(){
+    var prods=[["반도체사업부",820],["디스플레이",430],["모바일(MX)",1120],["생활가전",360],["네트워크장비",210],["부품/소재",180],["서비스/기타",95]];
+    var head="<tr><th class='lbl'>사업부 (단위: 억원)</th>";MON.forEach(function(m){head+="<th>"+m+"</th>"});head+="<th>합계</th><th>비중</th></tr>";
+    var mat=[],gtot=0,ct=[0,0,0,0,0,0,0,0,0,0,0,0];
+    prods.forEach(function(p,ix){var row=[],tot=0;for(var m=0;m<12;m++){var v=Math.round(p[1]*(1+0.022*m)*(0.9+0.2*Math.abs(Math.sin(ix*1.7+m*0.6))));row.push(v);tot+=v;ct[m]+=v;}mat.push({n:p[0],row:row,tot:tot});gtot+=tot;});
+    var body="";mat.forEach(function(r){var mx=Math.max.apply(null,r.row),tr="<tr><td class='lbl'>"+r.n+"</td>";
+      r.row.forEach(function(v){var a=(0.1+0.5*(v/mx)).toFixed(2);tr+="<td class='num' style='background:rgba(33,115,70,"+a+")'>"+fmt(v)+"</td>";});
+      tr+="<td class='num'>"+fmt(r.tot)+"</td><td class='num'>"+(r.tot/gtot*100).toFixed(1)+"%</td></tr>";body+=tr;});
+    var t="<tr class='total'><td class='lbl'>합계</td>";ct.forEach(function(v){t+="<td class='num'>"+fmt(v)+"</td>";});t+="<td class='num'>"+fmt(gtot)+"</td><td class='num'>100.0%</td></tr>";
+    return "<div class='dsheet'><h2>2026년 사업부별 월 매출 실적</h2><table class='xtable'>"+head+body+t+"</table></div>";
+  }
+  function buildQ(){
+    var q=["1분기","2분기","3분기","4분기"],sales=[9800,10600,11200,12100],op=[1680,1920,2130,2460],yoy=[8.2,11.4,9.6,13.1];
+    var head="<tr><th class='lbl'>구분 (억원)</th>"+q.map(function(x){return "<th>"+x+"</th>"}).join("")+"<th>연간</th></tr>";
+    function rowf(name,arr,pct){var s=arr.reduce(function(a,b){return a+b},0),tr="<tr><td class='lbl'>"+name+"</td>";
+      arr.forEach(function(v){tr+="<td class='num'>"+(pct?v.toFixed(1)+"%":fmt(v))+"</td>";});tr+="<td class='num'>"+(pct?(s/4).toFixed(1)+"%":fmt(s))+"</td></tr>";return tr;}
+    var margin=op.map(function(v,i){return v/sales[i]*100});
+    var body=rowf("매출액",sales)+rowf("영업이익",op)+rowf("영업이익률",margin,true)+rowf("전년대비 성장",yoy,true);
+    var mx=Math.max.apply(null,sales),bars="<h2>분기별 매출 추이</h2><table class='xtable'><tr><th class='lbl'>분기</th><th>그래프</th><th>매출</th></tr>";
+    sales.forEach(function(v,i){var w=Math.round(v/mx*24);bars+="<tr><td class='lbl'>"+q[i]+"</td><td style='letter-spacing:-1px;color:#217346'>"+new Array(w+1).join("■")+"</td><td class='num'>"+fmt(v)+"</td></tr>";});bars+="</table>";
+    return "<div class='dsheet'><h2>2026년 분기 요약 (P&amp;L)</h2><table class='xtable'>"+head+body+"</table>"+bars+"</div>";
+  }
+  function buildS3(){
+    var items=[["인건비",310],["마케팅/광고",180],["임차료",64],["감가상각비",92],["연구개발비",240],["여비교통비",28],["기타경비",45]];
+    var head="<tr><th class='lbl'>판관비 항목 (백만원)</th>"+["1Q","2Q","3Q","4Q"].map(function(x){return "<th>"+x+"</th>"}).join("")+"<th>합계</th></tr>";
+    var body="",ct=[0,0,0,0],g=0;
+    items.forEach(function(p,ix){var tot=0,tr="<tr><td class='lbl'>"+p[0]+"</td>";for(var qi=0;qi<4;qi++){var v=Math.round(p[1]*(1+0.04*qi)*(0.95+0.1*Math.abs(Math.sin(ix+qi))));tr+="<td class='num'>"+fmt(v)+"</td>";tot+=v;ct[qi]+=v;}tr+="<td class='num'>"+fmt(tot)+"</td></tr>";body+=tr;g+=tot;});
+    var t="<tr class='total'><td class='lbl'>합계</td>";ct.forEach(function(v){t+="<td class='num'>"+fmt(v)+"</td>";});t+="<td class='num'>"+fmt(g)+"</td></tr>";
+    return "<div class='dsheet'><h2>판매관리비 집계표</h2><table class='xtable'>"+head+body+t+"</table></div>";
+  }
+  document.getElementById("vSales").innerHTML=buildSales();
+  document.getElementById("vQ").innerHTML=buildQ();
+  document.getElementById("vS3").innerHTML=buildS3();
+  /* ===== 시트 전환 ===== */
+  var ORDER=["dash","sales","q","s3"],CURV="dash";
+  var VIEW={dash:document.querySelector(".v-dash"),sales:document.getElementById("vSales"),q:document.getElementById("vQ"),s3:document.getElementById("vS3")};
+  var STAT={dash:"준비",sales:"평균: 7,240  ·  합계: 86,880  ·  개수: 84",q:"평균: 10,925  ·  합계: 43,700",s3:"평균: 1,086  ·  합계: 30,408"};
+  function switchView(v){if(!VIEW[v])return;CURV=v;
+    for(var k in VIEW){VIEW[k].classList.toggle("on",k===v)}
+    [].forEach.call(document.querySelectorAll(".tabs .t"),function(t){t.classList.toggle("on",t.getAttribute("data-v")===v)});
+    document.getElementById("status").textContent=STAT[v]||"준비";
+    try{track("desk_sheet",{v:v})}catch(e){}}
+  document.getElementById("tabs").addEventListener("click",function(e){var t=e.target.closest(".t");if(t)switchView(t.getAttribute("data-v"))});
+  window.addEventListener("keydown",function(e){
+    if(e.altKey&&!e.ctrlKey&&!e.metaKey&&e.key>="1"&&e.key<="4"){switchView(ORDER[+e.key-1]);e.preventDefault();return;}
+    if(e.ctrlKey&&(e.key==="PageDown"||e.key==="PageUp")){var ii=ORDER.indexOf(CURV);ii=(ii+(e.key==="PageDown"?1:ORDER.length-1))%ORDER.length;switchView(ORDER[ii]);e.preventDefault();}
+  });
   /* 게임 드롭다운 */
   var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
   var sel=document.getElementById("gsel"),fr=document.getElementById("gframe");
@@ -149,27 +220,22 @@
   function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
   function get(u){return viaR(u).catch(function(){return viaA(u)})}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
-  function load(){
-    get(FEED).then(function(list){DATA=list;
+  function load(){get(FEED).then(function(list){DATA=list;
       var top=splitSrc(list[0].title||""),isNew=lastTop&&list[0].link!==lastTop;
       sokEl.innerHTML='<b>'+(isNew?"[NEW] ":"")+'속보</b> '+esc(top[0]);lastTop=list[0].link;
       var h="";for(var i=0;i<list.length;i++){var s=splitSrc(list[i].title||"");
         h+='<div class="nitem" data-i="'+i+'"><span class="ni">'+(i+1)+'</span><span class="nt">'+esc(s[0])+'<div class="nm">'+(s[1]?esc(s[1])+" · ":"")+ago(list[i].pubDate)+'</div></span></div>';}
       newsEl.innerHTML=h;
-    }).catch(function(){newsEl.innerHTML='<div class="nloading">뉴스 서버가 붐벼요. 잠시 후 [새로고침] 눌러주세요.</div>';sokEl.innerHTML='<b>속보</b> 로딩 대기 중…';});
-  }
-  /* 클릭 → 미리보기 */
+    }).catch(function(){newsEl.innerHTML='<div class="nloading">뉴스 서버가 붐벼요. 잠시 후 [새로고침].</div>';sokEl.innerHTML='<b>속보</b> 로딩 대기 중…';});}
   var reader=document.getElementById("reader");
-  function openReader(it){
-    var s=splitSrc(it.title||"");
+  function openReader(it){var s=splitSrc(it.title||"");
     document.getElementById("rtitle").textContent=s[0];
     document.getElementById("rmeta").textContent=(s[1]?s[1]+" · ":"")+ago(it.pubDate);
     document.getElementById("rorig").href=it.link||"#";
-    var rel=document.getElementById("rrel");var tmp=document.createElement("div");tmp.innerHTML=it.desc||"";
-    var as=tmp.querySelectorAll("a"),rh="";for(var k=0;k<as.length&&k<8;k++){rh+='<a href="'+esc(as[k].href)+'" target="_blank" rel="noopener">'+esc(as[k].textContent)+'</a>';}
-    rel.innerHTML=rh||'<div style="font-size:12px;color:#aaa">관련 보도 없음 — 원문에서 확인하세요.</div>';
-    reader.classList.add("on");try{track("desk_read")}catch(e){}
-  }
+    var tmp=document.createElement("div");tmp.innerHTML=it.desc||"";var as=tmp.querySelectorAll("a"),rh="";
+    for(var k=0;k<as.length&&k<8;k++){rh+='<a href="'+esc(as[k].href)+'" target="_blank" rel="noopener">'+esc(as[k].textContent)+'</a>';}
+    document.getElementById("rrel").innerHTML=rh||'<div style="font-size:12px;color:#aaa">관련 보도 없음 — 원문에서 확인하세요.</div>';
+    reader.classList.add("on");try{track("desk_read")}catch(e){}}
   newsEl.addEventListener("click",function(e){var n=e.target.closest(".nitem");if(!n)return;var it=DATA[+n.getAttribute("data-i")];if(it)openReader(it);});
   document.getElementById("rclose").addEventListener("click",function(){reader.classList.remove("on")});
   reader.addEventListener("click",function(e){if(e.target===reader)reader.classList.remove("on")});
