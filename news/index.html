@@ -4,81 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>통합 문서6 - Excel</title>
-<meta name="description" content="실시간 뉴스 헤드라인 모음 — 종합·경제·IT·세계·스포츠. 제목·출처·시간을 한 곳에서, 클릭하면 원문으로. 무료.">
+<meta name="description" content="실시간 인기 뉴스 TOP 10 — 종합·경제·IT·세계·스포츠. 지금 가장 많이 보는 기사 제목을 한눈에, 클릭하면 원문으로.">
 <link rel="canonical" href="https://seam0814.github.io/simsim/news/">
 <link rel="stylesheet" href="../style.css">
 <style>
-  .nwrap{max-width:760px}
-  .tabs{display:flex;gap:2px;flex-wrap:wrap;margin:6px 0 10px}
+  .nwrap{max-width:700px}
+  .tabs{display:flex;gap:2px;flex-wrap:wrap;margin:8px 0 10px}
   .tabs button{font:inherit;border:1px solid #d4d4d4;background:#f8f8f8;color:#217346;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:13px}
   .tabs button.on{background:#217346;color:#fff;border-color:#217346}
-  .feed{background:#fff;border:1px solid #c6c6c6;border-radius:4px;min-height:200px}
-  .feed .it{border-bottom:1px solid #eee;padding:0}
-  .feed .it:last-child{border-bottom:none}
-  .feed a{display:block;padding:10px 14px;text-decoration:none;color:#1c2b1c}
-  .feed a:hover{background:#eafaf0}
-  .feed .tt{font-size:14px;line-height:1.45}
-  .feed .meta{font-size:11px;color:#8a8f98;margin-top:3px}
-  .feed .msg{padding:16px 14px;color:#999;font-size:13px}
-  .barogaki{margin-top:14px;font-size:12px;color:#777}
-  .barogaki a{color:#217346;text-decoration:none;margin-right:10px;white-space:nowrap}
+  .feed{background:#fff;border:1px solid #c6c6c6;border-radius:6px;overflow:hidden;min-height:260px}
+  .rk{display:flex;align-items:flex-start;gap:12px;padding:11px 14px;border-bottom:1px solid #eee;text-decoration:none;color:#1c2b1c}
+  .rk:last-child{border-bottom:none}
+  .rk:hover{background:#eafaf0}
+  .rk .num{flex:0 0 24px;text-align:center;font-weight:800;font-size:17px;color:#217346;line-height:1.4}
+  .rk .num.top{color:#c0504d}
+  .rk .body{flex:1;min-width:0}
+  .rk .tt{font-size:14px;line-height:1.45}
+  .rk .meta{font-size:11px;color:#8a8f98;margin-top:3px}
+  .msg{padding:18px 14px;color:#999;font-size:13px}
+  .foot{margin-top:12px;font-size:11px;color:#999}
 </style>
 </head>
 <body>
 <div class="wrap nwrap">
   <div id="site-header"></div>
-  <h1 style="font-size:1.2rem;color:#1b5e20">뉴스 · 실시간 헤드라인</h1>
-  <p class="sub" style="font-size:.86rem">카테고리를 눌러 최신 기사 제목을 보고, 클릭하면 원문으로. Esc=업무화면.</p>
+  <h1 style="font-size:1.2rem;color:#1b5e20">실시간 인기 뉴스 TOP 10</h1>
+  <p class="sub" style="font-size:.86rem">지금 많이 보는 기사 제목을 한눈에. 클릭하면 원문으로. Esc=업무화면.</p>
   <div class="tabs" id="tabs">
     <button data-k="top" class="on">종합</button>
     <button data-k="biz">경제</button>
     <button data-k="tech">IT·과학</button>
     <button data-k="world">세계</button>
+    <button data-k="ent">연예</button>
     <button data-k="sports">스포츠</button>
   </div>
   <div class="feed" id="feed"><div class="msg">불러오는 중…</div></div>
-  <div class="barogaki">
-    바로가기:
-    <a href="https://news.naver.com/" target="_blank" rel="noopener">네이버뉴스</a>
-    <a href="https://www.yna.co.kr/" target="_blank" rel="noopener">연합뉴스</a>
-    <a href="https://www.mk.co.kr/" target="_blank" rel="noopener">매일경제</a>
-    <a href="https://zdnet.co.kr/" target="_blank" rel="noopener">ZDNet</a>
-    <a href="https://news.google.com/?hl=ko" target="_blank" rel="noopener">Google뉴스</a>
-  </div>
+  <div class="foot" id="foot"></div>
   <div id="site-footer"></div>
 </div>
 <script>window.SITE_ROOT="../";</script>
 <script src="../common.js"></script>
 <script>
 (function(){
-  var feed=document.getElementById("feed"),cache={},cur="top";
+  var feed=document.getElementById("feed"),foot=document.getElementById("foot"),cache={},cur="top";
+  var T="?hl=ko&gl=KR&ceid=KR:ko";
   var FEEDS={
-    top:"https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko",
-    biz:"https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko",
-    tech:"https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=ko&gl=KR&ceid=KR:ko",
-    world:"https://news.google.com/rss/headlines/section/topic/WORLD?hl=ko&gl=KR&ceid=KR:ko",
-    sports:"https://news.google.com/rss/headlines/section/topic/SPORTS?hl=ko&gl=KR&ceid=KR:ko"
+    top:"https://news.google.com/rss"+T,
+    biz:"https://news.google.com/rss/headlines/section/topic/BUSINESS"+T,
+    tech:"https://news.google.com/rss/headlines/section/topic/TECHNOLOGY"+T,
+    world:"https://news.google.com/rss/headlines/section/topic/WORLD"+T,
+    ent:"https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT"+T,
+    sports:"https://news.google.com/rss/headlines/section/topic/SPORTS"+T
   };
-  function esc(t){return String(t).replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
+  function esc(t){return String(t||"").replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
   function ago(d){var t=new Date(d).getTime();if(isNaN(t))return "";var m=Math.floor((Date.now()-t)/60000);
     if(m<1)return "방금";if(m<60)return m+"분 전";var h=Math.floor(m/60);if(h<24)return h+"시간 전";return Math.floor(h/24)+"일 전";}
+  function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
+  function viaRss2json(u){return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=10").then(function(r){return r.json()}),9000)
+    .then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate}})})}
+  function viaAllorigins(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000)
+    .then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml");var its=xml.querySelectorAll("item");if(!its.length)throw 0;
+      var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent})});return a})}
+  function getFeed(u){return viaRss2json(u).catch(function(){return viaAllorigins(u)})}
   function render(items){
-    var h="";for(var i=0;i<items.length&&i<20;i++){var it=items[i],title=it.title||"",src="";
-      var idx=title.lastIndexOf(" - ");if(idx>20){src=title.slice(idx+3);title=title.slice(0,idx);}
-      h+='<div class="it"><a href="'+esc(it.link)+'" target="_blank" rel="noopener"><div class="tt">'+esc(title)+'</div><div class="meta">'+(src?esc(src)+" · ":"")+ago(it.pubDate)+'</div></a></div>';}
-    feed.innerHTML=h||'<div class="msg">기사를 불러오지 못했어요. 아래 바로가기를 이용하세요.</div>';
+    var h="";for(var i=0;i<items.length&&i<10;i++){var it=items[i],title=it.title||"",src="";
+      var idx=title.lastIndexOf(" - ");if(idx>15){src=title.slice(idx+3);title=title.slice(0,idx);}
+      h+='<a class="rk" href="'+esc(it.link)+'" target="_blank" rel="noopener"><span class="num'+(i<3?" top":"")+'">'+(i+1)+'</span><span class="body"><span class="tt">'+esc(title)+'</span><span class="meta">'+(src?esc(src)+" · ":"")+ago(it.pubDate)+'</span></span></a>';}
+    feed.innerHTML=h||'<div class="msg">기사를 불러오지 못했어요.</div>';
+    foot.textContent="업데이트: "+new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})+" · 출처: Google 뉴스";
   }
-  function load(k){
-    cur=k;
-    if(cache[k]){render(cache[k]);return;}
-    feed.innerHTML='<div class="msg">불러오는 중…</div>';
-    var url="https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(FEEDS[k])+"&count=20";
-    var ctrl=new AbortController(),to=setTimeout(function(){ctrl.abort()},9000);
-    fetch(url,{signal:ctrl.signal}).then(function(r){return r.json()}).then(function(d){clearTimeout(to);
-      if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;
-      cache[k]=d.items;if(cur===k)render(d.items);
-    }).catch(function(){clearTimeout(to);if(cur===k)feed.innerHTML='<div class="msg">잠시 후 다시 시도해 주세요 (또는 아래 바로가기 이용). 뉴스 서버가 붐빌 수 있어요.</div>';});
-  }
+  function load(k){cur=k;if(cache[k]){render(cache[k]);return;}
+    feed.innerHTML='<div class="msg">불러오는 중…</div>';foot.textContent="";
+    getFeed(FEEDS[k]).then(function(items){cache[k]=items;if(cur===k)render(items);})
+    .catch(function(){if(cur===k)feed.innerHTML='<div class="msg">잠시 후 다시 눌러주세요 — 뉴스 서버가 붐빌 수 있어요.</div>';});}
   document.getElementById("tabs").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;
     [].forEach.call(this.children,function(x){x.classList.remove("on")});b.classList.add("on");load(b.getAttribute("data-k"));});
   load("top");
