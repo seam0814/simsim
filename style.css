@@ -48,3 +48,19 @@ details p{color:var(--muted);margin:.5em 0 0}
 .chatform input{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:5px}
 .chatform input#cnick{flex:0 0 88px}
 .chatform .btn{width:auto;margin:0;padding:10px 14px}
+/* ===== 보스화면 전문 엑셀 시트 ===== */
+#bossv .bosssheet{overflow:auto;max-height:calc(100vh - 118px);padding:0 2px}
+#bossv .xlsheet{border-collapse:collapse;font-size:12px;font-family:var(--font);margin:0}
+#bossv .xlsheet th,#bossv .xlsheet td{border:1px solid #d4d4d4;height:20px;padding:1px 7px;white-space:nowrap;font-size:12px}
+#bossv .xlsheet .colh{background:#f3f3f3;color:#8a8a8a;text-align:center;font-weight:600;min-width:60px}
+#bossv .xlsheet .rowh{background:#f3f3f3;color:#8a8a8a;text-align:center;width:30px;font-weight:600}
+#bossv .xlsheet .corner{background:#e6e6e6;width:30px}
+#bossv .xlsheet td{background:#fff;color:#222}
+#bossv .xlsheet td.lb{text-align:left;font-weight:600;color:#333;background:#fafafa}
+#bossv .xlsheet td.n{text-align:right;font-variant-numeric:tabular-nums}
+#bossv .xlsheet td.hh{background:#217346;color:#fff;font-weight:700;text-align:center}
+#bossv .xlsheet td.sub{background:#e8f3ec;font-weight:700}
+#bossv .xlsheet td.tot{background:#f0f6f0;font-weight:700;border-top:2px solid #999}
+#bossv .xlsheet td.pos{color:#1b7a2f}
+#bossv .xlsheet td.neg{color:#c0392b}
+#bossv #bosssel option{color:#222}
