@@ -1,7 +1,7 @@
 (function(){
   var ROOT=window.SITE_ROOT||"./";
   (function(){var l=document.createElement("link");l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family=Jua&display=swap";document.head.appendChild(l)})();
-  var GA_ID="",CLARITY_ID="";
+  var GA_ID="G-3WT6016LYF",CLARITY_ID="";
   if(GA_ID){var g=document.createElement("script");g.async=true;g.src="https://www.googletagmanager.com/gtag/js?id="+GA_ID;document.head.appendChild(g);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag("js",new Date());gtag("config",GA_ID)}
   if(CLARITY_ID){(function(c,l,a,r,i){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};var t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;var y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script",CLARITY_ID)}
   window.track=function(n,p){try{if(window.gtag)gtag("event",n,p||{})}catch(e){}try{if(window.clarity)clarity("event",n)}catch(e){}};
@@ -49,7 +49,7 @@
       else{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="심심풀이.png";a.click();setTimeout(function(){URL.revokeObjectURL(u)},1000);track("card_download")}},"image/png")};
 
   /* ===== 휴게실 채팅 (익명·최근50 보존, Firebase. config 넣으면 활성화) ===== */
-  var FIREBASE_CONFIG={}; // 집에서 firebaseConfig 붙여넣기
+  var FIREBASE_CONFIG={apiKey:"AIzaSyDOoMfpblSgms5JXw_ETwkCrHlcuYUanQ8",authDomain:"simsim-games-faac6.firebaseapp.com",projectId:"simsim-games-faac6",storageBucket:"simsim-games-faac6.firebasestorage.app",messagingSenderId:"732340191924",appId:"1:732340191924:web:716d3923f7b95b83c48de1"}; // 집에서 firebaseConfig 붙여넣기
   function esc(t){return String(t).replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
   var BAD=["씨발","시발","개새끼","병신","좆","지랄","fuck","shit"];
   function clean(t){BAD.forEach(function(w){t=t.split(w).join(new Array(w.length+1).join("*"))});return t}
