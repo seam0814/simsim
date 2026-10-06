@@ -9,6 +9,7 @@
 
   // 등록: path=내부 폴더, url=외부(기존 사이트). cat=카테고리
   var ITEMS=[
+    {path:"desk/", ic:"", title:"업무 대시보드 (뉴스+게임+채팅)", desc:"한 화면에 다 모은 올인원", cat:"사무실에서", pop:true},
     {path:"reaction/", ic:"", title:"반응속도 테스트", desc:"몇 ms? 점수 자랑하기", cat:"테스트", pop:true},
     {path:"minesweeper/", ic:"", title:"지뢰찾기", desc:"고전 지뢰찾기 (엑셀풍)", cat:"사무실에서", pop:true},
     {path:"omok/", ic:"", title:"오목 (AI 대국)", desc:"컴퓨터와 5목 두기", cat:"사무실에서", pop:true},

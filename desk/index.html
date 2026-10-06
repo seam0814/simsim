@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통합 문서 - Excel</title>
+<meta name="description" content="한 화면에서 실시간 뉴스·미니게임·익명 채팅을 동시에. 업무 대시보드처럼 보이는 심심풀이 올인원. Esc로 업무화면 전환.">
+<link rel="canonical" href="https://seam0814.github.io/simsim/desk/">
+<link rel="stylesheet" href="../style.css">
+<style>
+  body{margin:0}
+  .dash{display:flex;gap:8px;padding:8px;box-sizing:border-box;height:calc(100vh - 96px);background:var(--bg)}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;min-height:0}
+  .panel>.ph{background:var(--bar);color:#fff;font-size:12px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex:0 0 auto}
+  .panel>.pb{flex:1;min-height:0;overflow:auto}
+  .left{flex:0 0 288px}.center{flex:1;min-width:0}.right{flex:0 0 322px}
+  .center .pb{overflow:hidden;display:flex;flex-direction:column}
+  .center iframe{flex:1;width:100%;border:0;background:#fff}
+  #gsel{font:inherit;font-size:12px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.14);color:#fff;border-radius:3px;padding:2px 5px;max-width:170px}
+  #gsel option{color:#222}
+  .sokbar{background:#fff4f4;border-bottom:1px solid #f0d0d0;padding:7px 10px;font-size:12px;color:#8a2a2a;line-height:1.4}
+  .sokbar b{color:#c0504d}
+  .nitem{display:block;padding:8px 10px;border-bottom:1px solid #eee;text-decoration:none;color:#1c2b1c;font-size:13px;line-height:1.42}
+  .nitem:last-child{border-bottom:none}.nitem:hover{background:#eafaf0}
+  .nitem .nm{font-size:11px;color:#8a8f98;margin-top:2px}
+  .nloading{padding:14px 10px;color:#999;font-size:12px}
+    .phbtn{cursor:pointer;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:3px;font-size:11px;padding:2px 7px}
+  .right .pb{display:flex;flex-direction:column;padding:0}
+  .right #lounge{flex:1;display:flex;flex-direction:column;min-height:0;padding:0 10px 10px}
+  .right #lounge .cat{margin:10px 0 6px}
+  .right #lounge .chatbox{max-height:none;flex:1;min-height:0}
+  @media(max-width:860px){
+    .dash{flex-direction:column;height:auto}
+    .left,.right,.center{flex:none}
+    .center{height:470px}.left{max-height:320px}.right{min-height:360px}
+    .right #lounge .chatbox{min-height:200px}
+  }
+</style>
+</head>
+<body>
+<div class="dash">
+  <div class="panel left">
+    <div class="ph"><span>실시간 뉴스</span><button class="phbtn" id="nref">새로고침</button></div>
+    <div class="sokbar" id="sok">속보 불러오는 중…</div>
+    <div class="pb" id="news"><div class="nloading">불러오는 중…</div></div>
+  </div>
+  <div class="panel center">
+    <div class="ph"><span>작업 영역</span><select id="gsel"></select></div>
+    <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe></div>
+  </div>
+  <div class="panel right">
+    <div class="ph"><span>사내 메신저</span><span style="opacity:.8;font-size:11px">익명</span></div>
+    <div class="pb"><div id="lounge"></div></div>
+  </div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  /* ---- 게임 드롭다운: window.ITEMS 재활용 ---- */
+  var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
+  var sel=document.getElementById("gsel"),fr=document.getElementById("gframe");
+  items.forEach(function(t){var href=t.ext?t.url:("../"+t.path);var o=document.createElement("option");o.value=href;o.textContent=t.title;sel.appendChild(o)});
+  function setg(){fr.src=sel.value;try{track("desk_game",{g:sel.options[sel.selectedIndex].text})}catch(e){}}
+  sel.addEventListener("change",setg);
+  if(items.length){sel.selectedIndex=0;setg();}
+
+  /* ---- 왼쪽 실시간 뉴스 (rss2json → allorigins 백업) ---- */
+  var newsEl=document.getElementById("news"),sokEl=document.getElementById("sok"),lastTop="";
+  var FEED="https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko";
+  function esc(t){return String(t||"").replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
+  function ago(d){var t=new Date(d).getTime();if(isNaN(t))return "";var m=Math.floor((Date.now()-t)/60000);if(m<1)return "방금";if(m<60)return m+"분 전";var h=Math.floor(m/60);if(h<24)return h+"시간 전";return Math.floor(h/24)+"일 전";}
+  function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
+  function viaR(u){return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=14").then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate}})})}
+  function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent})});return a})}
+  function get(u){return viaR(u).catch(function(){return viaA(u)})}
+  function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
+  function load(){
+    get(FEED).then(function(items){
+      var top=splitSrc(items[0].title||"");
+      var isNew=lastTop&&items[0].link!==lastTop;
+      sokEl.innerHTML='<b>'+(isNew?"[NEW] ":"")+'속보</b> '+esc(top[0]);
+      lastTop=items[0].link;
+      var h="";for(var i=0;i<items.length;i++){var s=splitSrc(items[i].title||"");
+        h+='<a class="nitem" href="'+esc(items[i].link)+'" target="_blank" rel="noopener">'+esc(s[0])+'<div class="nm">'+(s[1]?esc(s[1])+" · ":"")+ago(items[i].pubDate)+'</div></a>';}
+      newsEl.innerHTML=h;
+    }).catch(function(){newsEl.innerHTML='<div class="nloading">뉴스를 잠시 후 다시 불러와요.</div>';sokEl.textContent="속보 로딩 대기 중…";});
+  }
+  document.getElementById("nref").addEventListener("click",load);
+  load();setInterval(load,180000); /* 3분마다 자동 갱신 */
+})();
+</script>
+</body>
+</html>
