@@ -113,6 +113,11 @@
   .hrez{flex:0 0 12px;background:#e4e8ea}
   .hrez::after{content:"";display:block;width:46px;height:3px;margin:3px auto;background:#b7b7b7;border-radius:2px}
   .wrez:hover::after,.hrez:hover::after{background:#217346}
+  .ph .ptog{cursor:pointer;background:transparent;border:0;color:#1b5e20;font-size:13px;line-height:1;padding:0 6px 0 0;font-weight:700}
+  .ph .ptog:hover{color:#0a3}
+  .panel.collapsed{flex:0 0 auto !important}
+  .panel.collapsed>.pb,.panel.collapsed>.sokbar{display:none}
+  .col.pcol .hrez,.col.pcol .wrez{display:none}
 </style>
 </head>
 <body>
@@ -243,6 +248,15 @@
     var ht=mk("hrez","data-h","top"),ft=mk("colfill","data-f","top");colC.insertBefore(ht,colC.firstChild);colC.insertBefore(ft,ht);
     colC.appendChild(mk("hrez","data-h","bot"));colC.appendChild(mk("colfill","data-f","bot"));
     dragV(colC,"top");dragV(colC,"bot");})();
+  /* 창 접기 토글: 끄면 뒤 가짜 시트 노출 */
+  [].forEach.call(document.querySelectorAll(".v-dash .panel"),function(panel,idx){
+    var ph=panel.querySelector(".ph");if(!ph)return;var key="pc_"+idx;
+    var btn=document.createElement("button");btn.className="ptog";btn.type="button";
+    function apply(c){panel.classList.toggle("collapsed",c);var col=panel.parentNode;if(col&&col.classList)col.classList.toggle("pcol",c);btn.textContent=c?"▸":"▾";btn.title=c?"창 펼치기":"창 접기"}
+    btn.addEventListener("click",function(e){e.stopPropagation();var c=!panel.classList.contains("collapsed");apply(c);store.set(key,c?"1":"0")});
+    ph.insertBefore(btn,ph.firstChild);
+    apply(store.get(key,"0")==="1");
+  });
   /* ===== 게임 / 리더 전환 ===== */
   var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
   var sel=document.getElementById("gsel"),fr=document.getElementById("gframe"),creader=document.getElementById("creader"),cph=document.getElementById("cph"),toGame=document.getElementById("toGame");
