@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통합 문서6 - Excel</title>
+<meta name="description" content="주요 언론사 바로가기 모음 + 오늘의 헤드라인. 네이버·연합·조선·중앙·경제·IT·해외 뉴스를 한 곳에서. 무료.">
+<link rel="canonical" href="https://seam0814.github.io/simsim/news/">
+<link rel="stylesheet" href="../style.css">
+<style>
+  .nwrap{max-width:860px}
+  .hl{background:#fff;border:1px solid #c6c6c6;border-radius:4px;padding:0;margin-bottom:16px}
+  .hl .hd{background:#217346;color:#fff;padding:7px 12px;font-size:13px;font-weight:600}
+  .hl ul{list-style:none;margin:0;padding:6px 0}
+  .hl li{border-bottom:1px solid #eee;padding:0}
+  .hl li:last-child{border-bottom:none}
+  .hl a{display:block;padding:7px 14px;text-decoration:none;color:#1c2b1c;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hl a:hover{background:#eafaf0}
+  .hl .loading{padding:10px 14px;color:#999;font-size:12px}
+  .cat{font-weight:700;color:#1b5e20;margin:18px 0 6px;border-left:3px solid #217346;padding-left:8px;font-size:.95rem}
+  .links{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:1px;background:#d4d4d4;border:1px solid #d4d4d4}
+  .links a{background:#fff;text-decoration:none;color:#1c2b1c;padding:9px 10px;font-size:13px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .links a:hover{background:#eafaf0;color:#217346}
+</style>
+</head>
+<body>
+<div class="wrap nwrap">
+  <div id="site-header"></div>
+  <h1 style="font-size:1.2rem;color:#1b5e20">뉴스 ·  언론사 자료실</h1>
+  <p class="sub" style="font-size:.86rem">언론사 바로가기 + 오늘의 헤드라인. Esc=업무화면.</p>
+
+  <div class="hl">
+    <div class="hd">오늘의 헤드라인 (Google 뉴스)</div>
+    <ul id="headlines"><li class="loading">불러오는 중…</li></ul>
+  </div>
+
+  <div class="cat">종합</div>
+  <div class="links">
+    <a href="https://news.naver.com/" target="_blank" rel="noopener">네이버뉴스</a>
+    <a href="https://news.daum.net/" target="_blank" rel="noopener">다음뉴스</a>
+    <a href="https://www.yna.co.kr/" target="_blank" rel="noopener">연합뉴스</a>
+    <a href="https://www.chosun.com/" target="_blank" rel="noopener">조선일보</a>
+    <a href="https://www.joongang.co.kr/" target="_blank" rel="noopener">중앙일보</a>
+    <a href="https://www.donga.com/" target="_blank" rel="noopener">동아일보</a>
+    <a href="https://www.hani.co.kr/" target="_blank" rel="noopener">한겨레</a>
+    <a href="https://www.khan.co.kr/" target="_blank" rel="noopener">경향신문</a>
+    <a href="https://news.kbs.co.kr/" target="_blank" rel="noopener">KBS</a>
+    <a href="https://imnews.imbc.com/" target="_blank" rel="noopener">MBC</a>
+    <a href="https://news.sbs.co.kr/" target="_blank" rel="noopener">SBS</a>
+    <a href="https://www.ytn.co.kr/" target="_blank" rel="noopener">YTN</a>
+  </div>
+
+  <div class="cat">경제</div>
+  <div class="links">
+    <a href="https://www.mk.co.kr/" target="_blank" rel="noopener">매일경제</a>
+    <a href="https://www.hankyung.com/" target="_blank" rel="noopener">한국경제</a>
+    <a href="https://www.sedaily.com/" target="_blank" rel="noopener">서울경제</a>
+    <a href="https://www.edaily.co.kr/" target="_blank" rel="noopener">이데일리</a>
+    <a href="https://news.mt.co.kr/" target="_blank" rel="noopener">머니투데이</a>
+    <a href="https://www.fnnews.com/" target="_blank" rel="noopener">파이낸셜뉴스</a>
+  </div>
+
+  <div class="cat">IT · 산업</div>
+  <div class="links">
+    <a href="https://zdnet.co.kr/" target="_blank" rel="noopener">ZDNet</a>
+    <a href="https://www.etnews.com/" target="_blank" rel="noopener">전자신문</a>
+    <a href="https://www.bloter.net/" target="_blank" rel="noopener">블로터</a>
+    <a href="https://it.chosun.com/" target="_blank" rel="noopener">IT조선</a>
+    <a href="https://news.hada.io/" target="_blank" rel="noopener">GeekNews</a>
+  </div>
+
+  <div class="cat">해외</div>
+  <div class="links">
+    <a href="https://news.google.com/?hl=ko" target="_blank" rel="noopener">Google 뉴스</a>
+    <a href="https://www.bbc.com/news" target="_blank" rel="noopener">BBC</a>
+    <a href="https://www.reuters.com/" target="_blank" rel="noopener">Reuters</a>
+    <a href="https://edition.cnn.com/" target="_blank" rel="noopener">CNN</a>
+    <a href="https://news.ycombinator.com/" target="_blank" rel="noopener">Hacker News</a>
+  </div>
+
+  <div class="cat">스포츠 · 연예</div>
+  <div class="links">
+    <a href="https://sports.news.naver.com/" target="_blank" rel="noopener">네이버 스포츠</a>
+    <a href="https://sportschosun.com/" target="_blank" rel="noopener">스포츠조선</a>
+    <a href="https://www.xportsnews.com/" target="_blank" rel="noopener">엑스포츠뉴스</a>
+  </div>
+
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var el=document.getElementById("headlines");
+  function esc(t){return String(t).replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
+  var feed="https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko";
+  var url="https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(feed)+"&count=12";
+  var ctrl=new AbortController(),to=setTimeout(function(){ctrl.abort()},8000);
+  fetch(url,{signal:ctrl.signal}).then(function(r){return r.json()}).then(function(d){
+    clearTimeout(to);
+    if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;
+    var h="";for(var i=0;i<d.items.length&&i<12;i++){var it=d.items[i];
+      h+='<li><a href="'+esc(it.link)+'" target="_blank" rel="noopener">'+esc(it.title)+'</a></li>';}
+    el.innerHTML=h;
+  }).catch(function(){clearTimeout(to);el.innerHTML='<li class="loading">헤드라인 로딩 실패 — 아래 언론사 바로가기를 이용하세요.</li>';});
+})();
+</script>
+</body>
+</html>
