@@ -238,6 +238,11 @@
     window.addEventListener("mousemove",mv);window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("mouseup",up);window.addEventListener("touchend",up);}
   var colL=document.getElementById("colL"),colR=document.getElementById("colR");
   dragW(colL);dragV(colL,"top");dragV(colL,"bot");dragW(colR);dragV(colR,"top");dragV(colR,"bot");
+  (function(){var colC=document.querySelector(".col.center");if(!colC)return;colC.id="colC";
+    function mk(cls,a,v){var e=document.createElement("div");e.className=cls;if(a)e.setAttribute(a,v);return e}
+    var ht=mk("hrez","data-h","top"),ft=mk("colfill","data-f","top");colC.insertBefore(ht,colC.firstChild);colC.insertBefore(ft,ht);
+    colC.appendChild(mk("hrez","data-h","bot"));colC.appendChild(mk("colfill","data-f","bot"));
+    dragV(colC,"top");dragV(colC,"bot");})();
   /* ===== 게임 / 리더 전환 ===== */
   var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
   var sel=document.getElementById("gsel"),fr=document.getElementById("gframe"),creader=document.getElementById("creader"),cph=document.getElementById("cph"),toGame=document.getElementById("toGame");
