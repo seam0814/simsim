@@ -63,10 +63,10 @@
   function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
   function viaRss2json(u){return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=10"+(RSS_KEY?"&api_key="+RSS_KEY:"")).then(function(r){return r.json()}),9000)
     .then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate}})})}
-  function viaAllorigins(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000)
+  function viaAllorigins(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000)
     .then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml");var its=xml.querySelectorAll("item");if(!its.length)throw 0;
       var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent})});return a})}
-  function getFeed(u){return viaRss2json(u).catch(function(){return viaAllorigins(u)})}
+  function getFeed(u){return viaAllorigins(u).catch(function(){return viaRss2json(u)})}
   function render(items){
     var h="";for(var i=0;i<items.length&&i<10;i++){var it=items[i],title=it.title||"",src="";
       var idx=title.lastIndexOf(" - ");if(idx>15){src=title.slice(idx+3);title=title.slice(0,idx);}

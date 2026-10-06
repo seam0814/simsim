@@ -84,6 +84,12 @@
     .center{height:470px}.left{max-height:340px}.right{min-height:360px}
     .right #lounge .chatbox{min-height:200px}.colhdr .c:nth-child(n+8){display:none}
   }
+  .right{position:relative}
+  .rez{position:absolute;left:-3px;top:0;bottom:0;width:7px;cursor:col-resize;z-index:5}
+  .rez:hover{background:rgba(33,115,70,.25)}
+  .right .pb{background-image:linear-gradient(#eef2ee 1px,transparent 1px),linear-gradient(90deg,#eef2ee 1px,transparent 1px);background-size:64px 22px}
+  .right #lounge .chatbox{background-color:rgba(255,255,255,.78);background-image:linear-gradient(#e8efe8 1px,transparent 1px),linear-gradient(90deg,#e8efe8 1px,transparent 1px);background-size:110px 24px}
+  @media(max-width:860px){.rez{display:none}}
 </style>
 </head>
 <body>
@@ -103,7 +109,7 @@
           <div class="ph"><span>작업 영역</span><select id="gsel" class="ctl"></select></div>
           <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe></div>
         </div>
-        <div class="panel right">
+        <div class="panel right"><div class="rez" id="rez"></div>
           <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">익명</span></div>
           <div class="pb"><div id="lounge"></div></div>
         </div>
@@ -217,8 +223,8 @@
   function ago(d){var t=new Date(d).getTime();if(isNaN(t))return "";var m=Math.floor((Date.now()-t)/60000);if(m<1)return "방금";if(m<60)return m+"분 전";var hh=Math.floor(m/60);if(hh<24)return hh+"시간 전";return Math.floor(hh/24)+"일 전";}
   function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
   function viaR(u){var k=RSS_KEY?("&api_key="+RSS_KEY):"";return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=14"+k).then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate,desc:x.description}})})}
-  function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
-  function get(u){return viaR(u).catch(function(){return viaA(u)})}
+  function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
+  function get(u){return viaA(u).catch(function(){return viaR(u)})}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
   function load(){get(FEED).then(function(list){DATA=list;
       var top=splitSrc(list[0].title||""),isNew=lastTop&&list[0].link!==lastTop;
@@ -241,6 +247,16 @@
   reader.addEventListener("click",function(e){if(e.target===reader)reader.classList.remove("on")});
   document.getElementById("nref").addEventListener("click",load);
   load();setInterval(load,180000);
+  /* 오른쪽 채팅 패널 크기 조절 */
+  (function(){var rp=document.querySelector(".panel.right"),rez=document.getElementById("rez");if(!rp||!rez)return;
+    var sw=parseInt(store.get("deskchat",""),10);if(sw>=240&&sw<=640)rp.style.flexBasis=sw+"px";
+    var drag=false;
+    function dn(e){drag=true;e.preventDefault();document.body.style.userSelect="none"}
+    function mv(e){if(!drag)return;var x=(e.touches?e.touches[0].clientX:e.clientX);var r=rp.getBoundingClientRect();var nw=Math.max(240,Math.min(640,r.right-x));rp.style.flexBasis=nw+"px"}
+    function up(){if(!drag)return;drag=false;document.body.style.userSelect="";store.set("deskchat",parseInt(rp.style.flexBasis,10)||322)}
+    rez.addEventListener("mousedown",dn);window.addEventListener("mousemove",mv);window.addEventListener("mouseup",up);
+    rez.addEventListener("touchstart",dn,{passive:false});window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("touchend",up);
+  })();
 })();
 </script>
 </body>
