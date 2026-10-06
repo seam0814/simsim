@@ -10,63 +10,63 @@
 <style>
   body{margin:0;background:#fff;font-family:var(--font)}
   .sheet{height:calc(100vh - 96px);display:flex;flex-direction:column;overflow:hidden}
-  /* 열 머리글 */
   .colhdr{display:flex;flex:0 0 22px;background:var(--head);border-bottom:1px solid var(--line);overflow:hidden}
   .colhdr .corner{flex:0 0 34px;border-right:1px solid var(--line)}
   .colhdr .c{flex:0 0 64px;text-align:center;line-height:22px;font-size:11px;color:#8a8a8a;border-right:1px solid var(--line)}
   .srow{flex:1;display:flex;min-height:0;overflow:hidden}
-  /* 행 번호 */
   .rowhdr{flex:0 0 34px;background:var(--head);border-right:1px solid var(--line);overflow:hidden}
   .rowhdr .r{height:22px;line-height:22px;text-align:center;font-size:11px;color:#8a8a8a;border-bottom:1px solid var(--line)}
-  /* 셀 격자 바탕 */
-  .content{flex:1;display:flex;gap:1px;min-height:0;
-    background-color:var(--line);
-    background-image:linear-gradient(#fff,#fff);
-  }
-  .gridbg{position:absolute;inset:0;z-index:0;
-    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-    background-size:64px 22px;opacity:.5;pointer-events:none}
-  /* 패널 = 셀 범위 (각지게, 회색 머리글 셀) */
-  .panel{background:#fff;border:1px solid var(--line);display:flex;flex-direction:column;min-height:0;position:relative;z-index:1}
+  .content{flex:1;display:flex;gap:4px;min-height:0;padding:4px;position:relative;background:#fff}
+  .gridbg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+    background-image:linear-gradient(#ededed 1px,transparent 1px),linear-gradient(90deg,#ededed 1px,transparent 1px);background-size:64px 22px}
+  .gridbg span{position:absolute;height:22px;line-height:22px;padding:0 4px;font-size:10px;color:#d6d6d6;overflow:hidden;white-space:nowrap}
+  .panel{background:#fff;border:1px solid #b7b7b7;display:flex;flex-direction:column;min-height:0;position:relative;z-index:1;box-shadow:1px 1px 0 rgba(0,0,0,.04)}
   .ph{background:var(--head);color:#1b5e20;border-bottom:1px solid var(--line);font-weight:700;font-size:12px;padding:5px 9px;display:flex;justify-content:space-between;align-items:center;gap:6px;flex:0 0 auto}
   .ph .ctl{font-weight:400}
-  .pb{flex:1;min-height:0;overflow:auto;background:#fff}
+  .pb{flex:1;min-height:0;overflow:auto;background:#fff;background-image:linear-gradient(#f4f4f4 1px,transparent 1px);background-size:100% 26px}
   .left{flex:0 0 300px}.center{flex:1;min-width:0}.right{flex:0 0 322px}
-  .center .pb{overflow:hidden;display:flex;flex-direction:column}
+  .center .pb{overflow:hidden;display:flex;flex-direction:column;background:#fff}
   .center iframe{flex:1;width:100%;border:0;background:#fff}
   #gsel{font:inherit;font-size:12px;border:1px solid var(--line);background:#fff;color:#1b5e20;border-radius:0;padding:1px 4px;max-width:170px}
   #nref{cursor:pointer;background:#fff;border:1px solid var(--line);color:#1b5e20;font-size:11px;padding:1px 7px;border-radius:0}
-  /* 뉴스: 셀 행처럼 */
   .sokbar{background:#fff8e6;border-bottom:1px solid #ecd9a0;padding:6px 9px;font-size:12px;color:#8a6d00;line-height:1.4}
   .sokbar b{color:#c0504d}
-  .nitem{display:flex;gap:0;text-decoration:none;color:#1c2b1c;font-size:13px;line-height:1.4;border-bottom:1px solid var(--line)}
+  .nitem{display:flex;text-decoration:none;color:#1c2b1c;font-size:13px;line-height:1.4;border-bottom:1px solid var(--line);cursor:pointer;background:#fff}
   .nitem .ni{flex:0 0 26px;background:var(--head);color:#9a9a9a;border-right:1px solid var(--line);text-align:center;font-size:10px;padding-top:7px}
   .nitem .nt{padding:7px 9px;min-width:0}
   .nitem:hover .nt{background:#eafaf0}
   .nitem .nm{font-size:11px;color:#8a8f98;margin-top:2px}
-  .nloading{padding:14px 10px;color:#999;font-size:12px}
-  /* 채팅 셀 */
-  .right .pb{display:flex;flex-direction:column;padding:0}
+  .nloading{padding:14px 10px;color:#aaa;font-size:12px}
+  .right .pb{display:flex;flex-direction:column;padding:0;background:#fff}
   .right #lounge{flex:1;display:flex;flex-direction:column;min-height:0;padding:0 9px 9px}
   .right #lounge .cat{margin:9px 0 6px;border-left:3px solid var(--sel)}
   .right #lounge .chatbox{max-height:none;flex:1;min-height:0;border-radius:0}
   .right #lounge .chatform input,.right #lounge .chatform .btn{border-radius:0}
-  /* 하단 시트 탭 */
   .tabs{flex:0 0 26px;display:flex;align-items:stretch;background:var(--head);border-top:1px solid var(--line);font-size:12px;overflow:hidden}
   .tabs .nav{color:#999;padding:0 8px;display:flex;align-items:center;border-right:1px solid var(--line)}
-  .tabs .t{padding:0 14px;display:flex;align-items:center;border-right:1px solid var(--line);color:#555;cursor:default}
+  .tabs .t{padding:0 14px;display:flex;align-items:center;border-right:1px solid var(--line);color:#555}
   .tabs .t.on{background:#fff;color:#1b5e20;font-weight:700;border-top:2px solid var(--sel);margin-top:-1px}
   .tabs .plus{padding:0 10px;display:flex;align-items:center;color:#999}
   .tabs .status{margin-left:auto;padding:0 12px;display:flex;align-items:center;color:#999;font-size:11px}
+  /* 엑셀풍 미리보기(셀 메모 창) */
+  .reader{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9998;display:none;align-items:center;justify-content:center;padding:16px}
+  .reader.on{display:flex}
+  .rwin{background:#fff;border:1px solid #888;max-width:520px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:3px 3px 10px rgba(0,0,0,.25)}
+  .rh{background:var(--bar);color:#fff;font-size:12px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center}
+  .rh button{background:transparent;border:0;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+  .rbody{padding:14px 16px;overflow:auto}
+  .rtitle{font-size:16px;font-weight:700;line-height:1.4;color:#1c2b1c}
+  .rmeta{font-size:12px;color:#8a8f98;margin:6px 0 12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .rorig{display:inline-block;background:var(--sel);color:#fff;text-decoration:none;padding:8px 16px;font-size:13px;font-weight:700;margin-bottom:14px}
+  .rrel-h{font-size:12px;font-weight:700;color:#1b5e20;border-left:3px solid var(--sel);padding-left:7px;margin-bottom:6px}
+  .rrel a{display:block;font-size:12.5px;color:#245;text-decoration:none;padding:5px 0;border-bottom:1px solid #f0f0f0;line-height:1.4}
+  .rrel a:hover{color:#217346}
+  .rnote{font-size:11px;color:#aaa;margin-top:10px}
   @media(max-width:860px){
-    .sheet{height:auto}
-    .srow{flex-direction:column}
-    .rowhdr{display:none}
-    .content{flex-direction:column}
-    .left,.right,.center{flex:none}
-    .center{height:470px}.left{max-height:320px}.right{min-height:360px}
-    .right #lounge .chatbox{min-height:200px}
-    .colhdr .c:nth-child(n+8){display:none}
+    .sheet{height:auto}.srow{flex-direction:column}.rowhdr{display:none}
+    .content{flex-direction:column}.left,.right,.center{flex:none}
+    .center{height:470px}.left{max-height:340px}.right{min-height:360px}
+    .right #lounge .chatbox{min-height:200px}.colhdr .c:nth-child(n+8){display:none}
   }
 </style>
 </head>
@@ -76,7 +76,7 @@
   <div class="srow">
     <div class="rowhdr" id="rowh"></div>
     <div class="content">
-      <div class="gridbg"></div>
+      <div class="gridbg" id="gridbg"></div>
       <div class="panel left">
         <div class="ph"><span>A : 실시간 뉴스</span><button id="nref" class="ctl">새로고침</button></div>
         <div class="sokbar" id="sok">속보 불러오는 중…</div>
@@ -93,50 +93,86 @@
     </div>
   </div>
   <div class="tabs">
-    <span class="nav">◀ ▶</span>
-    <span class="t on">대시보드</span>
-    <span class="t">매출실적</span>
-    <span class="t">분기요약</span>
-    <span class="t">Sheet3</span>
-    <span class="plus">＋</span>
+    <span class="nav">◀ ▶</span><span class="t on">대시보드</span><span class="t">매출실적</span>
+    <span class="t">분기요약</span><span class="t">Sheet3</span><span class="plus">＋</span>
     <span class="status">준비  ·  평균: 0  ·  합계: 0</span>
   </div>
 </div>
+<div class="reader" id="reader"><div class="rwin">
+  <div class="rh"><span>셀 메모 - 미리보기</span><button id="rclose">×</button></div>
+  <div class="rbody">
+    <div class="rtitle" id="rtitle"></div>
+    <div class="rmeta" id="rmeta"></div>
+    <a class="rorig" id="rorig" target="_blank" rel="noopener">원문 열기 ↗</a>
+    <div class="rrel-h">관련 보도</div>
+    <div class="rrel" id="rrel"></div>
+    <div class="rnote">※ 기사 전문은 저작권상 원문에서 제공됩니다. 위 링크로 확인하세요.</div>
+  </div>
+</div></div>
 <script>window.SITE_ROOT="../";</script>
 <script src="../common.js"></script>
 <script>
 (function(){
-  /* 열 머리글 A,B,C… / 행 번호 1,2,3… */
+  var RSS_KEY=""; /* rss2json 무료 키 (받으면 여기에) */
+  /* 열/행 머리글 */
   function colName(n){var s="";n++;while(n>0){var m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s}
   var CH=document.getElementById("colh");for(var i=0;i<40;i++){var d=document.createElement("div");d.className="c";d.textContent=colName(i);CH.appendChild(d)}
   var RH=document.getElementById("rowh");for(var j=1;j<=80;j++){var r=document.createElement("div");r.className="r";r.textContent=j;RH.appendChild(r)}
-
-  /* 게임 드롭다운: window.ITEMS 재활용 */
+  /* 가짜 엑셀 데이터 배경 */
+  function fillBg(){
+    var bg=document.getElementById("gridbg");var w=bg.offsetWidth,h=bg.offsetHeight;if(!w)return;
+    var cols=Math.ceil(w/64),rows=Math.ceil(h/22);
+    var tpl=[["항목","1월","2월","3월","4월","5월","6월","상반기"],["매출액","1,240","1,310","1,455","1,388","1,520","1,610","8,523"],
+      ["매출원가","720","760","810","775","848","902","4,815"],["매출총이익","520","550","645","613","672","708","3,708"],
+      ["판관비","310","325","330","318","340","352","1,975"],["영업이익","210","225","315","295","332","356","1,733"],
+      ["영업이익률","16.9%","17.2%","21.6%","21.3%","21.8%","22.1%","20.3%"]];
+    var html="",blk=tpl.length+3;
+    for(var rr=0;rr<rows;rr++){var tr=tpl[rr%blk];if(!tr)continue;
+      for(var c=0;c<cols&&c<tr.length;c++){
+        html+='<span style="left:'+(c*64)+'px;top:'+(rr*22)+'px;width:60px;'+(c===0?'text-align:left':'text-align:right')+'">'+tr[c]+'</span>';}}
+    bg.innerHTML=html;
+  }
+  fillBg();window.addEventListener("resize",fillBg);
+  /* 게임 드롭다운 */
   var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
   var sel=document.getElementById("gsel"),fr=document.getElementById("gframe");
   items.forEach(function(t){var href=t.ext?t.url:("../"+t.path);var o=document.createElement("option");o.value=href;o.textContent=t.title;sel.appendChild(o)});
   function setg(){fr.src=sel.value;try{track("desk_game",{g:sel.options[sel.selectedIndex].text})}catch(e){}}
   sel.addEventListener("change",setg);if(items.length){sel.selectedIndex=0;setg();}
-
-  /* 왼쪽 실시간 뉴스 */
-  var newsEl=document.getElementById("news"),sokEl=document.getElementById("sok"),lastTop="";
+  /* 뉴스 */
+  var newsEl=document.getElementById("news"),sokEl=document.getElementById("sok"),lastTop="",DATA=[];
   var FEED="https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko";
   function esc(t){return String(t||"").replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
-  function ago(d){var t=new Date(d).getTime();if(isNaN(t))return "";var m=Math.floor((Date.now()-t)/60000);if(m<1)return "방금";if(m<60)return m+"분 전";var h=Math.floor(m/60);if(h<24)return h+"시간 전";return Math.floor(h/24)+"일 전";}
+  function ago(d){var t=new Date(d).getTime();if(isNaN(t))return "";var m=Math.floor((Date.now()-t)/60000);if(m<1)return "방금";if(m<60)return m+"분 전";var hh=Math.floor(m/60);if(hh<24)return hh+"시간 전";return Math.floor(hh/24)+"일 전";}
   function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
-  function viaR(u){return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=14").then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate}})})}
-  function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent})});return a})}
+  function viaR(u){var k=RSS_KEY?("&api_key="+RSS_KEY):"";return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=14"+k).then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate,desc:x.description}})})}
+  function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
   function get(u){return viaR(u).catch(function(){return viaA(u)})}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
   function load(){
-    get(FEED).then(function(list){
+    get(FEED).then(function(list){DATA=list;
       var top=splitSrc(list[0].title||""),isNew=lastTop&&list[0].link!==lastTop;
       sokEl.innerHTML='<b>'+(isNew?"[NEW] ":"")+'속보</b> '+esc(top[0]);lastTop=list[0].link;
       var h="";for(var i=0;i<list.length;i++){var s=splitSrc(list[i].title||"");
-        h+='<a class="nitem" href="'+esc(list[i].link)+'" target="_blank" rel="noopener"><span class="ni">'+(i+1)+'</span><span class="nt">'+esc(s[0])+'<div class="nm">'+(s[1]?esc(s[1])+" · ":"")+ago(list[i].pubDate)+'</div></span></a>';}
+        h+='<div class="nitem" data-i="'+i+'"><span class="ni">'+(i+1)+'</span><span class="nt">'+esc(s[0])+'<div class="nm">'+(s[1]?esc(s[1])+" · ":"")+ago(list[i].pubDate)+'</div></span></div>';}
       newsEl.innerHTML=h;
-    }).catch(function(){newsEl.innerHTML='<div class="nloading">뉴스를 잠시 후 다시 불러와요.</div>';sokEl.textContent="속보 로딩 대기 중…";});
+    }).catch(function(){newsEl.innerHTML='<div class="nloading">뉴스 서버가 붐벼요. 잠시 후 [새로고침] 눌러주세요.</div>';sokEl.innerHTML='<b>속보</b> 로딩 대기 중…';});
   }
+  /* 클릭 → 미리보기 */
+  var reader=document.getElementById("reader");
+  function openReader(it){
+    var s=splitSrc(it.title||"");
+    document.getElementById("rtitle").textContent=s[0];
+    document.getElementById("rmeta").textContent=(s[1]?s[1]+" · ":"")+ago(it.pubDate);
+    document.getElementById("rorig").href=it.link||"#";
+    var rel=document.getElementById("rrel");var tmp=document.createElement("div");tmp.innerHTML=it.desc||"";
+    var as=tmp.querySelectorAll("a"),rh="";for(var k=0;k<as.length&&k<8;k++){rh+='<a href="'+esc(as[k].href)+'" target="_blank" rel="noopener">'+esc(as[k].textContent)+'</a>';}
+    rel.innerHTML=rh||'<div style="font-size:12px;color:#aaa">관련 보도 없음 — 원문에서 확인하세요.</div>';
+    reader.classList.add("on");try{track("desk_read")}catch(e){}
+  }
+  newsEl.addEventListener("click",function(e){var n=e.target.closest(".nitem");if(!n)return;var it=DATA[+n.getAttribute("data-i")];if(it)openReader(it);});
+  document.getElementById("rclose").addEventListener("click",function(){reader.classList.remove("on")});
+  reader.addEventListener("click",function(e){if(e.target===reader)reader.classList.remove("on")});
   document.getElementById("nref").addEventListener("click",load);
   load();setInterval(load,180000);
 })();

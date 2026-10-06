@@ -46,6 +46,7 @@
 <script src="../common.js"></script>
 <script>
 (function(){
+  var RSS_KEY="";
   var feed=document.getElementById("feed"),foot=document.getElementById("foot"),cache={},cur="top";
   var T="?hl=ko&gl=KR&ceid=KR:ko";
   var FEEDS={
@@ -60,7 +61,7 @@
   function ago(d){var t=new Date(d).getTime();if(isNaN(t))return "";var m=Math.floor((Date.now()-t)/60000);
     if(m<1)return "방금";if(m<60)return m+"분 전";var h=Math.floor(m/60);if(h<24)return h+"시간 전";return Math.floor(h/24)+"일 전";}
   function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
-  function viaRss2json(u){return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=10").then(function(r){return r.json()}),9000)
+  function viaRss2json(u){return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=10"+(RSS_KEY?"&api_key="+RSS_KEY:"")).then(function(r){return r.json()}),9000)
     .then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate}})})}
   function viaAllorigins(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),9000)
     .then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml");var its=xml.querySelectorAll("item");if(!its.length)throw 0;
