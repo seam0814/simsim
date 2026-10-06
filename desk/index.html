@@ -27,7 +27,7 @@
   /* 컬럼 + 리사이즈 핸들 */
   .col{display:flex;flex-direction:column;min-height:0;min-width:0;position:relative}
   .col.left{flex:0 0 300px}.col.center{flex:1 1 auto}.col.right{flex:0 0 322px}
-  .col>.panel{flex:1 1 auto;min-height:0}
+  .col>.panel{flex:1 1 auto;min-height:80px}
   .colfill{flex:0 0 0;min-height:0;pointer-events:none}
   .wrez{position:absolute;top:0;bottom:0;width:8px;z-index:6;cursor:col-resize}
   .col.left .wrez{right:-5px}.col.right .wrez{left:-5px}
@@ -123,13 +123,13 @@
     <div class="content">
       <div class="gridbg" id="gridbg"></div>
       <div class="view v-dash on">
-        <div class="col left" id="colL">
+        <div class="col left" id="colL"><div class="colfill" data-f="top"></div><div class="hrez" data-h="top"></div>
           <div class="panel">
             <div class="ph"><span>A : 실시간 뉴스</span><span class="ctl"><label><input type="checkbox" id="pers"> 맞춤</label><button id="nref">↻</button></span></div>
             <div class="sokbar" id="sok">속보 불러오는 중…</div>
             <div class="pb" id="news"><div class="nloading">불러오는 중…</div></div>
           </div>
-          <div class="hrez" data-c="L"></div><div class="colfill"></div><div class="wrez"></div>
+          <div class="hrez" data-h="bot"></div><div class="colfill" data-f="bot"></div><div class="wrez"></div>
         </div>
         <div class="col center">
           <div class="panel">
@@ -137,13 +137,13 @@
             <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe><div class="creader" id="creader"></div></div>
           </div>
         </div>
-        <div class="col right" id="colR">
+        <div class="col right" id="colR"><div class="colfill" data-f="top"></div><div class="hrez" data-h="top"></div>
           <div class="wrez"></div>
           <div class="panel">
             <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">익명</span></div>
             <div class="pb"><div id="lounge"></div></div>
           </div>
-          <div class="hrez" data-c="R"></div><div class="colfill"></div>
+          <div class="hrez" data-h="bot"></div><div class="colfill" data-f="bot"></div>
         </div>
       </div>
       <div class="view v-sales" id="vSales"></div>
@@ -225,15 +225,15 @@
     function up(){if(!drag)return;drag=false;document.body.style.userSelect="";store.set(col.id+"_w",parseInt(col.style.flexBasis,10)||300)}
     h.addEventListener("mousedown",dn);h.addEventListener("touchstart",dn,{passive:false});
     window.addEventListener("mousemove",mv);window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("mouseup",up);window.addEventListener("touchend",up);}
-  function dragH(col){var h=col.querySelector(".hrez"),panel=col.querySelector(".panel"),fill=col.querySelector(".colfill"),drag=false;
-    var sh=parseInt(store.get(col.id+"_h",""),10);if(sh>=120){panel.style.flex="0 0 "+sh+"px";fill.style.flex="1 1 auto"}
+  function dragV(col,which){var h=col.querySelector('.hrez[data-h="'+which+'"]'),fill=col.querySelector('.colfill[data-f="'+which+'"]'),drag=false;
+    var sv=parseInt(store.get(col.id+"_"+which,""),10);if(sv>=0&&sv<500)fill.style.flex="0 0 "+sv+"px";
     function dn(e){drag=true;e.preventDefault();document.body.style.userSelect="none"}
-    function mv(e){if(!drag)return;var y=e.touches?e.touches[0].clientY:e.clientY,pr=panel.getBoundingClientRect(),cr=col.getBoundingClientRect();var hh=Math.max(120,Math.min(cr.height-24,y-pr.top));panel.style.flex="0 0 "+hh+"px";fill.style.flex="1 1 auto"}
-    function up(){if(!drag)return;drag=false;document.body.style.userSelect="";store.set(col.id+"_h",parseInt(panel.getBoundingClientRect().height,10)||300)}
+    function mv(e){if(!drag)return;var y=e.touches?e.touches[0].clientY:e.clientY,cr=col.getBoundingClientRect();var v=which==="top"?(y-cr.top):(cr.bottom-y);v=Math.max(0,Math.min(cr.height-140,v));fill.style.flex="0 0 "+v+"px"}
+    function up(){if(!drag)return;drag=false;document.body.style.userSelect="";store.set(col.id+"_"+which,parseInt(fill.getBoundingClientRect().height,10)||0)}
     h.addEventListener("mousedown",dn);h.addEventListener("touchstart",dn,{passive:false});
     window.addEventListener("mousemove",mv);window.addEventListener("touchmove",mv,{passive:false});window.addEventListener("mouseup",up);window.addEventListener("touchend",up);}
   var colL=document.getElementById("colL"),colR=document.getElementById("colR");
-  dragW(colL);dragH(colL);dragW(colR);dragH(colR);
+  dragW(colL);dragV(colL,"top");dragV(colL,"bot");dragW(colR);dragV(colR,"top");dragV(colR,"bot");
   /* ===== 게임 / 리더 전환 ===== */
   var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
   var sel=document.getElementById("gsel"),fr=document.getElementById("gframe"),creader=document.getElementById("creader"),cph=document.getElementById("cph"),toGame=document.getElementById("toGame");
