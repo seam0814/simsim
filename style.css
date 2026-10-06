@@ -64,3 +64,5 @@ details p{color:var(--muted);margin:.5em 0 0}
 #bossv .xlsheet td.pos{color:#1b7a2f}
 #bossv .xlsheet td.neg{color:#c0392b}
 #bossv #bosssel option{color:#222}
+
+.ctime{float:right;color:#aaa;font-size:.72rem;margin-left:8px}
