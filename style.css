@@ -66,3 +66,19 @@ details p{color:var(--muted);margin:.5em 0 0}
 #bossv #bosssel option{color:#222}
 
 .ctime{float:right;color:#aaa;font-size:.72rem;margin-left:8px}
+
+/* 보스화면 이메일(Outlook) 템플릿 */
+#bossv .olwrap{display:flex;height:calc(100vh - 110px)}
+#bossv .olfold{flex:0 0 170px;background:#faf9f8;border-right:1px solid #e1dfdd;padding:8px 0;font-size:13px;overflow:auto}
+#bossv .olf{padding:6px 14px;color:#444;white-space:nowrap}
+#bossv .olf.on{background:#eaf2fb;color:#0f6cbd;font-weight:700;border-left:3px solid #0f6cbd;padding-left:11px}
+#bossv .olmain{flex:1;overflow:auto;background:#fff}
+#bossv .oltbl{width:100%;border-collapse:collapse;font-size:13px}
+#bossv .oltbl th{background:#f3f2f1;color:#666;font-weight:600;text-align:left;padding:6px 10px;border-bottom:1px solid #e1dfdd;position:sticky;top:0}
+#bossv .oltbl td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
+#bossv .oltbl td.st{color:#0f6cbd;width:18px;text-align:center}
+#bossv .oltbl td.fr{width:100px;color:#222}
+#bossv .oltbl td.sj{color:#333}
+#bossv .oltbl td.dt{width:74px;color:#999;font-size:12px;text-align:right}
+#bossv .oltbl tr.unread td.fr,#bossv .oltbl tr.unread td.sj{font-weight:700;color:#000}
+#bossv .oltbl tr:hover td{background:#f5faff}

@@ -154,7 +154,7 @@
         <div class="col right" id="colR"><div class="colfill" data-f="top"></div><div class="hrez" data-h="top"></div>
           <div class="wrez"></div>
           <div class="panel">
-            <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">익명</span></div>
+            <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">👥 <b id="presN" style="color:#1b5e20">·</b> · 익명</span></div>
             <div class="pb"><div id="lounge"></div></div>
           </div>
           <div class="hrez" data-h="bot"></div><div class="colfill" data-f="bot"></div>
@@ -282,7 +282,12 @@
   items.forEach(function(t){var href=t.ext?t.url:("./"+t.path);var b=document.createElement("button");b.className="gcard";b.type="button";b.innerHTML="<b>"+t.title+"</b><small>"+t.desc+"</small>";b.onclick=function(){sel.value=href;setg()};gc.appendChild(b)});
   sel.selectedIndex=0;showWelcome();
   /* ===== Firebase (좋아요/댓글) ===== */
-  var DB=null;(function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
+  var DB=null;
+  function startPresence(){try{var sid=Math.random().toString(36).slice(2),ref=DB.collection("stats").doc("presence"),el=document.getElementById("presN");
+    function beat(){DB.runTransaction(function(tx){return tx.get(ref).then(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now();u[sid]=now;Object.keys(u).forEach(function(k){if(now-u[k]>600000)delete u[k]});tx.set(ref,{k:"presence",u:u},{merge:true})})}).catch(function(){})}
+    beat();setInterval(beat,30000);
+    ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});if(el)el.textContent=(cc||1)+"명"},function(){})}catch(e){}}
+  (function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();startPresence();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
   function hashLink(l){var h=0;for(var i=0;i<l.length;i++){h=(h*31+l.charCodeAt(i))|0}return "N"+(h>>>0)}
   var cmtUnsub=null,likeUnsub=null;
   /* ===== 뉴스 ===== */

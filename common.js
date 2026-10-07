@@ -23,7 +23,7 @@
   var foot=document.getElementById("site-footer");
   if(foot){foot.className="sitefoot";var links=ITEMS.map(function(t){var href=t.ext?t.url:ROOT+t.path;return '<a href="'+href+'">'+t.title+'</a>'}).join("");
     foot.appendChild(h('<div class="fnav">'+links+'</div>'));
-    foot.appendChild(h('<div>재미로 즐겨요 · <a href="'+ROOT+'privacy.html">개인정보처리방침</a></div>'))}
+    foot.appendChild(h('<div>재미로 즐겨요 · 특정인·회사 비방·개인정보 공유 금지(위반 시 작성자 책임) · <a href="'+ROOT+'privacy.html">개인정보처리방침</a></div>'))}
   var grid=document.getElementById("items");
   if(grid){
     function card(t){var href=t.ext?t.url:ROOT+t.path;var tgt=t.ext?' target="_blank" rel="noopener"':'';
@@ -141,7 +141,8 @@
           row("품질관리",14,13,6.1,54000),
           row("연구소",22,20,4.0,78000),
           [C("합계/평균","tot"),C("197","n tot"),C("183","n tot"),C("14","n tot neg"),C("4.6년","n tot"),C("61,429","n tot")]
-        ];}}
+        ];}},
+      email:{label:"이메일(Outlook)"}
     };
     var OPTS=Object.keys(TPL).map(function(k){return '<option value="'+k+'">'+TPL[k].label+'</option>'}).join("");
     function render(rows){
@@ -156,13 +157,22 @@
       return h+"</table>";
     }
     function draw(name){var t=TPL[name]||TPL.finance;
-      boss.innerHTML='<div class="xltitle" style="background:#217346;color:#fff;padding:6px 12px;display:flex;justify-content:space-between;align-items:center">'
-        +'<span>'+t.file+' - Excel</span>'
-        +'<span style="display:flex;gap:8px;align-items:center;font-size:12px;opacity:.95">보기 <select id="bosssel" style="font:inherit;font-size:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;border-radius:2px;padding:1px 4px">'+OPTS+'</select><span style="letter-spacing:3px">—▢✕</span></span></div>'
-        +'<div class="xlribbon" style="background:#f3f3f3;border-bottom:1px solid #d4d4d4;padding:6px 12px;color:#555"><b>파일</b> &nbsp;홈 &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
-        +'<div class="xlformbar"><span class="nb">'+t.cell+'</span><span>fx</span><span>'+t.fx+'</span></div>'
-        +'<div class="bosssheet">'+render(t.rows())+'</div>'
-        +'<div class="bosshint">아무 키나 누르면 돌아갑니다…</div>';
+      var SEL='<span style="display:flex;gap:8px;align-items:center;font-size:12px;opacity:.95">보기 <select id="bosssel" style="font:inherit;font-size:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;border-radius:2px;padding:1px 4px">'+OPTS+'</select><span style="letter-spacing:3px">—▢✕</span></span>';
+      var HINT='<div class="bosshint">아무 키나 누르면 돌아갑니다…</div>';
+      if(name==="email"){
+        var folds=["⭐ 즐겨찾기","받은 편지함 (12)","보낸 편지함","임시 보관함","삭제된 항목","정크 메일","보관"];
+        var fh=folds.map(function(x,i){return '<div class="olf'+(i===1?" on":"")+'">'+x+'</div>'}).join("");
+        var M=[["인사팀","[공지] 2026년 연차 사용 촉진 안내","오전 9:14",1],["김과장","Re: 주간 업무보고 제출 요청","오전 9:02",0],["IT보안팀","[보안] 분기 비밀번호 변경 권고","어제",0],["총무팀","사무용품 신청 마감(금일 18시)","어제",1],["이대리","회의실 예약 확인 부탁드립니다","어제",0],["급여관리","2026년 9월 급여명세서 안내","10/05",0],["프로젝트A","Re: Re: 일정 조율 건","10/05",0],["뉴스레터","[주간] 업계 동향 리포트","10/04",0],["박부장","[중요] 3분기 실적 취합 건","10/04",1],["교육팀","필수 이수 교육 안내(기한 임박)","10/02",0]];
+        var mr=M.map(function(m){return '<tr class="'+(m[3]?"unread":"")+'"><td class="st">'+(m[3]?"●":"")+'</td><td class="fr">'+m[0]+'</td><td class="sj">'+m[1]+'</td><td class="dt">'+m[2]+'</td></tr>'}).join("");
+        boss.innerHTML='<div class="xltitle" style="background:#0f6cbd;color:#fff;padding:6px 12px;display:flex;justify-content:space-between;align-items:center"><span>받은 편지함 - 홍길동 - Outlook</span>'+SEL+'</div>'
+          +'<div class="xlribbon" style="background:#f3f3f3;border-bottom:1px solid #d4d4d4;padding:6px 12px;color:#555"><b>파일</b> &nbsp;홈 &nbsp;보내기/받기 &nbsp;폴더 &nbsp;보기 &nbsp;도움말</div>'
+          +'<div class="olwrap"><div class="olfold">'+fh+'</div><div class="olmain"><table class="oltbl"><tr><th></th><th>보낸 사람</th><th>제목</th><th>받은 날짜</th></tr>'+mr+'</table></div></div>'+HINT;
+      }else{
+        boss.innerHTML='<div class="xltitle" style="background:#217346;color:#fff;padding:6px 12px;display:flex;justify-content:space-between;align-items:center"><span>'+t.file+' - Excel</span>'+SEL+'</div>'
+          +'<div class="xlribbon" style="background:#f3f3f3;border-bottom:1px solid #d4d4d4;padding:6px 12px;color:#555"><b>파일</b> &nbsp;홈 &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
+          +'<div class="xlformbar"><span class="nb">'+t.cell+'</span><span>fx</span><span>'+t.fx+'</span></div>'
+          +'<div class="bosssheet">'+render(t.rows())+'</div>'+HINT;
+      }
       var se=document.getElementById("bosssel");if(se){se.value=name;
         se.addEventListener("click",function(e){e.stopPropagation()});
         se.addEventListener("mousedown",function(e){e.stopPropagation()});
