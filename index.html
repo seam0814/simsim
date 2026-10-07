@@ -135,10 +135,38 @@
   [data-skin="mail"] .cwelcome h2,[data-skin="mail"] .gcard b,[data-skin="mail"] .rrel-h,[data-skin="mail"] .rtitle{color:#0a4a8c}
   [data-skin="mail"] .sokbar{background:#eef4fb;border-color:#cfe0f3;color:#0a4a8c}
   [data-skin="mail"] .sokbar b{color:#0f6cbd}
+  .mailv{display:flex;height:calc(100vh - 96px);background:#fff}
+  [data-skin="excel"] #mailView{display:none}
+  [data-skin="mail"] #excelView{display:none}
+  .mside{flex:0 0 190px;background:#faf9f8;border-right:1px solid #e1dfdd;display:flex;flex-direction:column;padding:6px 0;font-size:13px}
+  .msideHd{padding:6px 14px;color:#999;font-size:11px}
+  .mfold{padding:8px 14px;color:#333;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .mfold:hover{background:#f0f0f0}
+  .mfold.on{background:#eaf2fb;color:#0f6cbd;font-weight:700;border-left:3px solid #0f6cbd;padding-left:11px}
+  .mfold .cnt{background:#0f6cbd;color:#fff;border-radius:9px;font-size:10px;padding:0 6px;font-weight:700}
+  .mpres{margin-top:auto;padding:8px 14px;color:#888;font-size:11px}
+  .mskin{padding:9px 14px;color:#0f6cbd;cursor:pointer;font-size:12px;border-top:1px solid #e1dfdd}
+  .mskin:hover{background:#eaf2fb}
+  .mlist{flex:0 0 290px;border-right:1px solid #e1dfdd;overflow:auto;background:#fff}
+  .mitem{padding:9px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer}
+  .mitem:hover{background:#f5faff}.mitem.on{background:#eaf2fb}
+  .mitem .mfrom{font-size:12px;color:#222;font-weight:700;display:flex;justify-content:space-between;gap:6px}
+  .mitem .mfrom .md{color:#999;font-weight:400;font-size:11px;white-space:nowrap}
+  .mitem .msub{font-size:12.5px;color:#333;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mitem.unread .msub{font-weight:700;color:#000}
+  .mitem .mprev{font-size:11px;color:#999;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mread{flex:1;overflow:auto;padding:18px 22px;background:#fff;min-width:0}
+  .mread .remail-h{font-size:17px;font-weight:700;color:#1c2b1c;margin-bottom:4px}
+  .mread .remail-m{font-size:12px;color:#8a8f98;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:14px}
+  .mread .remail-b{font-size:14px;line-height:1.85;color:#333;white-space:pre-wrap}
+  .mread iframe{width:100%;height:100%;min-height:470px;border:0;display:block}
+  .mread #lounge{display:flex;flex-direction:column;height:100%}
+  .mread #lounge .chatbox{max-height:none;flex:1;min-height:320px}
+  @media(max-width:860px){.mailv{flex-direction:column;height:auto}.mside{flex:none;flex-direction:row;flex-wrap:wrap;padding:4px}.msideHd,.mpres{display:none}.mskin{border:0}.mlist{flex:none;max-height:260px}.mread{min-height:420px}}
 </style>
 </head>
 <body>
-<div class="sheet">
+<div class="sheet" id="excelView">
   <div class="colhdr" id="colh"><div class="corner"></div></div>
   <div class="srow">
     <div class="rowhdr" id="rowh"></div>
@@ -162,7 +190,7 @@
         <div class="col right" id="colR"><div class="colfill" data-f="top"></div><div class="hrez" data-h="top"></div>
           <div class="wrez"></div>
           <div class="panel">
-            <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">👥 <b id="presN" style="color:#1b5e20">·</b> · 익명</span></div>
+            <div class="ph"><span>검토 : 메모</span><span class="ctl" style="color:#888;font-size:11px">👥 <b class="presN" style="color:#1b5e20">·</b> · 익명</span></div>
             <div class="pb"><div id="lounge"></div></div>
           </div>
           <div class="hrez" data-h="bot"></div><div class="colfill" data-f="bot"></div>
@@ -179,6 +207,19 @@
     <span class="t" data-v="q">분기요약</span><span class="t" data-v="s3">Sheet3</span>
     <span class="plus">＋</span><span class="tbtn" id="skinBtn">✉ 메일</span><span class="status" id="status">준비</span>
   </div>
+</div>
+<div class="mailv" id="mailView">
+  <div class="mside">
+    <div class="msideHd">폴더</div>
+    <div class="mfold on" data-f="inbox">📥 받은 편지함 <span class="cnt">12</span></div>
+    <div class="mfold" data-f="news">📰 뉴스</div>
+    <div class="mfold" data-f="chat">💬 회의</div>
+    <div class="mfold" data-f="game">🎮 휴식</div>
+    <div class="mpres">👥 <span class="presN">·</span> 접속</div>
+    <div class="mskin" id="skinBtn2">▦ 엑셀 대시보드 보기</div>
+  </div>
+  <div class="mlist" id="mlist"></div>
+  <div class="mread" id="mread"></div>
 </div>
 <script>window.SITE_ROOT="./";</script>
 <script src="./common.js"></script>
@@ -291,10 +332,10 @@
   sel.selectedIndex=0;showWelcome();
   /* ===== Firebase (좋아요/댓글) ===== */
   var DB=null;
-  function startPresence(){try{var sid=Math.random().toString(36).slice(2),ref=DB.collection("stats").doc("presence"),el=document.getElementById("presN");
+  function startPresence(){try{var sid=Math.random().toString(36).slice(2),ref=DB.collection("stats").doc("presence"),els=document.querySelectorAll(".presN");
     function beat(){DB.runTransaction(function(tx){return tx.get(ref).then(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now();u[sid]=now;Object.keys(u).forEach(function(k){if(now-u[k]>600000)delete u[k]});tx.set(ref,{k:"presence",u:u},{merge:true})})}).catch(function(){})}
     beat();setInterval(beat,30000);
-    ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});if(el)el.textContent=(cc||1)+"명"},function(){})}catch(e){}}
+    ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});els.forEach(function(e){e.textContent=(cc||1)+"명"})},function(){})}catch(e){}}
   (function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();startPresence();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
   function hashLink(l){var h=0;for(var i=0;i<l.length;i++){h=(h*31+l.charCodeAt(i))|0}return "N"+(h>>>0)}
   var cmtUnsub=null,likeUnsub=null;
@@ -331,16 +372,16 @@
   document.getElementById("nref").addEventListener("click",load);
   /* 가운데 리더 열기 */
   function stripTags(x){var t=document.createElement("div");t.innerHTML=x||"";return (t.textContent||"").replace(/\s+/g," ").trim()}
-  function openReader(it){learn(it.title);
-    cwel.classList.remove("on");fr.style.display="none";creader.classList.add("on");cph.textContent="뉴스";toGame.hidden=false;
-    var id=hashLink(it.link||""),sum=stripTags(it.desc);if(sum.length>300)sum=sum.slice(0,300)+"…";
-    creader.innerHTML='<div class="rtitle">'+esc(it.title)+'</div><div class="rmeta">'+(it.src?esc(it.src)+" · ":"")+ago(it.pubDate)+'</div>'
+  function articleHTML(it){var sum=stripTags(it.desc);if(sum.length>300)sum=sum.slice(0,300)+"…";
+    return '<div class="rtitle">'+esc(it.title)+'</div><div class="rmeta">'+(it.src?esc(it.src)+" · ":"")+ago(it.pubDate)+'</div>'
       +(sum?'<div class="rsum">'+esc(sum)+'</div>':'<div class="rsum muted">이 기사는 요약이 제공되지 않아요. 원문에서 확인하세요.</div>')
       +'<div class="ract"><a class="rorig" href="'+esc(it.link)+'" target="_blank" rel="noopener">원문 전체 보기 ↗</a><button class="likebtn" id="lk">♥ 좋아요 <span id="lkc">·</span></button></div>'
       +'<div class="rrel-h">댓글 <span id="cmtn">0</span></div><div class="cmtbox" id="cmtbox"><div class="rnote">첫 댓글을 남겨보세요.</div></div>'
       +'<form class="cmtform" id="cmtf"><input class="nk" id="cnk" maxlength="12" placeholder="닉네임"><input id="cmi" maxlength="200" placeholder="댓글 달기"><button type="submit">등록</button></form>'
-      +'<div class="rnote">※ 요약은 원문 발췌예요. 좋아요·댓글은 이 사이트 자체 반응(네이버 수치 아님). 전문은 원문에서.</div>';
-    wireLike(id,it.link,it.title);wireCmt(it.link);try{track("desk_read")}catch(e){}}
+      +'<div class="rnote">※ 요약은 원문 발췌예요. 좋아요·댓글은 이 사이트 자체 반응(네이버 수치 아님). 전문은 원문에서.</div>';}
+  function wireArticle(it){wireLike(hashLink(it.link||""),it.link,it.title);wireCmt(it.link);}
+  function openReader(it){learn(it.title);cwel.classList.remove("on");fr.style.display="none";creader.classList.add("on");cph.textContent="뉴스";toGame.hidden=false;creader.innerHTML=articleHTML(it);wireArticle(it);try{track("desk_read")}catch(e){}}
+  window.__mailOpenArticle=function(it){learn(it.title);var mr=document.getElementById("mread");if(mr){mr.innerHTML=articleHTML(it);wireArticle(it)}};
   function wireLike(id,link,title){var btn=document.getElementById("lk"),cnt=document.getElementById("lkc");if(!DB){cnt.textContent="0";return;}
     var ref=DB.collection("stats").doc(id);if(likeUnsub)likeUnsub();
     likeUnsub=ref.onSnapshot(function(d){cnt.textContent=(d.exists&&d.data().count)||0},function(){});
@@ -365,7 +406,45 @@
       document.getElementById("cmi").value="";try{track("news_comment")}catch(e){}};}
   newsEl.addEventListener("click",function(e){var n=e.target.closest(".nitem");if(!n)return;var it=DATA[+n.getAttribute("data-i")];if(it)openReader(it);});
   load();setInterval(load,180000);
-  (function(){var b=document.getElementById("skinBtn");if(!b)return;var cur=store.get("skin","excel");b.textContent=cur==="mail"?"▦ 엑셀":"✉ 메일";b.onclick=function(){store.set("skin",cur==="mail"?"excel":"mail");location.reload()}})();
+  (function(){var b=document.getElementById("skinBtn");if(!b)return;b.textContent="✉ 메일";b.onclick=function(){store.set("skin","mail");location.reload()}})();
+
+  /* ===== 메일(아웃룩) 레이아웃 ===== */
+  (function(){
+    var mlist=document.getElementById("mlist"),mread=document.getElementById("mread"),folds=document.querySelectorAll("#mailView .mfold");
+    if(!mlist)return;
+    var FAKE=[
+      {f:"인사팀",s:"[공지] 2026년 연차 사용 촉진 안내",d:"오전 9:14",u:1,b:"안녕하세요, 인사팀입니다.\n\n2026년 연차 사용 촉진 제도에 따라 미사용 연차 현황을 안내드립니다. 기한 내 사용 계획을 등록해 주세요.\n\n감사합니다."},
+      {f:"김과장",s:"Re: 주간 업무보고 제출 요청",d:"오전 9:02",u:0,b:"주간 보고 양식 첨부합니다. 금일 오후 3시까지 회신 부탁드려요."},
+      {f:"IT보안팀",s:"[보안] 분기 비밀번호 변경 권고",d:"어제",u:0,b:"정보보안 정책에 따라 분기별 비밀번호 변경을 권고드립니다. 포털에서 변경해 주세요."},
+      {f:"총무팀",s:"사무용품 신청 마감(금일 18시)",d:"어제",u:1,b:"이번 달 사무용품 신청은 금일 18시 마감입니다. 필요 물품을 신청해 주세요."},
+      {f:"이대리",s:"회의실 예약 확인 부탁드립니다",d:"어제",u:0,b:"오후 2시 대회의실 예약 확인 부탁드립니다."},
+      {f:"급여관리",s:"2026년 9월 급여명세서 안내",d:"10/05",u:0,b:"9월 급여명세서가 발행되었습니다. 포털에서 확인하세요."},
+      {f:"박부장",s:"[중요] 3분기 실적 취합 건",d:"10/04",u:1,b:"3분기 실적 자료 금주 금요일까지 취합 바랍니다."}
+    ];
+    function clk(el,cb){el.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){el.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");cb(x)}})}
+    function inbox(){mread.innerHTML='<div style="color:#999;font-size:13px;padding-top:30px;text-align:center">왼쪽에서 메일을 선택하세요.</div>';
+      mlist.innerHTML=FAKE.map(function(m,i){return '<div class="mitem'+(m.u?" unread":"")+'" data-k="'+i+'"><div class="mfrom">'+esc(m.f)+'<span class="md">'+m.d+'</span></div><div class="msub">'+esc(m.s)+'</div><div class="mprev">'+esc(m.b.slice(0,42))+'</div></div>'}).join("");
+      clk(mlist,function(x){var m=FAKE[+x.getAttribute("data-k")];mread.innerHTML='<div class="remail-h">'+esc(m.s)+'</div><div class="remail-m">'+esc(m.f)+' · '+m.d+'</div><div class="remail-b">'+esc(m.b)+'</div>'})}
+    function newsList(){mread.innerHTML='<div style="color:#999;font-size:13px;padding-top:30px;text-align:center">기사를 선택하세요.</div>';mlist.innerHTML='<div class="mitem"><div class="mprev">불러오는 중…</div></div>';
+      Promise.all(FEEDS.map(function(ff){return get(ff.u).then(function(ls){return ls.map(function(it){it.src=ff.s;return it})}).catch(function(){return[]})})).then(function(res){
+        var all=[],seen={};res.forEach(function(ls){ls.forEach(function(it){if(it&&it.link&&!seen[it.link]){seen[it.link]=1;all.push(it)}})});
+        all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});all=all.slice(0,25);
+        if(!all.length){mlist.innerHTML='<div class="mitem"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div>';return}
+        mlist.innerHTML=all.map(function(it,i){return '<div class="mitem unread" data-i="'+i+'"><div class="mfrom">'+esc(it.src||"뉴스")+'<span class="md">'+ago(it.pubDate)+'</span></div><div class="msub">'+esc(it.title)+'</div></div>'}).join("");
+        clk(mlist,function(x){window.__mailOpenArticle(all[+x.getAttribute("data-i")])})
+      }).catch(function(){mlist.innerHTML='<div class="mitem"><div class="mprev">불러오지 못했어요.</div></div>'})}
+    function chat(){mlist.innerHTML='<div class="mitem on"><div class="mfrom">일반 회의실<span class="md">실시간</span></div><div class="msub">익명 채팅 · 누구나</div></div>';
+      var lo=document.getElementById("lounge");if(lo){mread.innerHTML="";mread.appendChild(lo);lo.style.display=""}else{mread.innerHTML='<div style="color:#999;font-size:13px">채팅 준비 중…</div>'}}
+    function gameList(){mread.innerHTML='<div style="color:#999;font-size:13px;padding-top:30px;text-align:center">왼쪽에서 게임을 선택하세요.</div>';
+      mlist.innerHTML=items.map(function(t){var href=t.ext?t.url:("./"+t.path);return '<div class="mitem" data-h="'+href+'"><div class="mfrom">'+esc(t.title)+'<span class="md">게임</span></div><div class="msub">'+esc(t.desc)+'</div></div>'}).join("");
+      clk(mlist,function(x){mread.innerHTML='<iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe>'})}
+    function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});
+      if(f==="news")newsList();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();try{track("mail_fold",{f:f})}catch(e){}}
+    folds.forEach(function(x){x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
+    var sb2=document.getElementById("skinBtn2");if(sb2)sb2.onclick=function(){store.set("skin","excel");location.reload()};
+    setFold("inbox");
+  })();
+
 })();
 </script>
 </body>

@@ -81,7 +81,7 @@
   /* ===== 엑셀 위장 크롬 + 공통 보스키(Esc/blur) ===== */
   (function(){
     if(window.self!==window.top)return; /* iframe 임베드 시 크롬/보스키 생략 (대시보드가 제공) */
-    var skin=store.get("skin","excel");document.documentElement.setAttribute("data-skin",skin);
+    var skin=store.get("skin","mail");document.documentElement.setAttribute("data-skin",skin);
     var bar=document.createElement("div");bar.className="xlchrome";
     if(skin==="mail"){
       bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">받은 편지함 - Outlook</a><span style="float:right">—  </span></div>'
