@@ -16,14 +16,14 @@
     {url:"https://seam0814.github.io/wordplay/", ic:"", title:"온라인 끝말잇기", desc:"친구랑 각자 PC에서 2인", cat:"같이 하기", ext:true, pop:true},
     {url:"https://seam0814.github.io/typetest/animal/", ic:"", title:"동물상 테스트", desc:"질문으로 보는 내 얼굴상", cat:"테스트", ext:true}
   ];
-  window.ITEMS=ITEMS; window.SITE_NAME='심심<span>풀이</span>';
+  window.ITEMS=ITEMS; window.SITE_NAME='업무 <span>대시보드</span>';
   function h(s){var d=document.createElement("div");d.innerHTML=s.trim();return d.firstChild}
   var head=document.getElementById("site-header");
   if(head){head.className="sitehead";head.appendChild(h('<a class="brand" href="'+ROOT+'">'+window.SITE_NAME+'</a>'));head.appendChild(h('<a class="home" href="'+ROOT+'">← 전체 놀거리</a>'))}
   var foot=document.getElementById("site-footer");
   if(foot){foot.className="sitefoot";var links=ITEMS.map(function(t){var href=t.ext?t.url:ROOT+t.path;return '<a href="'+href+'">'+t.title+'</a>'}).join("");
     foot.appendChild(h('<div class="fnav">'+links+'</div>'));
-    foot.appendChild(h('<div>심심할 때 하나씩 · 재미로 즐겨요 · <a href="'+ROOT+'privacy.html">개인정보처리방침</a></div>'))}
+    foot.appendChild(h('<div>재미로 즐겨요 · <a href="'+ROOT+'privacy.html">개인정보처리방침</a></div>'))}
   var grid=document.getElementById("items");
   if(grid){
     function card(t){var href=t.ext?t.url:ROOT+t.path;var tgt=t.ext?' target="_blank" rel="noopener"':'';
@@ -39,13 +39,13 @@
   window.shareCard=function(o){var W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d");
     var g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,"#ff5e7e");g.addColorStop(1,"#ff9a5a");x.fillStyle=g;x.fillRect(0,0,W,H);
     x.fillStyle="rgba(255,255,255,.14)";rr(x,70,190,W-140,H-380,44);x.fill();x.textAlign="center";x.fillStyle="#fff";
-    x.font="700 46px Jua,sans-serif";x.fillText("심심풀이",W/2,140);x.font="180px sans-serif";x.fillText(o.emoji||"",W/2,470);
+    x.font="700 46px Jua,sans-serif";x.fillText("",W/2,140);x.font="180px sans-serif";x.fillText(o.emoji||"",W/2,470);
     x.font="800 86px Jua,sans-serif";var yy=wrapC(x,o.title||"",W/2,610,W-240,98);
     x.font="400 42px sans-serif";x.fillStyle="rgba(255,255,255,.95)";(o.lines||[]).forEach(function(ln){yy=wrapC(x,ln,W/2,yy+24,W-260,58)});
     x.font="600 36px Jua,sans-serif";x.fillStyle="rgba(255,255,255,.92)";x.fillText("seam0814.github.io/simsim",W/2,H-90);
     c.toBlob(function(b){if(!b)return;var f=null;try{f=new File([b],"simsim.png",{type:"image/png"})}catch(e){}
       if(f&&navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],text:o.share||"내 결과 "}).then(function(){track("card_share")}).catch(function(){})}
-      else{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="심심풀이.png";a.click();setTimeout(function(){URL.revokeObjectURL(u)},1000);track("card_download")}},"image/png")};
+      else{var u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="결과.png";a.click();setTimeout(function(){URL.revokeObjectURL(u)},1000);track("card_download")}},"image/png")};
 
   /* ===== 휴게실 채팅 (익명·최근50 보존, Firebase. config 넣으면 활성화) ===== */
   var FIREBASE_CONFIG={apiKey:"AIzaSyDOoMfpblSgms5JXw_ETwkCrHlcuYUanQ8",authDomain:"simsim-games-faac6.firebaseapp.com",projectId:"simsim-games-faac6",storageBucket:"simsim-games-faac6.firebasestorage.app",messagingSenderId:"732340191924",appId:"1:732340191924:web:716d3923f7b95b83c48de1"}; // 집에서 firebaseConfig 붙여넣기
