@@ -181,6 +181,11 @@
   .reem{color:#888;font-weight:400;font-size:12px}
   .reto{font-size:12px;color:#8a8f98;margin-top:2px}
   .resig{margin-top:22px;padding-top:12px;border-top:1px solid #eee;color:#999;font-size:12px;white-space:pre-wrap}
+  .msubs{display:none}
+  .msubs.on{display:block}
+  .msub{padding:6px 14px 6px 28px;color:#555;cursor:pointer;font-size:12px}
+  .msub:hover{background:#f0f0f0}
+  .msub.on{color:#0f6cbd;font-weight:700;background:#eef4fb}
 </style>
 </head>
 <body>
@@ -231,6 +236,14 @@
     <div class="msideHd">폴더</div>
     <div class="mfold on" data-f="inbox">받은 편지함 <span class="cnt">12</span></div>
     <div class="mfold" data-f="news">뉴스</div>
+    <div class="msubs" id="newsSubs">
+      <div class="msub on" data-cat="all">전체</div>
+      <div class="msub" data-cat="경제">경제·재테크</div>
+      <div class="msub" data-cat="IT산업">IT·산업</div>
+      <div class="msub" data-cat="스포츠">스포츠</div>
+      <div class="msub" data-cat="연예">연예</div>
+      <div class="msub" data-cat="세계">세계</div>
+    </div>
     <div class="mfold" data-f="chat">회의</div>
     <div class="mfold" data-f="game">휴식</div>
     <div class="mpres">접속 <span class="presN">·</span></div>
@@ -435,6 +448,9 @@
   /* ===== 메일(아웃룩) 레이아웃 ===== */
   (function(){
     var mitems=document.getElementById("mitems"),mread=document.getElementById("mread"),folds=document.querySelectorAll("#mailView .mfold");
+    var subs=document.getElementById("newsSubs");
+    function showSubs(v){if(subs)subs.classList.toggle("on",v)}
+    function markSub(c){if(subs)subs.querySelectorAll(".msub").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-cat")===c)})}
     if(!mitems)return;
     var FAKE=[
       {f:"인사팀",e:"hr@company.co.kr",s:"[공지] 2026년 4분기 연차 사용 촉진 안내",d:"오전 9:14",u:1,b:"안녕하세요, 인사팀입니다.\n\n근로기준법에 따른 연차 사용 촉진 제도 운영을 안내드립니다. 첨부된 미사용 연차 현황을 확인하시고, 10월 31일까지 사용 계획을 그룹웨어에 등록해 주시기 바랍니다.\n\n미등록 연차는 소멸될 수 있으니 유의 바랍니다.\n\n[첨부] 미사용연차_현황.xlsx"},
@@ -462,8 +478,8 @@
           +'<div class="rehead"><div class="mav" style="background:'+avColor(m.f)+'">'+esc(initial(m.f))+'</div><div><div class="refrom">'+esc(m.f)+' <span class="reem">&lt;'+esc(m.e)+'&gt;</span></div><div class="reto">받는 사람: 나 &lt;me@company.co.kr&gt;  ·  2026-10-07 '+esc(m.d)+'</div></div></div>'
           +'<div class="remail-b">'+esc(m.b)+'</div>'
           +'<div class="resig">'+esc(m.f)+' 드림\n(주)컴퍼니  ·  본 메일은 수신 전용입니다.</div>'})}
-    function newsList(){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
-      fetchNews().then(function(all){all=(all||[]).slice(0,30);
+    function newsList(cat){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
+      fetchNews().then(function(all){all=(all||[]);if(cat&&cat!=="all")all=all.filter(function(x){return x.cat===cat});all=all.slice(0,40);
         if(!all.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
         mitems.innerHTML=all.map(function(it,i){return row({top:it.src||"뉴스",topR:ago(it.pubDate),sub:it.title,unread:true,attr:'data-i="'+i+'"'})}).join("");
         clk(function(x){x.classList.remove("unread");window.__mailOpenArticle(all[+x.getAttribute("data-i")])})
@@ -473,10 +489,11 @@
     function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 게임을 선택하세요.</div>';
       mitems.innerHTML=items.map(function(t){var href=t.ext?t.url:("./"+t.path);return row({top:t.title,topR:"게임",sub:t.desc,attr:'data-h="'+href+'"'})}).join("");
       clk(function(x){mread.innerHTML='<iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe>'})}
-    function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});
-      if(f==="news")newsList();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
+    function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});showSubs(f==="news");
+      if(f==="news"){markSub("all");newsList("all")}else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
       var se=document.getElementById("msearch");if(se)se.value="";try{track("mail_fold",{f:f})}catch(e){}}
     folds.forEach(function(x){x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
+    if(subs)subs.querySelectorAll(".msub").forEach(function(x){x.addEventListener("click",function(e){e.stopPropagation();folds.forEach(function(y){y.classList.toggle("on",y.getAttribute("data-f")==="news")});showSubs(true);markSub(x.getAttribute("data-cat"));newsList(x.getAttribute("data-cat"))})});
     var sb2=document.getElementById("skinBtn2");if(sb2)sb2.onclick=function(){store.set("skin","excel");location.reload()};
     var se=document.getElementById("msearch");if(se)se.addEventListener("input",function(){var q=this.value.trim().toLowerCase();mitems.querySelectorAll(".mitem").forEach(function(el){el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?"":"none"})});
     var mr=document.getElementById("mrefresh");if(mr)mr.onclick=function(){var on=document.querySelector("#mailView .mfold.on");setFold(on?on.getAttribute("data-f"):"inbox")};
