@@ -118,6 +118,15 @@
   .panel.collapsed{flex:0 0 auto !important}
   .panel.collapsed>.pb,.panel.collapsed>.sokbar{display:none}
   .col.pcol .hrez,.col.pcol .wrez{display:none}
+  .cwelcome{flex:1;overflow:auto;display:none;padding:20px;background:#fff;background-image:linear-gradient(#f4f4f4 1px,transparent 1px);background-size:100% 26px}
+  .cwelcome.on{display:block}
+  .cwelcome h2{font-size:1.1rem;color:#1b5e20;margin:0 0 8px}
+  .cwelcome p{font-size:12.5px;color:#555;line-height:1.7;margin:0 0 16px}
+  .gcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px}
+  .gcard{text-align:left;background:#fff;border:1px solid var(--line);border-radius:4px;padding:11px;cursor:pointer;font:inherit;display:block}
+  .gcard:hover{background:#eafaf0;border-color:var(--sel)}
+  .gcard b{display:block;color:#1b5e20;font-size:13px;margin-bottom:2px}
+  .gcard small{color:#888;font-size:11px}
 </style>
 </head>
 <body>
@@ -139,7 +148,7 @@
         <div class="col center">
           <div class="panel">
             <div class="ph"><span id="cph">작업 영역</span><span class="ctl"><select id="gsel"></select><button id="toGame" hidden>게임으로</button></span></div>
-            <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe><div class="creader" id="creader"></div></div>
+            <div class="pb"><iframe id="gframe" title="game" referrerpolicy="no-referrer"></iframe><div class="creader" id="creader"></div><div class="cwelcome" id="cwelcome"><h2>심심풀이 · 사무실 대시보드</h2><p>왼쪽은 <b>실시간 뉴스</b>, 오른쪽은 <b>익명 채팅</b>, 가운데에서 <b>게임</b>을 즐겨요. 위 드롭다운이나 아래 카드로 고르세요.<br><b>Esc</b>=업무화면(보스키) · <b>Alt+1~4</b>=시트 전환 · 각 창 <b>▾</b> 접기 · 가장자리 드래그로 크기 조절.</p><div class="gcards" id="gcards"></div></div></div>
           </div>
         </div>
         <div class="col right" id="colR"><div class="colfill" data-f="top"></div><div class="hrez" data-h="top"></div>
@@ -259,11 +268,17 @@
   });
   /* ===== 게임 / 리더 전환 ===== */
   var items=(window.ITEMS||[]).filter(function(t){return (t.path||"")!=="desk/" && (t.path||"")!=="news/"});
-  var sel=document.getElementById("gsel"),fr=document.getElementById("gframe"),creader=document.getElementById("creader"),cph=document.getElementById("cph"),toGame=document.getElementById("toGame");
+  var sel=document.getElementById("gsel"),fr=document.getElementById("gframe"),creader=document.getElementById("creader"),cwel=document.getElementById("cwelcome"),cph=document.getElementById("cph"),toGame=document.getElementById("toGame"),lastView="home";
+  var hop=document.createElement("option");hop.value="__home__";hop.textContent="홈 · 안내";sel.appendChild(hop);
   items.forEach(function(t){var href=t.ext?t.url:("./"+t.path);var o=document.createElement("option");o.value=href;o.textContent=t.title;sel.appendChild(o)});
-  function showGame(){creader.classList.remove("on");fr.style.display="";cph.textContent="작업 영역";toGame.hidden=true;}
-  function setg(){fr.src=sel.value;showGame();try{track("desk_game",{g:sel.options[sel.selectedIndex].text})}catch(e){}}
-  sel.addEventListener("change",setg);toGame.addEventListener("click",showGame);sel.selectedIndex=0;fr.src=sel.value;
+  function showWelcome(){lastView="home";cwel.classList.add("on");creader.classList.remove("on");fr.style.display="none";cph.textContent="심심풀이";toGame.hidden=true;}
+  function showGame(){lastView="game";cwel.classList.remove("on");creader.classList.remove("on");fr.style.display="";cph.textContent="작업 영역";toGame.hidden=true;}
+  function setg(){if(sel.value==="__home__"){showWelcome();return;}fr.src=sel.value;showGame();try{track("desk_game",{g:sel.options[sel.selectedIndex].text})}catch(e){}}
+  sel.addEventListener("change",setg);
+  toGame.addEventListener("click",function(){if(lastView==="game"&&fr.src)showGame();else showWelcome();});
+  var gc=document.getElementById("gcards");
+  items.forEach(function(t){var href=t.ext?t.url:("./"+t.path);var b=document.createElement("button");b.className="gcard";b.type="button";b.innerHTML="<b>"+t.title+"</b><small>"+t.desc+"</small>";b.onclick=function(){sel.value=href;setg()};gc.appendChild(b)});
+  sel.selectedIndex=0;showWelcome();
   /* ===== Firebase (좋아요/댓글) ===== */
   var DB=null;(function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
   function hashLink(l){var h=0;for(var i=0;i<l.length;i++){h=(h*31+l.charCodeAt(i))|0}return "N"+(h>>>0)}
@@ -302,7 +317,7 @@
   /* 가운데 리더 열기 */
   function stripTags(x){var t=document.createElement("div");t.innerHTML=x||"";return (t.textContent||"").replace(/\s+/g," ").trim()}
   function openReader(it){learn(it.title);
-    fr.style.display="none";creader.classList.add("on");cph.textContent="뉴스";toGame.hidden=false;
+    cwel.classList.remove("on");fr.style.display="none";creader.classList.add("on");cph.textContent="뉴스";toGame.hidden=false;
     var id=hashLink(it.link||""),sum=stripTags(it.desc);if(sum.length>300)sum=sum.slice(0,300)+"…";
     creader.innerHTML='<div class="rtitle">'+esc(it.title)+'</div><div class="rmeta">'+(it.src?esc(it.src)+" · ":"")+ago(it.pubDate)+'</div>'
       +(sum?'<div class="rsum">'+esc(sum)+'</div>':'<div class="rsum muted">이 기사는 요약이 제공되지 않아요. 원문에서 확인하세요.</div>')
