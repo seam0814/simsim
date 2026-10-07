@@ -127,6 +127,14 @@
   .gcard:hover{background:#eafaf0;border-color:var(--sel)}
   .gcard b{display:block;color:#1b5e20;font-size:13px;margin-bottom:2px}
   .gcard small{color:#888;font-size:11px}
+  .tabs .tbtn{padding:0 12px;display:flex;align-items:center;border-right:1px solid var(--line);color:#0f6cbd;cursor:pointer}
+  .tabs .tbtn:hover{background:#eee}
+  :root[data-skin="mail"]{--bar:#0f6cbd;--sel:#0f6cbd;--accent:#0f6cbd}
+  [data-skin="mail"] .ph{color:#0a4a8c}
+  [data-skin="mail"] .tabs .t.on{color:#0a4a8c;border-top-color:#0f6cbd}
+  [data-skin="mail"] .cwelcome h2,[data-skin="mail"] .gcard b,[data-skin="mail"] .rrel-h,[data-skin="mail"] .rtitle{color:#0a4a8c}
+  [data-skin="mail"] .sokbar{background:#eef4fb;border-color:#cfe0f3;color:#0a4a8c}
+  [data-skin="mail"] .sokbar b{color:#0f6cbd}
 </style>
 </head>
 <body>
@@ -169,7 +177,7 @@
     <span class="nav">◀ ▶</span>
     <span class="t on" data-v="dash">대시보드</span><span class="t" data-v="sales">매출실적</span>
     <span class="t" data-v="q">분기요약</span><span class="t" data-v="s3">Sheet3</span>
-    <span class="plus">＋</span><span class="status" id="status">준비</span>
+    <span class="plus">＋</span><span class="tbtn" id="skinBtn">✉ 메일</span><span class="status" id="status">준비</span>
   </div>
 </div>
 <script>window.SITE_ROOT="./";</script>
@@ -296,7 +304,7 @@
   function timed(p,ms){return new Promise(function(res,rej){var t=setTimeout(function(){rej(0)},ms);p.then(function(v){clearTimeout(t);res(v)},function(e){clearTimeout(t);rej(e)})})}
   function viaR(u){var k=RSS_KEY?("&api_key="+RSS_KEY):"";return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=16"+k).then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate,desc:x.description}})})}
   function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
-  function get(u){return viaR(u).catch(function(){return viaA(u)})}
+  function get(u){return viaA(u).catch(function(){return viaR(u)})}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
   /* 맞춤: 관심 학습 */
   var STOP=["뉴스","속보","종합","오늘","관련","지난","대한","위해","이번","그는","있다","한다","했다","the","and","for","with","news"];
@@ -357,6 +365,7 @@
       document.getElementById("cmi").value="";try{track("news_comment")}catch(e){}};}
   newsEl.addEventListener("click",function(e){var n=e.target.closest(".nitem");if(!n)return;var it=DATA[+n.getAttribute("data-i")];if(it)openReader(it);});
   load();setInterval(load,180000);
+  (function(){var b=document.getElementById("skinBtn");if(!b)return;var cur=store.get("skin","excel");b.textContent=cur==="mail"?"▦ 엑셀":"✉ 메일";b.onclick=function(){store.set("skin",cur==="mail"?"excel":"mail");location.reload()}})();
 })();
 </script>
 </body>

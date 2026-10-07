@@ -81,10 +81,17 @@
   /* ===== 엑셀 위장 크롬 + 공통 보스키(Esc/blur) ===== */
   (function(){
     if(window.self!==window.top)return; /* iframe 임베드 시 크롬/보스키 생략 (대시보드가 제공) */
+    var skin=store.get("skin","excel");document.documentElement.setAttribute("data-skin",skin);
     var bar=document.createElement("div");bar.className="xlchrome";
-    bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">통합 문서1 - Excel</a><span style="float:right">—  </span></div>'
-      +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
-      +'<div class="xlformbar"><span class="nb">A1</span><span>fx</span><span>=SHEET()</span></div>';
+    if(skin==="mail"){
+      bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">받은 편지함 - Outlook</a><span style="float:right">—  </span></div>'
+        +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;보내기/받기 &nbsp;폴더 &nbsp;보기 &nbsp;도움말</div>'
+        +'<div class="xlformbar"><span class="nb">🔍</span><span>받은 편지함 검색…</span></div>';
+    }else{
+      bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">통합 문서1 - Excel</a><span style="float:right">—  </span></div>'
+        +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
+        +'<div class="xlformbar"><span class="nb">A1</span><span>fx</span><span>=SHEET()</span></div>';
+    }
     document.body.insertBefore(bar,document.body.firstChild);
     var boss=document.createElement("div");boss.id="bossv";
     function colN(n){var r="";n++;while(n>0){var m=(n-1)%26;r=String.fromCharCode(65+m)+r;n=Math.floor((n-1)/26)}return r}
