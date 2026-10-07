@@ -44,6 +44,8 @@
   table.ob td{width:22px;height:22px;border:1px solid #dcdcdc;background:#fff;cursor:pointer;padding:0}
   table.ob td.s1{background:#2e7d32}
   table.ob td.s2{background:#c0504d}
+  .mini.on{background:#217346;color:#fff;border-color:#217346}
+  #netctl input{vertical-align:middle}
   table.ob td.last{outline:2px solid #ffd400;outline-offset:-2px}
 </style>
 <script>if(window.self!==window.top){document.documentElement.classList.add("embed")}</script>
@@ -60,6 +62,16 @@
       <span id="state">내 차례</span>
       <button class="mini" id="restart">새 대국</button>
       <select id="bgsel" class="mini" style="padding:2px 4px"><option value="office">배경:일반사무</option><option value="sales">배경:영업</option><option value="dev">배경:개발/IT</option><option value="finance">배경:회계</option></select>
+    </div>
+    <div class="otoolbar" id="netbar">
+      <button class="mini on" id="mAI">AI 대국</button>
+      <button class="mini" id="mNet">친구 대전</button>
+      <span id="netctl" style="display:none">
+        <button class="mini" id="mkRoom">방 만들기</button>
+        <input id="roomCode" placeholder="코드" maxlength="6" style="width:66px;border:1px solid #d4d4d4;border-radius:3px;padding:2px 5px;font-size:11px">
+        <button class="mini" id="joinRoom">참가</button>
+        <button class="mini" id="copyRoom" style="display:none">링크복사</button>
+      </span>
     </div>
     <table class="ob" id="board"></table>
     <div style="font-size:10px;color:#999;margin-top:5px">제목줄을 끌어 이동 · Esc=업무화면</div>
@@ -169,9 +181,49 @@
       if(win(m[0],m[1],2)){over=true;render();setState("반려 — 패배");return}if(full()){over=true;render();setState("보류");return}
       render();setState("내 차례")},160)}
   function init(){g=[];for(var r=0;r<N;r++){g[r]=[];for(var c=0;c<N;c++)g[r][c]=0}over=false;last=null;thinking=false;setState("내 차례");render()}
-  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(td&&td.dataset.r!==undefined)playerMove(+td.dataset.r,+td.dataset.c)});
+  $("#board").addEventListener("click",function(e){var td=e.target.closest("td");if(!td||td.dataset.r===undefined)return;var r=+td.dataset.r,c=+td.dataset.c;if(online)onlineMove(r,c);else playerMove(r,c)});
   $("#lv").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;[].forEach.call(this.children,function(x){x.classList.remove("on")});b.classList.add("on");level=+b.dataset.d;init()});
-  $("#restart").addEventListener("click",init);
+  $("#restart").addEventListener("click",function(){if(online&&roomRef){roomRef.set({k:"omok",mv:"",ver:Date.now()},{merge:true}).catch(function(){})}else init()});
+
+  /* ===== 온라인 대전 (Firebase / stats 컬렉션) ===== */
+  var online=false,myColor=1,roomId="",roomRef=null,unsub=null,DB=null;
+  var CFG={apiKey:"AIzaSyDOoMfpblSgms5JXw_ETwkCrHlcuYUanQ8",authDomain:"simsim-games-faac6.firebaseapp.com",projectId:"simsim-games-faac6",storageBucket:"simsim-games-faac6.firebasestorage.app",messagingSenderId:"732340191924",appId:"1:732340191924:web:716d3923f7b95b83c48de1"};
+  function loadFb(cb){if(DB){cb();return}
+    function go(){try{if(!firebase.apps.length)firebase.initializeApp(CFG);DB=firebase.firestore();cb()}catch(e){setState("연결 실패 — 새로고침")}}
+    if(window.firebase&&window.firebase.firestore){go();return}
+    var a=document.createElement("script");a.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js";
+    a.onload=function(){var b=document.createElement("script");b.src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js";b.onload=go;b.onerror=function(){setState("연결 실패")};document.head.appendChild(b)};
+    a.onerror=function(){setState("연결 실패")};document.head.appendChild(a)}
+  function rebuild(mv,p2){g=[];for(var r=0;r<N;r++){g[r]=[];for(var c=0;c<N;c++)g[r][c]=0}
+    var list=mv?mv.split(";"):[],lm=null,lp=0;
+    for(var i=0;i<list.length;i++){var q=list[i].split(","),rr2=+q[0],cc=+q[1],pp=(i%2===0)?1:2;if(rr2>=0&&rr2<N&&cc>=0&&cc<N){g[rr2][cc]=pp;lm=[rr2,cc];lp=pp}}
+    last=lm;render();
+    if(lm&&win(lm[0],lm[1],lp)){over=true;setState(lp===myColor?"결재 승인 — 승리!":"반려 — 패배");return}
+    if(full()){over=true;setState("보류 — 무승부");return}
+    over=false;
+    if(myColor===1&&!p2&&list.length===0){setState("방코드 "+roomId+" · 상대 기다리는 중…");return}
+    var turn=(list.length%2===0)?1:2;
+    setState(turn===myColor?("내 차례 · 내 돌 "+(myColor===1?"흑":"백")):"상대 차례…")}
+  function sub(){if(unsub)unsub();unsub=roomRef.onSnapshot(function(d){var m=d.exists?d.data():null;if(!m)return;rebuild(m.mv||"",m.p2)},function(){})}
+  function mkCode(){var s="",A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";for(var i=0;i<5;i++)s+=A.charAt(Math.floor(Math.random()*A.length));return s}
+  function host(){loadFb(function(){online=true;myColor=1;roomId=mkCode();roomRef=DB.collection("stats").doc("omok_"+roomId);
+    roomRef.set({k:"omok",mv:"",ver:Date.now()}).then(function(){sub();
+      var link=location.origin+location.pathname+"?room="+roomId;
+      $("#roomCode").value=roomId;$("#copyRoom").style.display="";
+      $("#copyRoom").onclick=function(){try{navigator.clipboard.writeText(link)}catch(e){}setState("링크 복사됨 · 친구에게 전송!")};
+      setState("방코드 "+roomId+" · 상대 기다리는 중…");
+    }).catch(function(){setState("방 생성 실패")});if(window.track)track("omok_host")})}
+  function join(code){if(!code)return;loadFb(function(){online=true;myColor=2;roomId=(code||"").toUpperCase().trim();roomRef=DB.collection("stats").doc("omok_"+roomId);
+    roomRef.get().then(function(d){if(!d.exists){setState("없는 방코드예요");online=false;return}roomRef.set({p2:true},{merge:true}).catch(function(){});sub()}).catch(function(){setState("참가 실패")});if(window.track)track("omok_join")})}
+  function onlineMove(r,c){if(!roomRef){setState("먼저 방 만들기 또는 참가");return}if(over||g[r][c])return;
+    var cnt=0;for(var a=0;a<N;a++)for(var b=0;b<N;b++)if(g[a][b])cnt++;var turn=(cnt%2===0)?1:2;
+    if(turn!==myColor){setState("상대 차례예요");return}
+    roomRef.get().then(function(d){var mv=(d.exists&&d.data().mv)||"";mv=mv?(mv+";"+r+","+c):(r+","+c);roomRef.set({mv:mv,ver:Date.now()},{merge:true}).catch(function(){})}).catch(function(){})}
+  $("#mAI").addEventListener("click",function(){online=false;if(unsub){unsub();unsub=null}roomRef=null;this.classList.add("on");$("#mNet").classList.remove("on");$("#netctl").style.display="none";$("#copyRoom").style.display="none";init()});
+  $("#mNet").addEventListener("click",function(){online=true;this.classList.add("on");$("#mAI").classList.remove("on");$("#netctl").style.display="";setState("방 만들기 또는 코드로 참가")});
+  $("#mkRoom").addEventListener("click",host);
+  $("#joinRoom").addEventListener("click",function(){join($("#roomCode").value)});
+  (function(){var q=location.search.match(/room=([A-Za-z0-9]+)/);if(q){$("#mNet").click();$("#roomCode").value=q[1];join(q[1])}})();
 
   /* 드래그 이동 + 최소화 */
   var panel=$("#panel"),phead=$("#phead"),dragging=false,ox=0,oy=0;
