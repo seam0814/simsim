@@ -163,6 +163,24 @@
   .mread #lounge{display:flex;flex-direction:column;height:100%}
   .mread #lounge .chatbox{max-height:none;flex:1;min-height:320px}
   @media(max-width:860px){.mailv{flex-direction:column;height:auto}.mside{flex:none;flex-direction:row;flex-wrap:wrap;padding:4px}.msideHd,.mpres{display:none}.mskin{border:0}.mlist{flex:none;max-height:260px}.mread{min-height:420px}}
+  .mlist{display:flex;flex-direction:column}
+  .mbar{flex:0 0 auto;display:flex;gap:6px;padding:6px 8px;border-bottom:1px solid #e1dfdd;background:#faf9f8}
+  .msearch{flex:1;min-width:0;border:1px solid #d4d4d4;border-radius:14px;padding:5px 12px;font:inherit;font-size:12px}
+  .mcmd{font-size:12px;color:#0f6cbd;cursor:pointer;padding:5px 6px;white-space:nowrap}
+  .mcmd:hover{text-decoration:underline}
+  .mitems{flex:1;overflow:auto}
+  .mitem{display:flex;gap:10px;align-items:flex-start}
+  .mav{flex:0 0 32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin-top:1px}
+  .mbody{flex:1;min-width:0}
+  .mempty{color:#999;font-size:13px;padding-top:36px;text-align:center}
+  .rebar{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
+  .rebar button{font:inherit;font-size:12px;border:1px solid #d4d4d4;background:#fff;color:#0f6cbd;padding:5px 12px;border-radius:4px;cursor:pointer}
+  .rebar button:hover{background:#eaf2fb}
+  .rehead{display:flex;gap:10px;align-items:center;margin:4px 0 16px}
+  .refrom{font-size:13px;font-weight:700;color:#222}
+  .reem{color:#888;font-weight:400;font-size:12px}
+  .reto{font-size:12px;color:#8a8f98;margin-top:2px}
+  .resig{margin-top:22px;padding-top:12px;border-top:1px solid #eee;color:#999;font-size:12px;white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -218,7 +236,7 @@
     <div class="mpres">접속 <span class="presN">·</span></div>
     <div class="mskin" id="skinBtn2">엑셀 대시보드 보기</div>
   </div>
-  <div class="mlist" id="mlist"></div>
+  <div class="mlist"><div class="mbar"><input class="msearch" id="msearch" placeholder="메일 검색"><span class="mcmd" id="mrefresh">새로고침</span></div><div class="mitems" id="mitems"></div></div>
   <div class="mread" id="mread"></div>
 </div>
 <script>window.SITE_ROOT="./";</script>
@@ -410,43 +428,54 @@
 
   /* ===== 메일(아웃룩) 레이아웃 ===== */
   (function(){
-    var mlist=document.getElementById("mlist"),mread=document.getElementById("mread"),folds=document.querySelectorAll("#mailView .mfold");
-    if(!mlist)return;
+    var mitems=document.getElementById("mitems"),mread=document.getElementById("mread"),folds=document.querySelectorAll("#mailView .mfold");
+    if(!mitems)return;
     var FAKE=[
-      {f:"인사팀",s:"[공지] 2026년 4분기 연차 사용 촉진 안내",d:"오전 9:14",u:1,b:"안녕하세요, 인사팀입니다.\n\n근로기준법에 따른 연차 사용 촉진 제도 운영을 안내드립니다. 첨부된 미사용 연차 현황을 확인하시고, 10월 31일까지 사용 계획을 그룹웨어에 등록해 주시기 바랍니다.\n\n미등록 연차는 소멸될 수 있으니 유의 바랍니다.\n\n감사합니다. 인사팀 드림."},
-      {f:"김민수 과장",s:"Re: 주간 업무보고(41주차) 제출 요청",d:"오전 9:02",u:0,b:"보고 양식 첨부합니다. 이번 주는 금일 오후 3시까지 취합하여 회신 부탁드립니다. 지난주 미제출 건도 함께 반영해 주세요."},
-      {f:"IT지원센터",s:"[필수] VPN 클라이언트 보안 업데이트 안내",d:"오전 8:40",u:1,b:"정보보안 강화를 위해 VPN 클라이언트 업데이트가 필요합니다. 포털 > 소프트웨어센터에서 금주 내 업데이트 바랍니다. 미적용 PC는 외부 접속이 제한됩니다."},
-      {f:"이수진",s:"점심 같이 하실 분 계신가요?",d:"어제",u:0,b:"오늘 12시 구내식당 말고 밖에 나가려는데 같이 가실 분 있을까요? 회신 주세요."},
-      {f:"경영기획팀",s:"[배포] 2026 하반기 경영계획 설명회 자료",d:"어제",u:0,b:"하반기 경영계획 설명회 발표자료를 공유드립니다. 부서별 KPI 및 예산 가이드라인이 포함되어 있으니 리뷰 바랍니다."},
-      {f:"groupware@noreply",s:"[결재] 휴가신청서가 승인되었습니다",d:"어제",u:0,b:"귀하가 상신한 휴가신청서(10/13~10/14)가 최종 승인되었습니다. 본 메일은 시스템에서 자동 발송되었습니다."},
-      {f:"총무팀",s:"사무용품·비품 신청 마감(금일 18시)",d:"어제",u:1,b:"10월 사무용품 신청은 금일 18시 마감입니다. 필요 물품은 비품신청 시스템에서 등록해 주세요."},
-      {f:"박정호 부장",s:"[중요] 3분기 실적 자료 취합 — 금요일 마감",d:"10/05",u:1,b:"각 팀 3분기 실적 자료를 금주 금요일 18시까지 취합 바랍니다. 양식은 지난 분기와 동일합니다. 지연 시 개별 연락 드리겠습니다."},
-      {f:"교육담당",s:"정보보호 법정의무교육 이수 요청(기한 임박)",d:"10/04",u:0,b:"전 직원 대상 정보보호 법정의무교육 이수 기한이 10월 10일까지입니다. 미이수자는 재공지 대상이 되오니 서둘러 완료 바랍니다."},
-      {f:"재무회계팀",s:"[안내] 9월 법인카드 사용내역 증빙 제출",d:"10/04",u:0,b:"9월 법인카드 사용분에 대한 영수증·증빙을 10월 8일까지 제출해 주세요. 미제출 건은 익월 급여에서 정산될 수 있습니다."},
-      {f:"안지영",s:"회의실 변경 공지(3층 → 5층)",d:"10/03",u:0,b:"오후 2시 주간회의 장소가 3층 소회의실에서 5층 대회의실로 변경되었습니다. 참고 부탁드립니다."},
-      {f:"시스템관리자",s:"[자동발송] 메일함 용량 85% 도달 안내",d:"10/02",u:0,b:"현재 메일함 사용량이 할당량의 85%에 도달했습니다. 오래된 메일을 정리하거나 보관 폴더로 이동해 주세요."}
+      {f:"인사팀",e:"hr@company.co.kr",s:"[공지] 2026년 4분기 연차 사용 촉진 안내",d:"오전 9:14",u:1,b:"안녕하세요, 인사팀입니다.\n\n근로기준법에 따른 연차 사용 촉진 제도 운영을 안내드립니다. 첨부된 미사용 연차 현황을 확인하시고, 10월 31일까지 사용 계획을 그룹웨어에 등록해 주시기 바랍니다.\n\n미등록 연차는 소멸될 수 있으니 유의 바랍니다.\n\n[첨부] 미사용연차_현황.xlsx"},
+      {f:"김민수",e:"kim.ms@company.co.kr",s:"Re: 주간 업무보고(41주차) 제출 요청",d:"오전 9:02",u:0,b:"보고 양식 첨부합니다.\n\n이번 주는 금일 오후 3시까지 취합하여 회신 부탁드립니다. 지난주 미제출 건도 함께 반영해 주세요.\n\n[첨부] 주간보고_양식_v3.xlsx"},
+      {f:"IT지원센터",e:"helpdesk@company.co.kr",s:"[필수] VPN 클라이언트 보안 업데이트 안내",d:"오전 8:40",u:1,b:"정보보안 강화를 위해 VPN 클라이언트 업데이트가 필요합니다.\n\n포털 > 소프트웨어센터에서 금주 내 업데이트 바랍니다. 미적용 PC는 외부 접속이 제한됩니다."},
+      {f:"이수진",e:"lee.sj@company.co.kr",s:"점심 같이 하실 분 계신가요?",d:"어제",u:0,b:"오늘 12시 구내식당 말고 밖에 나가려는데 같이 가실 분 있을까요? 회신 주세요."},
+      {f:"경영기획팀",e:"planning@company.co.kr",s:"[배포] 2026 하반기 경영계획 설명회 자료",d:"어제",u:0,b:"하반기 경영계획 설명회 발표자료를 공유드립니다.\n\n부서별 KPI 및 예산 가이드라인이 포함되어 있으니 리뷰 바랍니다.\n\n[첨부] 하반기_경영계획.pdf"},
+      {f:"groupware",e:"groupware@noreply.company.co.kr",s:"[결재] 휴가신청서가 승인되었습니다",d:"어제",u:0,b:"귀하가 상신한 휴가신청서(10/13~10/14)가 최종 승인되었습니다.\n\n본 메일은 시스템에서 자동 발송되었습니다."},
+      {f:"총무팀",e:"ga@company.co.kr",s:"사무용품·비품 신청 마감(금일 18시)",d:"어제",u:1,b:"10월 사무용품 신청은 금일 18시 마감입니다. 필요 물품은 비품신청 시스템에서 등록해 주세요."},
+      {f:"박정호",e:"park.jh@company.co.kr",s:"[중요] 3분기 실적 자료 취합 — 금요일 마감",d:"10/05",u:1,b:"각 팀 3분기 실적 자료를 금주 금요일 18시까지 취합 바랍니다.\n\n양식은 지난 분기와 동일합니다. 지연 시 개별 연락 드리겠습니다."},
+      {f:"교육담당",e:"edu@company.co.kr",s:"정보보호 법정의무교육 이수 요청(기한 임박)",d:"10/04",u:0,b:"전 직원 대상 정보보호 법정의무교육 이수 기한이 10월 10일까지입니다.\n\n미이수자는 재공지 대상이 되오니 서둘러 완료 바랍니다."},
+      {f:"재무회계팀",e:"finance@company.co.kr",s:"[안내] 9월 법인카드 사용내역 증빙 제출",d:"10/04",u:0,b:"9월 법인카드 사용분에 대한 영수증·증빙을 10월 8일까지 제출해 주세요. 미제출 건은 익월 급여에서 정산될 수 있습니다."},
+      {f:"안지영",e:"ahn.jy@company.co.kr",s:"회의실 변경 공지(3층 → 5층)",d:"10/03",u:0,b:"오후 2시 주간회의 장소가 3층 소회의실에서 5층 대회의실로 변경되었습니다. 참고 부탁드립니다."},
+      {f:"시스템관리자",e:"sysadmin@company.co.kr",s:"[자동발송] 메일함 용량 85% 도달 안내",d:"10/02",u:0,b:"현재 메일함 사용량이 할당량의 85%에 도달했습니다. 오래된 메일을 정리하거나 보관 폴더로 이동해 주세요."}
     ];
-    function clk(el,cb){el.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){el.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");cb(x)}})}
-    function inbox(){mread.innerHTML='<div style="color:#999;font-size:13px;padding-top:30px;text-align:center">왼쪽에서 메일을 선택하세요.</div>';
-      mlist.innerHTML=FAKE.map(function(m,i){return '<div class="mitem'+(m.u?" unread":"")+'" data-k="'+i+'"><div class="mfrom">'+esc(m.f)+'<span class="md">'+m.d+'</span></div><div class="msub">'+esc(m.s)+'</div><div class="mprev">'+esc(m.b.slice(0,42))+'</div></div>'}).join("");
-      clk(mlist,function(x){var m=FAKE[+x.getAttribute("data-k")];mread.innerHTML='<div class="remail-h">'+esc(m.s)+'</div><div class="remail-m">'+esc(m.f)+' · '+m.d+'</div><div class="remail-b">'+esc(m.b)+'</div>'})}
-    function newsList(){mread.innerHTML='<div style="color:#999;font-size:13px;padding-top:30px;text-align:center">기사를 선택하세요.</div>';mlist.innerHTML='<div class="mitem"><div class="mprev">불러오는 중…</div></div>';
+    function initial(s){s=(s||"?").trim();return s.charAt(0).toUpperCase()}
+    function avColor(s){var h=0,i;for(i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;var c=["#0f6cbd","#107c41","#c0504d","#7a4ebb","#b7791f","#2a7a6b"];return c[Math.abs(h)%c.length]}
+    function row(o){return '<div class="mitem'+(o.unread?" unread":"")+'" '+(o.attr||"")+'><div class="mav" style="background:'+avColor(o.top)+'">'+esc(initial(o.top))+'</div><div class="mbody"><div class="mfrom">'+esc(o.top)+'<span class="md">'+esc(o.topR||"")+'</span></div><div class="msub">'+esc(o.sub)+'</div>'+(o.prev?'<div class="mprev">'+esc(o.prev)+'</div>':'')+'</div></div>'}
+    function clk(cb){mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");cb(x)}})}
+    function inbox(){mread.innerHTML='<div class="mempty">왼쪽에서 메일을 선택하세요.</div>';
+      mitems.innerHTML=FAKE.map(function(m,i){return row({top:m.f,topR:m.d,sub:m.s,prev:m.b.replace(/\n/g," ").slice(0,42),unread:m.u,attr:'data-k="'+i+'"'})}).join("");
+      clk(function(x){x.classList.remove("unread");var m=FAKE[+x.getAttribute("data-k")];
+        mread.innerHTML='<div class="rebar"><button type="button">회신</button><button type="button">전체 회신</button><button type="button">전달</button><button type="button">삭제</button><button type="button">보관</button></div>'
+          +'<div class="remail-h">'+esc(m.s)+'</div>'
+          +'<div class="rehead"><div class="mav" style="background:'+avColor(m.f)+'">'+esc(initial(m.f))+'</div><div><div class="refrom">'+esc(m.f)+' <span class="reem">&lt;'+esc(m.e)+'&gt;</span></div><div class="reto">받는 사람: 나 &lt;me@company.co.kr&gt;  ·  2026-10-07 '+esc(m.d)+'</div></div></div>'
+          +'<div class="remail-b">'+esc(m.b)+'</div>'
+          +'<div class="resig">'+esc(m.f)+' 드림\n(주)컴퍼니  ·  본 메일은 수신 전용입니다.</div>'})}
+    function newsList(){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
       Promise.all(FEEDS.map(function(ff){return get(ff.u).then(function(ls){return ls.map(function(it){it.src=ff.s;return it})}).catch(function(){return[]})})).then(function(res){
         var all=[],seen={};res.forEach(function(ls){ls.forEach(function(it){if(it&&it.link&&!seen[it.link]){seen[it.link]=1;all.push(it)}})});
         all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});all=all.slice(0,25);
-        if(!all.length){mlist.innerHTML='<div class="mitem"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div>';return}
-        mlist.innerHTML=all.map(function(it,i){return '<div class="mitem unread" data-i="'+i+'"><div class="mfrom">'+esc(it.src||"뉴스")+'<span class="md">'+ago(it.pubDate)+'</span></div><div class="msub">'+esc(it.title)+'</div></div>'}).join("");
-        clk(mlist,function(x){window.__mailOpenArticle(all[+x.getAttribute("data-i")])})
-      }).catch(function(){mlist.innerHTML='<div class="mitem"><div class="mprev">불러오지 못했어요.</div></div>'})}
-    function chat(){mlist.innerHTML='<div class="mitem on"><div class="mfrom">일반 회의실<span class="md">실시간</span></div><div class="msub">익명 채팅 · 누구나</div></div>';
-      var lo=document.getElementById("lounge");if(lo){mread.innerHTML="";mread.appendChild(lo);lo.style.display=""}else{mread.innerHTML='<div style="color:#999;font-size:13px">채팅 준비 중…</div>'}}
-    function gameList(){mread.innerHTML='<div style="color:#999;font-size:13px;padding-top:30px;text-align:center">왼쪽에서 게임을 선택하세요.</div>';
-      mlist.innerHTML=items.map(function(t){var href=t.ext?t.url:("./"+t.path);return '<div class="mitem" data-h="'+href+'"><div class="mfrom">'+esc(t.title)+'<span class="md">게임</span></div><div class="msub">'+esc(t.desc)+'</div></div>'}).join("");
-      clk(mlist,function(x){mread.innerHTML='<iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe>'})}
+        if(!all.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
+        mitems.innerHTML=all.map(function(it,i){return row({top:it.src||"뉴스",topR:ago(it.pubDate),sub:it.title,unread:true,attr:'data-i="'+i+'"'})}).join("");
+        clk(function(x){x.classList.remove("unread");window.__mailOpenArticle(all[+x.getAttribute("data-i")])})
+      }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
+    function chat(){mitems.innerHTML=row({top:"일반 회의실",topR:"실시간",sub:"익명 채팅 · 누구나"});var f0=mitems.querySelector(".mitem");if(f0)f0.classList.add("on");
+      var lo=document.getElementById("lounge");if(lo){mread.innerHTML="";mread.appendChild(lo);lo.style.display=""}else{mread.innerHTML='<div class="mempty">채팅 준비 중…</div>'}}
+    function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 게임을 선택하세요.</div>';
+      mitems.innerHTML=items.map(function(t){var href=t.ext?t.url:("./"+t.path);return row({top:t.title,topR:"게임",sub:t.desc,attr:'data-h="'+href+'"'})}).join("");
+      clk(function(x){mread.innerHTML='<iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe>'})}
     function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});
-      if(f==="news")newsList();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();try{track("mail_fold",{f:f})}catch(e){}}
+      if(f==="news")newsList();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
+      var se=document.getElementById("msearch");if(se)se.value="";try{track("mail_fold",{f:f})}catch(e){}}
     folds.forEach(function(x){x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
     var sb2=document.getElementById("skinBtn2");if(sb2)sb2.onclick=function(){store.set("skin","excel");location.reload()};
+    var se=document.getElementById("msearch");if(se)se.addEventListener("input",function(){var q=this.value.trim().toLowerCase();mitems.querySelectorAll(".mitem").forEach(function(el){el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?"":"none"})});
+    var mr=document.getElementById("mrefresh");if(mr)mr.onclick=function(){var on=document.querySelector("#mailView .mfold.on");setFold(on?on.getAttribute("data-f"):"inbox")};
     setFold("inbox");
   })();
 
