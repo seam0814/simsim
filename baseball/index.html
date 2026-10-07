@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>통합 문서 - Excel</title>
+<meta name="description" content="숫자야구 게임 — 스트라이크·볼로 숨은 숫자 추리. 엑셀 위장, 보스키 지원. 무료, 설치 없이 브라우저에서.">
+<link rel="canonical" href="https://seam0814.github.io/simsim/baseball/">
+<link rel="stylesheet" href="../style.css">
+<style>
+  .bwrap{max-width:460px}
+  .brow{display:flex;gap:8px;align-items:center;margin:10px 0}
+  .brow input{flex:1;font:inherit;font-size:1.1rem;letter-spacing:4px;text-align:center;border:1px solid var(--line);border-radius:4px;padding:10px}
+  .lvsel button{font:inherit;border:1px solid var(--line);background:#f8f8f8;color:var(--sel);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px;margin-right:4px}
+  .lvsel button.on{background:var(--sel);color:#fff;border-color:var(--sel)}
+  table.hist{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}
+  table.hist th,table.hist td{border:1px solid var(--line);padding:5px 8px;text-align:center}
+  table.hist th{background:var(--head);color:#666;font-weight:600}
+  table.hist td.g{font-weight:700;letter-spacing:3px;font-variant-numeric:tabular-nums}
+  .s{color:#1b7a2f;font-weight:700}.b{color:#c0792a;font-weight:700}.o{color:#999}
+  .bmsg{margin:10px 0;font-weight:700;color:var(--sel);min-height:22px}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap bwrap">
+  <div id="site-header"></div>
+  <h1 style="font-size:1.2rem;color:#1b5e20">숫자야구</h1>
+  <p class="sub" style="font-size:.86rem">서로 다른 숫자를 맞혀요. 자리·숫자 맞으면 <b class="s">S(스트라이크)</b>, 숫자만 맞으면 <b class="b">B(볼)</b>. Esc=업무화면.</p>
+  <div class="lvsel" id="lvsel"><button data-n="3" class="on">3자리</button><button data-n="4">4자리</button></div>
+  <div class="brow"><input id="guess" inputmode="numeric" maxlength="4" placeholder="숫자 입력"><button class="btn" id="go" style="width:auto;margin:0;padding:11px 18px">확인</button></div>
+  <div class="bmsg" id="msg">서로 다른 숫자 3개를 입력하세요.</div>
+  <table class="hist" id="hist"><tr><th>#</th><th>입력</th><th>결과</th></tr></table>
+  <button class="btn sec" id="restart" style="margin-top:12px">새 게임</button>
+  <div class="hint">예) 정답 <b>412</b>, 입력 <b>142</b> → 1S 2B (1은 자리까지 정답, 4·2는 숫자만)</div>
+  <div id="site-footer"></div>
+</div>
+<script>window.SITE_ROOT="../";</script>
+<script src="../common.js"></script>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var N=3,secret=[],tries=0,done=false;
+  function pick(){var d=[0,1,2,3,4,5,6,7,8,9];secret=[];for(var i=0;i<N;i++){var j=Math.floor(Math.random()*d.length);secret.push(d.splice(j,1)[0])}}
+  function reset(){pick();tries=0;done=false;$("#hist").innerHTML="<tr><th>#</th><th>입력</th><th>결과</th></tr>";
+    $("#msg").textContent="서로 다른 숫자 "+N+"개를 입력하세요.";$("#msg").style.color="var(--sel)";$("#guess").value="";$("#guess").maxLength=N;$("#guess").focus()}
+  function submit(){
+    if(done){return}
+    var v=($("#guess").value||"").trim();
+    if(!/^[0-9]+$/.test(v)||v.length!==N){$("#msg").textContent=N+"자리 숫자를 입력하세요.";$("#msg").style.color="#c0392b";return}
+    var arr=v.split("").map(Number);
+    if(new Set(arr).size!==N){$("#msg").textContent="서로 다른 숫자여야 해요.";$("#msg").style.color="#c0392b";return}
+    var s=0,b=0;for(var i=0;i<N;i++){if(arr[i]===secret[i])s++;else if(secret.indexOf(arr[i])>=0)b++;}
+    tries++;
+    var res=s===N?'<span class="s">홈런! '+N+'S</span>':(s||b?('<span class="s">'+s+'S</span> <span class="b">'+b+'B</span>'):'<span class="o">OUT</span>');
+    var tr=document.createElement("tr");tr.innerHTML="<td>"+tries+"</td><td class='g'>"+v+"</td><td>"+res+"</td>";$("#hist").appendChild(tr);
+    $("#guess").value="";$("#guess").focus();
+    if(s===N){done=true;$("#msg").textContent="🏆 홈런! "+tries+"번 만에 맞혔어요! (정답 "+secret.join("")+")";$("#msg").style.color="var(--sel)";try{track("baseball_win",{tries:tries,n:N})}catch(e){}}
+    else{$("#msg").textContent=tries+"번째 시도 — "+s+"S "+b+"B";$("#msg").style.color="#555"}
+  }
+  $("#go").addEventListener("click",submit);
+  $("#guess").addEventListener("keydown",function(e){if(e.key==="Enter")submit()});
+  $("#restart").addEventListener("click",reset);
+  $("#lvsel").addEventListener("click",function(e){var b=e.target;if(b.tagName!=="BUTTON")return;[].forEach.call(this.children,function(x){x.classList.remove("on")});b.classList.add("on");N=+b.dataset.n;reset()});
+  reset();
+})();
+</script>
+</body>
+</html>
