@@ -80,6 +80,7 @@
 
   /* ===== 엑셀 위장 크롬 + 공통 보스키(Esc/blur) ===== */
   (function(){
+    if(window.self!==window.top)return; /* iframe 임베드 시 크롬/보스키 생략 (대시보드가 제공) */
     var bar=document.createElement("div");bar.className="xlchrome";
     bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">통합 문서1 - Excel</a><span style="float:right">—  </span></div>'
       +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
