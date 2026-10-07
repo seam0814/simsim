@@ -9,15 +9,11 @@
 
   // 등록: path=내부 폴더, url=외부(기존 사이트). cat=카테고리
   var ITEMS=[
-    {path:"desk/", ic:"", title:"업무 대시보드 (뉴스+게임+채팅)", desc:"한 화면에 다 모은 올인원", cat:"사무실에서", pop:true},
-    {path:"reaction/", ic:"", title:"반응속도 테스트", desc:"몇 ms? 점수 자랑하기", cat:"테스트", pop:true},
+    {path:"omok/", ic:"", title:"오목 (AI·온라인)", desc:"AI 또는 친구와 5목", cat:"사무실에서", pop:true},
     {path:"minesweeper/", ic:"", title:"지뢰찾기", desc:"고전 지뢰찾기 (엑셀풍)", cat:"사무실에서", pop:true},
-    {path:"omok/", ic:"", title:"오목 (AI 대국)", desc:"컴퓨터와 5목 두기", cat:"사무실에서", pop:true},
-    {path:"news/", ic:"", title:"뉴스 모음", desc:"언론사 바로가기+헤드라인", cat:"사무실에서"},
-    {url:"https://seam0814.github.io/typetest/animal/", ic:"", title:"동물상 테스트", desc:"질문으로 보는 내 얼굴상", cat:"테스트", ext:true},
+    {path:"reaction/", ic:"", title:"반응속도 테스트", desc:"몇 ms? 점수 자랑하기", cat:"테스트", pop:true},
     {url:"https://seam0814.github.io/wordplay/", ic:"", title:"온라인 끝말잇기", desc:"친구랑 각자 PC에서 2인", cat:"같이 하기", ext:true, pop:true},
-    {url:"https://seam0814.github.io/sheetgame/", ic:"", title:"엑셀 2048", desc:"업무 위장 퍼즐 (보스키)", cat:"사무실에서", ext:true},
-    {url:"https://seam0814.github.io/sheetgame/idle/", ic:"", title:"방치형 실적게임", desc:"숫자만 쌓이는 방치형", cat:"사무실에서", ext:true}
+    {url:"https://seam0814.github.io/typetest/animal/", ic:"", title:"동물상 테스트", desc:"질문으로 보는 내 얼굴상", cat:"테스트", ext:true}
   ];
   window.ITEMS=ITEMS; window.SITE_NAME='심심<span>풀이</span>';
   function h(s){var d=document.createElement("div");d.innerHTML=s.trim();return d.firstChild}
