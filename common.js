@@ -86,7 +86,7 @@
     if(skin==="mail"){
       bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">받은 편지함 - Outlook</a><span style="float:right">—  </span></div>'
         +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;보내기/받기 &nbsp;폴더 &nbsp;보기 &nbsp;도움말</div>'
-        +'<div class="xlformbar"><span class="nb">🔍</span><span>받은 편지함 검색…</span></div>';
+        +'<div class="xlformbar"><span class="nb">검색</span><span>받은 편지함</span></div>';
     }else{
       bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">통합 문서1 - Excel</a><span style="float:right">—  </span></div>'
         +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'
@@ -167,7 +167,7 @@
       var SEL='<span style="display:flex;gap:8px;align-items:center;font-size:12px;opacity:.95">보기 <select id="bosssel" style="font:inherit;font-size:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);color:#fff;border-radius:2px;padding:1px 4px">'+OPTS+'</select><span style="letter-spacing:3px">—▢✕</span></span>';
       var HINT='<div class="bosshint">아무 키나 누르면 돌아갑니다…</div>';
       if(name==="email"){
-        var folds=["⭐ 즐겨찾기","받은 편지함 (12)","보낸 편지함","임시 보관함","삭제된 항목","정크 메일","보관"];
+        var folds=["즐겨찾기","받은 편지함 (12)","보낸 편지함","임시 보관함","삭제된 항목","정크 메일","보관"];
         var fh=folds.map(function(x,i){return '<div class="olf'+(i===1?" on":"")+'">'+x+'</div>'}).join("");
         var M=[["인사팀","[공지] 2026년 연차 사용 촉진 안내","오전 9:14",1],["김과장","Re: 주간 업무보고 제출 요청","오전 9:02",0],["IT보안팀","[보안] 분기 비밀번호 변경 권고","어제",0],["총무팀","사무용품 신청 마감(금일 18시)","어제",1],["이대리","회의실 예약 확인 부탁드립니다","어제",0],["급여관리","2026년 9월 급여명세서 안내","10/05",0],["프로젝트A","Re: Re: 일정 조율 건","10/05",0],["뉴스레터","[주간] 업계 동향 리포트","10/04",0],["박부장","[중요] 3분기 실적 취합 건","10/04",1],["교육팀","필수 이수 교육 안내(기한 임박)","10/02",0]];
         var mr=M.map(function(m){return '<tr class="'+(m[3]?"unread":"")+'"><td class="st">'+(m[3]?"●":"")+'</td><td class="fr">'+m[0]+'</td><td class="sj">'+m[1]+'</td><td class="dt">'+m[2]+'</td></tr>'}).join("");
