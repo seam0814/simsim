@@ -13,6 +13,17 @@ const FEEDS=[
 ];
 function tag(block,name){const m=block.match(new RegExp("<"+name+"[^>]*>([\\s\\S]*?)</"+name+">","i"));if(!m)return "";let v=m[1].trim();v=v.replace(/^<!\[CDATA\[/,"").replace(/\]\]>$/,"").trim();return v;}
 function strip(h){return h.replace(/<[^>]+>/g," ").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();}
+async function fullText(url){
+  try{
+    const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),8000);
+    const r=await fetch(url,{signal:ctrl.signal,headers:{"User-Agent":"Mozilla/5.0 (newsbot)"}});clearTimeout(t);
+    const h=await r.text();
+    const ps=[...h.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map(m=>strip(m[1])).filter(x=>x.length>40 && !/^[^가-힣]*$/.test(x));
+    let txt=ps.slice(0,4).join(" ");
+    if(txt.length<100){const m=h.match(/<meta property=\"og:description\" content=\"([^\"]*)\"/i);if(m)txt=strip(m[1]);}
+    return txt.slice(0,600);
+  }catch(e){return "";}
+}
 async function one(f){
   try{
     const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);
@@ -23,7 +34,7 @@ async function one(f){
       const title=strip(tag(b,"title"));
       let link=tag(b,"link");if(!link){const m=b.match(/<link[^>]*>([\s\S]*?)<\/link>/i);link=m?m[1].trim():"";}
       const pub=tag(b,"pubDate")||tag(b,"dc:date");
-      const desc=strip(tag(b,"description")).slice(0,500);
+      const desc=strip(tag(b,"description")).slice(0,600);
       return {title,link,pubDate:pub,src:f.s,cat:f.cat,desc};
     }).filter(x=>x.title&&x.link);
   }catch(e){console.error("fail",f.u,e.message);return [];}
@@ -33,6 +44,8 @@ for(const f of FEEDS){const arr=await one(f);let n=0;for(const it of arr){if(it.
 const byCat={};for(const it of all){(byCat[it.cat]=byCat[it.cat]||[]).push(it);}
 let items=[];for(const c in byCat){byCat[c].sort((a,b)=>(new Date(b.pubDate)-new Date(a.pubDate))||0);items=items.concat(byCat[c].slice(0,22));}
 items.sort((a,b)=>(new Date(b.pubDate)-new Date(a.pubDate))||0);
+console.log("enriching",items.length,"articles...");
+for(let i=0;i<items.length;i+=12){const batch=items.slice(i,i+12);await Promise.all(batch.map(async it=>{const ft=await fullText(it.link);if(ft&&ft.length>(it.desc||"").length)it.desc=ft;}));}
 const out={updated:new Date().toISOString(),count:items.length,items:items};
 import("fs").then(fs=>fs.writeFileSync("news.json",JSON.stringify(out)));
 console.log("TOTAL news.json:",items.length);

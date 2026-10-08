@@ -412,7 +412,7 @@
     var S=[{n:"퇴근하고파",t:"이거 실화냐 ㄷㄷ",l:42},{n:"익명의직장인",t:"아침부터 이런 뉴스라니...",l:31},{n:"김대리",t:"회사에서 몰래 보는 중 ㅋㅋ",l:25},{n:"5년차이직각",t:"남 일 같지 않네요 하...",l:14},{n:"점심뭐먹지",t:"그래서 결론이 뭔데요",l:6}];
     S.sort(function(a,b){return b.l-a.l});if(nEl)nEl.textContent=S.length;
     if(box)box.innerHTML=S.map(function(m,i){return '<div class="cmt'+(i===0?" best":"")+'">'+(i===0?'<span class="besttag">BEST</span>':"")+'<b>'+esc(m.n)+'</b>'+esc(m.t)+'<button class="clk" type="button">▲ '+m.l+'</button></div>'}).join("")+'<div class="rnote" style="color:#c0392b">※ 미리보기(샘플) 데이터 — 실제 사용자 반응 아님. ?demo=0 으로 끄기.</div>';}
-  function articleHTML(it){var sum=stripTags(it.desc);if(sum.length>500)sum=sum.slice(0,500)+"…";
+  function articleHTML(it){var sum=stripTags(it.desc);if(sum.length>600)sum=sum.slice(0,600)+"…";
     return '<div class="rtitle">'+esc(it.title)+'</div><div class="rmeta">'+(it.src?esc(it.src)+" · ":"")+ago(it.pubDate)+'</div>'
       +(sum?'<div class="rsum">'+esc(sum)+'</div>':'<div class="rsum muted">이 기사는 요약이 제공되지 않아요. 원문에서 확인하세요.</div>')
       +'<div class="ract"><a class="rorig" href="'+esc(it.link)+'" target="_blank" rel="noopener">원문 전체 보기 ↗</a><button class="likebtn" id="lk">추천 <span id="lkc">·</span></button></div>'
