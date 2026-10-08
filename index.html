@@ -192,6 +192,11 @@
   .nsort{position:sticky;top:0;background:#faf9f8;border-bottom:1px solid #e1dfdd;padding:6px 12px;font-size:12px;display:flex;gap:12px;z-index:2}
   .ns{cursor:pointer;color:#888}
   .ns.on{color:#0f6cbd;font-weight:700}
+  .roomhd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:15px;color:#1c2b1c}
+  .roomnick{font-size:12px;color:#888}
+  .roomnick a,.mread .rnote a{color:#0f6cbd;cursor:pointer;text-decoration:underline}
+  .mread #rbox{max-height:none;height:54vh;min-height:300px}
+  .nsort .ns#newRoom,.nsort .ns#newRoom.on{color:#0f6cbd;font-weight:700}
 </style>
 </head>
 <body>
@@ -497,8 +502,41 @@
         if(mode==="hot"){getClicks().then(function(c){all.forEach(function(it){it.__c=c[hashLink(it.link)]||0});all.sort(function(a,b){return (b.__c-a.__c)||((new Date(b.pubDate)-new Date(a.pubDate))||0)});paint(all,true)})}
         else{all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});paint(all,false)}
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
-    function chat(){mitems.innerHTML=row({top:"일반 회의실",topR:"실시간",sub:"익명 채팅 · 누구나"});var f0=mitems.querySelector(".mitem");if(f0)f0.classList.add("on");
-      var lo=document.getElementById("lounge");if(lo){mread.innerHTML="";mread.appendChild(lo);lo.style.display=""}else{mread.innerHTML='<div class="mempty">채팅 준비 중…</div>'}}
+    var CURROOM=null,roomUnsub=null;
+    var PRESET=[{id:"free",name:"자유수다",desc:"아무 얘기나 편하게"},{id:"job",name:"이직·연봉 토크",desc:"연봉·이직·면접 정보"},{id:"work",name:"직장생활 고민",desc:"상사·동료·업무 고민"},{id:"money",name:"재테크·주식",desc:"투자·부동산·코인"},{id:"love",name:"연애·결혼",desc:"썸·연애·결혼 수다"},{id:"lunch",name:"점심·맛집",desc:"오늘 뭐 먹지"}];
+    function nickGet(){var n=store.get("nick","");if(!n){n="익명"+Math.floor(Math.random()*9000+1000);store.set("nick",n)}return n}
+    function pinHash(p){var h=0,i;for(i=0;i<p.length;i++)h=(h*31+p.charCodeAt(i))|0;return "h"+(h>>>0)}
+    function refreshNick(){var el=document.getElementById("setNick");if(el)el.textContent=store.get("nick","")}
+    function claimNick(){var cur=store.get("nick","");var n=prompt("닉네임(2~12자)",cur);if(!n)return;n=n.trim().slice(0,12);if(n.length<2)return;
+      var pin=prompt("이 닉을 선점/복원하려면 숫자 4자리 PIN 입력\n(이 기기에서만 쓸 거면 취소)");
+      if(pin===null){store.set("nick",n);refreshNick();return;}
+      pin=(pin||"").replace(/[^0-9]/g,"").slice(0,4);if(pin.length<4){alert("PIN은 숫자 4자리여야 해요.");return;}
+      if(!DB){store.set("nick",n);refreshNick();return;}
+      var ref=DB.collection("stats").doc("nick_"+n),h=pinHash(pin);
+      ref.get().then(function(dc){if(dc.exists){if((dc.data().h||"")===h){store.set("nick",n);store.set("nickpin",pin);alert("'"+n+"' 복원 완료!");refreshNick();}else alert("이미 선점된 닉이에요. PIN이 달라요.");}
+        else{ref.set({k:"nick",h:h,ts:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){store.set("nick",n);store.set("nickpin",pin);alert("'"+n+"' 선점 완료! 다른 기기에선 같은 닉+PIN으로 복원하세요.");refreshNick();}).catch(function(){});}}).catch(function(){});}
+    function createRoom(){var name=prompt("방 제목(2~16자)");if(!name)return;name=name.trim().slice(0,16);if(name.length<2)return;var desc=(prompt("방 설명(선택, 40자)")||"").slice(0,40);
+      var rid="r"+Date.now().toString(36);if(DB)DB.collection("stats").add({k:"room",rid:rid,name:name,desc:desc,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});enterRoom(rid,name);}
+    function enterRoom(rid,name){CURROOM=rid;mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
+      mread.innerHTML='<div class="roomhd"><b>'+esc(name)+'</b><span class="roomnick">닉: <a id="setNick">'+esc(nickGet())+'</a></span></div>'
+        +'<div class="chatbox" id="rbox"><div class="rnote">첫 메시지를 남겨보세요. (익명·공개)</div></div>'
+        +'<form class="chatform" id="rform"><input id="rmsg" maxlength="200" placeholder="메시지 입력 (Enter 전송)"><button class="btn" type="submit">전송</button></form>'
+        +'<div class="rnote" style="font-size:11px;margin-top:6px">특정인·회사 비방, 개인정보 공유 금지 · <a id="rReport">신고</a></div>';
+      document.getElementById("setNick").onclick=claimNick;
+      document.getElementById("rReport").onclick=function(){if(DB)DB.collection("stats").add({k:"report",room:rid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});alert("신고가 접수되었어요.");};
+      document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(document.getElementById("rmsg").value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return;}
+        DB.collection("lounge").add({room:rid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});document.getElementById("rmsg").value="";try{track("room_msg")}catch(ee){}};
+      if(roomUnsub){roomUnsub();roomUnsub=null;}
+      if(DB){roomUnsub=DB.collection("lounge").where("room","==",rid).onSnapshot(function(q){var arr=[];q.forEach(function(dc){arr.push(dc.data())});arr.sort(function(a,b){return (a.createdAt&&b.createdAt)?(a.createdAt.seconds-b.createdAt.seconds):0});arr=arr.slice(-60);
+        var box=document.getElementById("rbox");if(!box)return;box.innerHTML=arr.length?arr.map(function(m){var tm="";try{if(m.createdAt&&m.createdAt.toDate){var dd=m.createdAt.toDate();tm=("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)}}catch(e){}return '<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+(tm?'<span class="ctime">'+tm+'</span>':"")+'</div>'}).join(""):'<div class="rnote">첫 메시지를 남겨보세요.</div>';box.scrollTop=box.scrollHeight;},function(){});}}
+    function chat(){mread.innerHTML='<div class="mempty">왼쪽에서 방을 선택하세요.</div>';
+      function render(extra){var rooms=PRESET.concat(extra||[]);
+        mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><span class="ns" id="newRoom" style="margin-left:auto">+ 방 만들기</span></div>'
+          +rooms.map(function(r){return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'"><div class="mav" style="background:'+avColor(r.name)+'">'+esc(r.name.charAt(0))+'</div><div class="mbody"><div class="mfrom">'+esc(r.name)+'</div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
+        mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){enterRoom(x.getAttribute("data-room"),x.getAttribute("data-name"))}});
+        var nr=document.getElementById("newRoom");if(nr)nr.onclick=function(e){e.stopPropagation();createRoom()};}
+      render([]);
+      if(DB){DB.collection("stats").where("k","==","room").get().then(function(q){var ex=[];q.forEach(function(dc){var m=dc.data();if(m.name)ex.push({id:m.rid||dc.id,name:m.name,desc:m.desc||""})});if(ex.length)render(ex)}).catch(function(){})}}
     function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 게임을 선택하세요.</div>';
       mitems.innerHTML=items.map(function(t){var href=t.ext?t.url:("./"+t.path);return row({top:t.title,topR:"게임",sub:t.desc,attr:'data-h="'+href+'"'})}).join("");
       clk(function(x){mread.innerHTML='<iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe>'})}
