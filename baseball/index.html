@@ -55,7 +55,7 @@
     var res=s===N?'<span class="s">홈런! '+N+'S</span>':(s||b?('<span class="s">'+s+'S</span> <span class="b">'+b+'B</span>'):'<span class="o">OUT</span>');
     var tr=document.createElement("tr");tr.innerHTML="<td>"+tries+"</td><td class='g'>"+v+"</td><td>"+res+"</td>";$("#hist").appendChild(tr);
     $("#guess").value="";$("#guess").focus();
-    if(s===N){done=true;$("#msg").textContent="🏆 홈런! "+tries+"번 만에 맞혔어요! (정답 "+secret.join("")+")";$("#msg").style.color="var(--sel)";try{track("baseball_win",{tries:tries,n:N})}catch(e){}}
+    if(s===N){done=true;$("#msg").textContent="홈런! "+tries+"번 만에 맞혔어요! (정답 "+secret.join("")+")";$("#msg").style.color="var(--sel)";try{track("baseball_win",{tries:tries,n:N})}catch(e){}}
     else{$("#msg").textContent=tries+"번째 시도 — "+s+"S "+b+"B";$("#msg").style.color="#555"}
   }
   $("#go").addEventListener("click",submit);
