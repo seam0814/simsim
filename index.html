@@ -171,7 +171,7 @@
   .mitems{flex:1;overflow:auto}
   .mitem{display:flex;gap:10px;align-items:flex-start}
   .mav{flex:0 0 32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;margin-top:1px}
-  .mbody{flex:1;min-width:0}
+  .mbody{flex:1;min-width:0;text-align:left}
   .mempty{color:#999;font-size:13px;padding-top:36px;text-align:center}
   .rebar{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
   .rebar button{font:inherit;font-size:12px;border:1px solid #d4d4d4;background:#fff;color:#0f6cbd;padding:5px 12px;border-radius:4px;cursor:pointer}
@@ -491,7 +491,7 @@
     function row(o){return '<div class="mitem'+(o.unread?" unread":"")+'" '+(o.attr||"")+'>'+(o.noav?"":'<div class="mav" style="background:'+avColor(o.top)+'">'+esc(initial(o.top))+'</div>')+'<div class="mbody"><div class="mfrom">'+esc(o.top)+'<span class="md">'+esc(o.topR||"")+'</span></div><div class="msub">'+esc(o.sub)+'</div>'+(o.prev?'<div class="mprev">'+esc(o.prev)+'</div>':'')+'</div></div>'}
     function clk(cb){mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");cb(x)}})}
     function inbox(){mread.innerHTML='<div class="mempty">왼쪽에서 메일을 선택하세요.</div>';
-      mitems.innerHTML=FAKE.map(function(m,i){return row({top:m.f,topR:m.d,sub:m.s,prev:m.b.replace(/\n/g," ").slice(0,42),unread:m.u,attr:'data-k="'+i+'"'})}).join("");
+      mitems.innerHTML=FAKE.map(function(m,i){return '<div class="mitem'+(m.u?" unread":"")+'" data-k="'+i+'"><div class="mav" style="background:'+avColor(m.f)+'">'+esc(initial(m.f))+'</div><div class="mbody"><div class="nmeta">'+esc(m.f)+' · '+m.d+'</div><div class="ntitle">'+esc(m.s)+'</div><div class="mprev">'+esc(m.b.replace(/\n/g," ").slice(0,44))+'</div></div></div>'}).join("");
       clk(function(x){x.classList.remove("unread");var m=FAKE[+x.getAttribute("data-k")];
         mread.innerHTML='<div class="rebar"><button type="button">회신</button><button type="button">전체 회신</button><button type="button">전달</button><button type="button">삭제</button><button type="button">보관</button></div>'
           +'<div class="remail-h">'+esc(m.s)+'</div>'
