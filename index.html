@@ -481,7 +481,7 @@
     ];
     function initial(s){s=(s||"?").trim();return s.charAt(0).toUpperCase()}
     function avColor(s){var h=0,i;for(i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;var c=["#0f6cbd","#107c41","#c0504d","#7a4ebb","#b7791f","#2a7a6b"];return c[Math.abs(h)%c.length]}
-    function row(o){return '<div class="mitem'+(o.unread?" unread":"")+'" '+(o.attr||"")+'><div class="mav" style="background:'+avColor(o.top)+'">'+esc(initial(o.top))+'</div><div class="mbody"><div class="mfrom">'+esc(o.top)+'<span class="md">'+esc(o.topR||"")+'</span></div><div class="msub">'+esc(o.sub)+'</div>'+(o.prev?'<div class="mprev">'+esc(o.prev)+'</div>':'')+'</div></div>'}
+    function row(o){return '<div class="mitem'+(o.unread?" unread":"")+'" '+(o.attr||"")+'>'+(o.noav?"":'<div class="mav" style="background:'+avColor(o.top)+'">'+esc(initial(o.top))+'</div>')+'<div class="mbody"><div class="mfrom">'+esc(o.top)+'<span class="md">'+esc(o.topR||"")+'</span></div><div class="msub">'+esc(o.sub)+'</div>'+(o.prev?'<div class="mprev">'+esc(o.prev)+'</div>':'')+'</div></div>'}
     function clk(cb){mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");cb(x)}})}
     function inbox(){mread.innerHTML='<div class="mempty">왼쪽에서 메일을 선택하세요.</div>';
       mitems.innerHTML=FAKE.map(function(m,i){return row({top:m.f,topR:m.d,sub:m.s,prev:m.b.replace(/\n/g," ").slice(0,42),unread:m.u,attr:'data-k="'+i+'"'})}).join("");
@@ -496,7 +496,7 @@
         if(!all.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
         var mode=store.get("newssort","new");
         function paint(list,ranked){var bar='<div class="nsort"><span class="ns'+(mode==="new"?" on":"")+'" data-m="new">최신순</span><span class="ns'+(mode==="hot"?" on":"")+'" data-m="hot">인기순</span></div>';
-          mitems.innerHTML=bar+list.map(function(it,i){return row({top:it.src||"뉴스",topR:(ranked?("조회 "+(it.__c||0)):ago(it.pubDate)),sub:(ranked?((i+1)+". "):"")+it.title,unread:true,attr:'data-i="'+i+'"'})}).join("");
+          mitems.innerHTML=bar+list.map(function(it,i){return row({top:it.src||"뉴스",topR:(ranked?("조회 "+(it.__c||0)):ago(it.pubDate)),sub:(ranked?((i+1)+". "):"")+it.title,unread:true,noav:true,attr:'data-i="'+i+'"'})}).join("");
           mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList(cat)}});
           mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");x.classList.remove("unread");window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});}
         if(mode==="hot"){getClicks().then(function(c){all.forEach(function(it){it.__c=c[hashLink(it.link)]||0});all.sort(function(a,b){return (b.__c-a.__c)||((new Date(b.pubDate)-new Date(a.pubDate))||0)});paint(all,true)})}
@@ -532,7 +532,7 @@
     function chat(){mread.innerHTML='<div class="mempty">왼쪽에서 방을 선택하세요.</div>';
       function render(extra){var rooms=PRESET.concat(extra||[]);
         mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><span class="ns" id="newRoom" style="margin-left:auto">+ 방 만들기</span></div>'
-          +rooms.map(function(r){return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'"><div class="mav" style="background:'+avColor(r.name)+'">'+esc(r.name.charAt(0))+'</div><div class="mbody"><div class="mfrom">'+esc(r.name)+'</div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
+          +rooms.map(function(r){return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'"><div class="mbody"><div class="mfrom">'+esc(r.name)+'</div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
         mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){enterRoom(x.getAttribute("data-room"),x.getAttribute("data-name"))}});
         var nr=document.getElementById("newRoom");if(nr)nr.onclick=function(e){e.stopPropagation();createRoom()};}
       render([]);
