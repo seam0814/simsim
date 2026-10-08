@@ -189,6 +189,9 @@
   .mrez{position:absolute;top:0;bottom:0;right:-3px;width:8px;cursor:col-resize;z-index:8}
   .mrez:hover{background:rgba(15,108,189,.3)}
   @media(max-width:860px){.mrez{display:none}}
+  .nsort{position:sticky;top:0;background:#faf9f8;border-bottom:1px solid #e1dfdd;padding:6px 12px;font-size:12px;display:flex;gap:12px;z-index:2}
+  .ns{cursor:pointer;color:#888}
+  .ns.on{color:#0f6cbd;font-weight:700}
 </style>
 </head>
 <body>
@@ -381,6 +384,8 @@
   function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
   function get(u){return viaR(u).catch(function(){return viaA(u)})}
   function fetchNews(){return fetch("./news.json?t="+Math.floor(Date.now()/60000)).then(function(r){return r.json()}).then(function(d){if(!d||!d.items||!d.items.length)throw 0;return d.items}).catch(function(){return Promise.all(FEEDS.map(function(ff){return get(ff.u).then(function(ls){return ls.map(function(it){it.src=ff.s;return it})}).catch(function(){return[]})})).then(function(res){var all=[],seen={};res.forEach(function(ls){ls.forEach(function(it){if(it&&it.link&&!seen[it.link]){seen[it.link]=1;all.push(it)}})});all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});return all})})}
+  function getClicks(){if(!DB)return Promise.resolve({});return DB.collection("stats").doc("newsclicks").get().then(function(d){return (d.exists&&d.data().c)||{}}).catch(function(){return {}})}
+  function bumpClick(link){try{if(!DB||!link)return;var o={};o[hashLink(link)]=firebase.firestore.FieldValue.increment(1);DB.collection("stats").doc("newsclicks").set({c:o},{merge:true}).catch(function(){})}catch(e){}}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
   /* 맞춤: 관심 학습 */
   var STOP=["뉴스","속보","종합","오늘","관련","지난","대한","위해","이번","그는","있다","한다","했다","the","and","for","with","news"];
@@ -420,8 +425,8 @@
       +'<form class="cmtform" id="cmtf"><input class="nk" id="cnk" maxlength="12" placeholder="닉네임"><input id="cmi" maxlength="200" placeholder="댓글 달기"><button type="submit">등록</button></form>'
       +'<div class="rnote">※ 요약은 원문 발췌예요. 좋아요·댓글은 이 사이트 자체 반응(네이버 수치 아님). 전문은 원문에서.</div>';}
   function wireArticle(it){if(__DEMO){sampleEngage();return;}wireLike(hashLink(it.link||""),it.link,it.title);wireCmt(it.link);}
-  function openReader(it){learn(it.title);cwel.classList.remove("on");fr.style.display="none";creader.classList.add("on");cph.textContent="뉴스";toGame.hidden=false;creader.innerHTML=articleHTML(it);wireArticle(it);try{track("desk_read")}catch(e){}}
-  window.__mailOpenArticle=function(it){learn(it.title);var mr=document.getElementById("mread");if(mr){mr.innerHTML=articleHTML(it);wireArticle(it)}};
+  function openReader(it){learn(it.title);bumpClick(it.link);cwel.classList.remove("on");fr.style.display="none";creader.classList.add("on");cph.textContent="뉴스";toGame.hidden=false;creader.innerHTML=articleHTML(it);wireArticle(it);try{track("desk_read")}catch(e){}}
+  window.__mailOpenArticle=function(it){learn(it.title);bumpClick(it.link);var mr=document.getElementById("mread");if(mr){mr.innerHTML=articleHTML(it);wireArticle(it)}};
   function wireLike(id,link,title){var btn=document.getElementById("lk"),cnt=document.getElementById("lkc");if(!DB){cnt.textContent="0";return;}
     var ref=DB.collection("stats").doc(id);if(likeUnsub)likeUnsub();
     likeUnsub=ref.onSnapshot(function(d){cnt.textContent=(d.exists&&d.data().count)||0},function(){});
@@ -484,8 +489,13 @@
     function newsList(cat){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
       fetchNews().then(function(all){all=(all||[]);if(cat&&cat!=="all")all=all.filter(function(x){return x.cat===cat});all=all.slice(0,40);
         if(!all.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
-        mitems.innerHTML=all.map(function(it,i){return row({top:it.src||"뉴스",topR:ago(it.pubDate),sub:it.title,unread:true,attr:'data-i="'+i+'"'})}).join("");
-        clk(function(x){x.classList.remove("unread");window.__mailOpenArticle(all[+x.getAttribute("data-i")])})
+        var mode=store.get("newssort","new");
+        function paint(list,ranked){var bar='<div class="nsort"><span class="ns'+(mode==="new"?" on":"")+'" data-m="new">최신순</span><span class="ns'+(mode==="hot"?" on":"")+'" data-m="hot">인기순</span></div>';
+          mitems.innerHTML=bar+list.map(function(it,i){return row({top:it.src||"뉴스",topR:(ranked?("조회 "+(it.__c||0)):ago(it.pubDate)),sub:(ranked?((i+1)+". "):"")+it.title,unread:true,attr:'data-i="'+i+'"'})}).join("");
+          mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList(cat)}});
+          mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");x.classList.remove("unread");window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});}
+        if(mode==="hot"){getClicks().then(function(c){all.forEach(function(it){it.__c=c[hashLink(it.link)]||0});all.sort(function(a,b){return (b.__c-a.__c)||((new Date(b.pubDate)-new Date(a.pubDate))||0)});paint(all,true)})}
+        else{all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});paint(all,false)}
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
     function chat(){mitems.innerHTML=row({top:"일반 회의실",topR:"실시간",sub:"익명 채팅 · 누구나"});var f0=mitems.querySelector(".mitem");if(f0)f0.classList.add("on");
       var lo=document.getElementById("lounge");if(lo){mread.innerHTML="";mread.appendChild(lo);lo.style.display=""}else{mread.innerHTML='<div class="mempty">채팅 준비 중…</div>'}}

@@ -9,7 +9,12 @@ const FEEDS=[
   {u:"https://www.yna.co.kr/rss/industry.xml",s:"연합뉴스",cat:"IT산업"},
   {u:"https://www.yna.co.kr/rss/sports.xml",s:"연합뉴스",cat:"스포츠"},
   {u:"https://www.yna.co.kr/rss/entertainment.xml",s:"연합뉴스",cat:"연예"},
-  {u:"https://www.yna.co.kr/rss/international.xml",s:"연합뉴스",cat:"세계"}
+  {u:"https://www.yna.co.kr/rss/international.xml",s:"연합뉴스",cat:"세계"},
+  {u:"https://www.hani.co.kr/rss/",s:"한겨레",cat:"종합"},
+  {u:"https://www.ytn.co.kr/_comm/rss_news.php?mcd=0102",s:"YTN",cat:"종합"},
+  {u:"https://www.mk.co.kr/rss/30000001/",s:"매일경제",cat:"경제"},
+  {u:"https://rss.etnews.com/Section901.xml",s:"전자신문",cat:"IT산업"},
+  {u:"https://rss.mt.co.kr/rss.xml",s:"머니투데이",cat:"경제"}
 ];
 function tag(block,name){const m=block.match(new RegExp("<"+name+"[^>]*>([\\s\\S]*?)</"+name+">","i"));if(!m)return "";let v=m[1].trim();v=v.replace(/^<!\[CDATA\[/,"").replace(/\]\]>$/,"").trim();return v;}
 function strip(h){return h.replace(/<[^>]+>/g," ").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();}
