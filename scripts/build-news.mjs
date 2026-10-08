@@ -18,6 +18,11 @@ const FEEDS=[
 ];
 function tag(block,name){const m=block.match(new RegExp("<"+name+"[^>]*>([\\s\\S]*?)</"+name+">","i"));if(!m)return "";let v=m[1].trim();v=v.replace(/^<!\[CDATA\[/,"").replace(/\]\]>$/,"").trim();return v;}
 function strip(h){return h.replace(/<[^>]+>/g," ").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();}
+function clip(t,max){t=(t||"").trim();if(t.length<=max)return t;var s=t.slice(0,max);
+  var cand=[s.lastIndexOf("다. "),s.lastIndexOf("다."),s.lastIndexOf("요. "),s.lastIndexOf("요."),s.lastIndexOf(". "),s.lastIndexOf("! "),s.lastIndexOf("? "),s.lastIndexOf("."),s.lastIndexOf("”")];
+  var i=Math.max.apply(null,cand);
+  if(i>max*0.5)return s.slice(0,i+1);
+  return s.slice(0,max).trim()+"…";}
 async function fullText(url){
   try{
     const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),8000);
@@ -52,6 +57,7 @@ let items=[];for(const c in byCat){byCat[c].sort((a,b)=>(new Date(b.pubDate)-new
 items.sort((a,b)=>(new Date(b.pubDate)-new Date(a.pubDate))||0);
 console.log("enriching",items.length,"articles...");
 for(let i=0;i<items.length;i+=12){const batch=items.slice(i,i+12);await Promise.all(batch.map(async it=>{const ft=await fullText(it.link);if(ft&&ft.length>(it.desc||"").length)it.desc=ft;}));}
+items.forEach(it=>{it.desc=clip(it.desc,460)});
 const out={updated:new Date().toISOString(),count:items.length,items:items};
 import("fs").then(fs=>fs.writeFileSync("news.json",JSON.stringify(out)));
 console.log("TOTAL news.json:",items.length);
