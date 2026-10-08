@@ -197,6 +197,9 @@
   .roomnick a,.mread .rnote a{color:#0f6cbd;cursor:pointer;text-decoration:underline}
   .mread #rbox{max-height:none;height:54vh;min-height:300px}
   .nsort .ns#newRoom,.nsort .ns#newRoom.on{color:#0f6cbd;font-weight:700}
+  .ntitle{font-size:14px;font-weight:700;color:#1c2b1c;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  [data-skin="mail"] .ntitle{color:#14324f}
+  .nmeta{font-size:11px;color:#8a8f98}
 </style>
 </head>
 <body>
@@ -389,6 +392,7 @@
   function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
   function get(u){return viaR(u).catch(function(){return viaA(u)})}
   function fetchNews(){return fetch("./news.json?t="+Math.floor(Date.now()/60000)).then(function(r){return r.json()}).then(function(d){if(!d||!d.items||!d.items.length)throw 0;return d.items}).catch(function(){return Promise.all(FEEDS.map(function(ff){return get(ff.u).then(function(ls){return ls.map(function(it){it.src=ff.s;return it})}).catch(function(){return[]})})).then(function(res){var all=[],seen={};res.forEach(function(ls){ls.forEach(function(it){if(it&&it.link&&!seen[it.link]){seen[it.link]=1;all.push(it)}})});all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});return all})})}
+  function catLabel(c){return ({"종합":"종합","경제":"경제","IT산업":"IT·산업","스포츠":"스포츠","연예":"연예","세계":"세계"})[c]||c||""}
   function getClicks(){if(!DB)return Promise.resolve({});return DB.collection("stats").doc("newsclicks").get().then(function(d){return (d.exists&&d.data().c)||{}}).catch(function(){return {}})}
   function bumpClick(link){try{if(!DB||!link)return;var o={};o[hashLink(link)]=firebase.firestore.FieldValue.increment(1);DB.collection("stats").doc("newsclicks").set({c:o},{merge:true}).catch(function(){})}catch(e){}}
   function splitSrc(t){var i=t.lastIndexOf(" - ");return i>15?[t.slice(0,i),t.slice(i+3)]:[t,""]}
@@ -496,7 +500,7 @@
         if(!all.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
         var mode=store.get("newssort","new");
         function paint(list,ranked){var bar='<div class="nsort"><span class="ns'+(mode==="new"?" on":"")+'" data-m="new">최신순</span><span class="ns'+(mode==="hot"?" on":"")+'" data-m="hot">인기순</span></div>';
-          mitems.innerHTML=bar+list.map(function(it,i){return row({top:it.src||"뉴스",topR:(ranked?("조회 "+(it.__c||0)):ago(it.pubDate)),sub:(ranked?((i+1)+". "):"")+it.title,unread:true,noav:true,attr:'data-i="'+i+'"'})}).join("");
+          mitems.innerHTML=bar+list.map(function(it,i){return '<div class="mitem" data-i="'+i+'"><div class="mbody"><div class="nmeta">'+esc(it.src||"뉴스")+' · '+esc(catLabel(it.cat))+' · '+(ranked?("조회 "+(it.__c||0)):ago(it.pubDate))+'</div><div class="ntitle">'+(ranked?((i+1)+'. '):'')+esc(it.title)+'</div></div></div>'}).join("");
           mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList(cat)}});
           mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");x.classList.remove("unread");window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});}
         if(mode==="hot"){getClicks().then(function(c){all.forEach(function(it){it.__c=c[hashLink(it.link)]||0});all.sort(function(a,b){return (b.__c-a.__c)||((new Date(b.pubDate)-new Date(a.pubDate))||0)});paint(all,true)})}
