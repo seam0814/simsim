@@ -253,14 +253,7 @@
     <div class="msideHd">폴더</div>
     <div class="mfold on" data-f="inbox">받은 편지함 <span class="cnt">12</span></div>
     <div class="mfold" data-f="news">뉴스</div>
-    <div class="msubs" id="newsSubs">
-      <div class="msub on" data-cat="all">전체</div>
-      <div class="msub" data-cat="경제">경제·재테크</div>
-      <div class="msub" data-cat="IT산업">IT·산업</div>
-      <div class="msub" data-cat="스포츠">스포츠</div>
-      <div class="msub" data-cat="연예">연예</div>
-      <div class="msub" data-cat="세계">세계</div>
-    </div>
+    <div class="mfold" data-f="board">게시판</div>
     <div class="mfold" data-f="chat">회의</div>
     <div class="mfold" data-f="game">휴식</div>
     <div class="mpres">접속 <span class="presN">·</span></div>
@@ -468,9 +461,7 @@
   /* ===== 메일(아웃룩) 레이아웃 ===== */
   (function(){
     var mitems=document.getElementById("mitems"),mread=document.getElementById("mread"),folds=document.querySelectorAll("#mailView .mfold");
-    var subs=document.getElementById("newsSubs");
-    function showSubs(v){if(subs)subs.classList.toggle("on",v)}
-    function markSub(c){if(subs)subs.querySelectorAll(".msub").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-cat")===c)})}
+    var postUnsub=null,pcmtUnsub=null;
     if(!mitems)return;
     var FAKE=[
       {f:"인사팀",e:"hr@company.co.kr",s:"[공지] 2026년 4분기 연차 사용 촉진 안내",d:"오전 9:14",u:1,b:"안녕하세요, 인사팀입니다.\n\n근로기준법에 따른 연차 사용 촉진 제도 운영을 안내드립니다. 첨부된 미사용 연차 현황을 확인하시고, 10월 31일까지 사용 계획을 그룹웨어에 등록해 주시기 바랍니다.\n\n미등록 연차는 소멸될 수 있으니 유의 바랍니다.\n\n[첨부] 미사용연차_현황.xlsx"},
@@ -498,21 +489,22 @@
           +'<div class="rehead"><div class="mav" style="background:'+avColor(m.f)+'">'+esc(initial(m.f))+'</div><div><div class="refrom">'+esc(m.f)+' <span class="reem">&lt;'+esc(m.e)+'&gt;</span></div><div class="reto">받는 사람: 나 &lt;me@company.co.kr&gt;  ·  2026-10-07 '+esc(m.d)+'</div></div></div>'
           +'<div class="remail-b">'+esc(m.b)+'</div>'
           +'<div class="resig">'+esc(m.f)+' 드림\n(주)컴퍼니  ·  본 메일은 수신 전용입니다.</div>'})}
-    function newsList(cat){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
+    function newsList(){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
       var mode=store.get("newssort","new");
       fetchNews().then(function(nd){var list;
-        if(mode==="hot"){var hc=(cat&&cat!=="all")?cat:"종합";list=(nd.hot||[]).filter(function(x){return x.cat===hc});}
-        else{list=(nd.items||[]).slice();if(cat&&cat!=="all")list=list.filter(function(x){return x.cat===cat});list.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});}
+        if(mode==="hot"){list=(nd.hot||[]).filter(function(x){return x.cat==="종합"});}
+        else{list=(nd.items||[]).slice();list.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});}
         list=list.slice(0,40);
         if(!list.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
         var ranked=(mode==="hot");
         var bar='<div class="nsort"><span class="ns'+(mode==="new"?" on":"")+'" data-m="new">최신순</span><span class="ns'+(mode==="hot"?" on":"")+'" data-m="hot">인기순</span></div>';
         mitems.innerHTML=bar+list.map(function(it,i){return '<div class="mitem" data-i="'+i+'">'+(ranked?'<div class="nrank'+(i<3?" top":"")+'">'+(i+1)+'</div>':'')+'<div class="mbody"><div class="nmeta">'+esc(it.src||"뉴스")+' · '+esc(catLabel(it.cat))+' · '+ago(it.pubDate)+'</div><div class="ntitle">'+esc(it.title)+'</div></div></div>'}).join("");
-        mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList(cat)}});
+        mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList()}});
         mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
-    var CURROOM=null,roomUnsub=null;
-    var PRESET=[{id:"free",name:"자유수다",desc:"아무 얘기나 편하게"},{id:"job",name:"이직·연봉 토크",desc:"연봉·이직·면접 정보"},{id:"work",name:"직장생활 고민",desc:"상사·동료·업무 고민"},{id:"money",name:"재테크·주식",desc:"투자·부동산·코인"},{id:"love",name:"연애·결혼",desc:"썸·연애·결혼 수다"},{id:"lunch",name:"점심·맛집",desc:"오늘 뭐 먹지"}];
+    var CURROOM=null,roomUnsub=null,rpInt=null,rpUnsub=null;
+    function mySid(){var s=store.get("sid","");if(!s){s="s"+Math.random().toString(36).slice(2);store.set("sid",s)}return s}
+    var PRESET=[{id:"free",name:"자유수다",desc:"아무 얘기나 편하게",cap:4},{id:"job",name:"이직·연봉 토크",desc:"연봉·이직·면접 정보",cap:4},{id:"work",name:"직장생활 고민",desc:"상사·동료·업무 고민",cap:4},{id:"money",name:"재테크·주식",desc:"투자·부동산·코인",cap:4},{id:"love",name:"연애·결혼",desc:"썸·연애·결혼 수다",cap:4},{id:"lunch",name:"점심·맛집",desc:"오늘 뭐 먹지",cap:4},{id:"oneone",name:"1:1 고민상담",desc:"단둘이 조용히",cap:2}];
     function nickGet(){var n=store.get("nick","");if(!n){n="익명"+Math.floor(Math.random()*9000+1000);store.set("nick",n)}return n}
     function pinHash(p){var h=0,i;for(i=0;i<p.length;i++)h=(h*31+p.charCodeAt(i))|0;return "h"+(h>>>0)}
     function refreshNick(){var el=document.getElementById("setNick");if(el)el.textContent=store.get("nick","")}
@@ -525,35 +517,46 @@
       ref.get().then(function(dc){if(dc.exists){if((dc.data().h||"")===h){store.set("nick",n);store.set("nickpin",pin);alert("'"+n+"' 복원 완료!");refreshNick();}else alert("이미 선점된 닉이에요. PIN이 달라요.");}
         else{ref.set({k:"nick",h:h,ts:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){store.set("nick",n);store.set("nickpin",pin);alert("'"+n+"' 선점 완료! 다른 기기에선 같은 닉+PIN으로 복원하세요.");refreshNick();}).catch(function(){});}}).catch(function(){});}
     function createRoom(){var name=prompt("방 제목(2~16자)");if(!name)return;name=name.trim().slice(0,16);if(name.length<2)return;var desc=(prompt("방 설명(선택, 40자)")||"").slice(0,40);
-      var rid="r"+Date.now().toString(36);if(DB)DB.collection("stats").add({k:"room",rid:rid,name:name,desc:desc,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});enterRoom(rid,name);}
-    function enterRoom(rid,name){CURROOM=rid;mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
-      mread.innerHTML='<div class="roomhd"><b>'+esc(name)+'</b><span class="roomnick">닉: <a id="setNick">'+esc(nickGet())+'</a></span></div>'
-        +'<div class="chatbox" id="rbox"><div class="rnote">첫 메시지를 남겨보세요. (익명·공개)</div></div>'
-        +'<form class="chatform" id="rform"><input id="rmsg" maxlength="200" placeholder="메시지 입력 (Enter 전송)"><button class="btn" type="submit">전송</button></form>'
-        +'<div class="rnote" style="font-size:11px;margin-top:6px">특정인·회사 비방, 개인정보 공유 금지 · <a id="rReport">신고</a></div>';
-      document.getElementById("setNick").onclick=claimNick;
-      document.getElementById("rReport").onclick=function(){if(DB)DB.collection("stats").add({k:"report",room:rid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});alert("신고가 접수되었어요.");};
-      document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(document.getElementById("rmsg").value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return;}
-        DB.collection("lounge").add({room:rid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});document.getElementById("rmsg").value="";try{track("room_msg")}catch(ee){}};
-      if(roomUnsub){roomUnsub();roomUnsub=null;}
-      if(DB){roomUnsub=DB.collection("lounge").where("room","==",rid).onSnapshot(function(q){var arr=[];q.forEach(function(dc){arr.push(dc.data())});arr.sort(function(a,b){return (a.createdAt&&b.createdAt)?(a.createdAt.seconds-b.createdAt.seconds):0});arr=arr.slice(-60);
-        var box=document.getElementById("rbox");if(!box)return;box.innerHTML=arr.length?arr.map(function(m){var tm="";try{if(m.createdAt&&m.createdAt.toDate){var dd=m.createdAt.toDate();tm=("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)}}catch(e){}return '<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+(tm?'<span class="ctime">'+tm+'</span>':"")+'</div>'}).join(""):'<div class="rnote">첫 메시지를 남겨보세요.</div>';box.scrollTop=box.scrollHeight;},function(){});}}
+      var capS=prompt("정원: 2 = 1:1, 4 = 4인","4");var cap=(capS&&capS.trim()==="2")?2:4;
+      var rid="r"+Date.now().toString(36);if(DB)DB.collection("stats").add({k:"room",rid:rid,name:name,desc:desc,cap:cap,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});enterRoom(rid,name,cap);}
+    function enterRoom(rid,name,cap){cap=cap||4;CURROOM=rid;mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
+      if(rpInt){clearInterval(rpInt);rpInt=null}if(rpUnsub){rpUnsub();rpUnsub=null}
+      var sid=mySid(),pref=DB?DB.collection("stats").doc("rpres_"+rid):null;
+      function cnt(u){var n=0,now=Date.now();for(var k in u){if(now-u[k]<45000)n++}return n}
+      function beat(){if(!pref)return;var o={};o[sid]=Date.now();pref.set({u:o},{merge:true}).catch(function(){})}
+      function render(){
+        mread.innerHTML='<div class="roomhd"><b>'+esc(name)+'</b><span class="roomnick">정원 <span id="roomcap">?/'+cap+'</span> · 닉 <a id="setNick">'+esc(nickGet())+'</a></span></div>'
+          +'<div class="chatbox" id="rbox"><div class="rnote">첫 메시지를 남겨보세요. (익명·공개)</div></div>'
+          +'<form class="chatform" id="rform"><input id="rmsg" maxlength="200" placeholder="메시지 입력 (Enter 전송)"><button class="btn" type="submit">전송</button></form>'
+          +'<div class="rnote" style="font-size:11px;margin-top:6px">특정인·회사 비방, 개인정보 공유 금지 · <a id="rReport">신고</a></div>';
+        document.getElementById("setNick").onclick=claimNick;
+        document.getElementById("rReport").onclick=function(){if(DB)DB.collection("stats").add({k:"report",room:rid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});alert("신고가 접수되었어요.")};
+        document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(document.getElementById("rmsg").value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return}
+          DB.collection("lounge").add({room:rid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});document.getElementById("rmsg").value="";try{track("room_msg")}catch(ee){}};
+        if(roomUnsub){roomUnsub();roomUnsub=null}
+        if(DB){roomUnsub=DB.collection("lounge").where("room","==",rid).onSnapshot(function(q){var arr=[];q.forEach(function(dc){arr.push(dc.data())});arr.sort(function(a,b){return (a.createdAt&&b.createdAt)?(a.createdAt.seconds-b.createdAt.seconds):0});arr=arr.slice(-60);
+          var box=document.getElementById("rbox");if(!box)return;box.innerHTML=arr.length?arr.map(function(m){var tm="";try{if(m.createdAt&&m.createdAt.toDate){var dd=m.createdAt.toDate();tm=("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)}}catch(e){}return '<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+(tm?'<span class="ctime">'+tm+'</span>':"")+'</div>'}).join(""):'<div class="rnote">첫 메시지를 남겨보세요.</div>';box.scrollTop=box.scrollHeight},function(){})}
+        if(pref){beat();rpInt=setInterval(beat,20000);rpUnsub=pref.onSnapshot(function(d2){var u=(d2.exists&&d2.data().u)||{};var el=document.getElementById("roomcap");if(el)el.textContent=cnt(u)+"/"+cap},function(){})}
+      }
+      if(pref){pref.get().then(function(dc){var u=(dc.exists&&dc.data().u)||{};var c=cnt(u),inR=u[sid]&&(Date.now()-u[sid]<45000);
+        if(c>=cap&&!inR){mread.innerHTML='<div class="mempty">이 방은 정원('+cap+'명)이 가득 찼어요.<br>다른 방을 이용해 주세요.</div>';return}
+        render()}).catch(function(){render()})}
+      else render();}
     function chat(){mread.innerHTML='<div class="mempty">왼쪽에서 방을 선택하세요.</div>';
       function render(extra){var rooms=PRESET.concat(extra||[]);
         mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><span class="ns" id="newRoom" style="margin-left:auto">+ 방 만들기</span></div>'
-          +rooms.map(function(r){return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'"><div class="mbody"><div class="mfrom">'+esc(r.name)+'</div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
-        mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){enterRoom(x.getAttribute("data-room"),x.getAttribute("data-name"))}});
+          +rooms.map(function(r){var cp=r.cap||4;return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'" data-cap="'+cp+'"><div class="mbody"><div class="mfrom">'+esc(r.name)+' <span class="md">'+(cp===2?"1:1":cp+"인")+'</span></div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
+        mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){enterRoom(x.getAttribute("data-room"),x.getAttribute("data-name"),+x.getAttribute("data-cap")||4)}});
         var nr=document.getElementById("newRoom");if(nr)nr.onclick=function(e){e.stopPropagation();createRoom()};}
       render([]);
-      if(DB){DB.collection("stats").where("k","==","room").get().then(function(q){var ex=[];q.forEach(function(dc){var m=dc.data();if(m.name)ex.push({id:m.rid||dc.id,name:m.name,desc:m.desc||""})});if(ex.length)render(ex)}).catch(function(){})}}
+      if(DB){DB.collection("stats").where("k","==","room").get().then(function(q){var ex=[];q.forEach(function(dc){var m=dc.data();if(m.name)ex.push({id:m.rid||dc.id,name:m.name,desc:m.desc||"",cap:m.cap||4})});if(ex.length)render(ex)}).catch(function(){})}}
     function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 게임을 선택하세요.</div>';
       mitems.innerHTML=items.map(function(t){var href=t.ext?t.url:("./"+t.path);return row({top:t.title,topR:"게임",sub:t.desc,attr:'data-h="'+href+'"'})}).join("");
       clk(function(x){mread.innerHTML='<iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe>'})}
-    function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});showSubs(f==="news");var se2=document.getElementById("msearch");if(se2)se2.placeholder=(f==="news"?"뉴스 검색":f==="chat"?"방 검색":f==="game"?"게임 검색":"메일 검색");
-      if(f==="news"){markSub("all");newsList("all")}else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
+    function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});var se2=document.getElementById("msearch");if(se2)se2.placeholder=(f==="news"?"뉴스 검색":f==="board"?"게시판 검색":f==="chat"?"방 검색":f==="game"?"게임 검색":"메일 검색");
+      if(f==="news")newsList();else if(f==="board")board();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
       var se=document.getElementById("msearch");if(se)se.value="";try{track("mail_fold",{f:f})}catch(e){}}
     folds.forEach(function(x){x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
-    if(subs)subs.querySelectorAll(".msub").forEach(function(x){x.addEventListener("click",function(e){e.stopPropagation();folds.forEach(function(y){y.classList.toggle("on",y.getAttribute("data-f")==="news")});showSubs(true);markSub(x.getAttribute("data-cat"));newsList(x.getAttribute("data-cat"))})});
     var sb2=document.getElementById("skinBtn2");if(sb2)sb2.onclick=function(){store.set("skin","excel");location.reload()};
     var se=document.getElementById("msearch");if(se)se.addEventListener("input",function(){var q=this.value.trim().toLowerCase();mitems.querySelectorAll(".mitem").forEach(function(el){el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?"":"none"})});
     var mr=document.getElementById("mrefresh");if(mr)mr.onclick=function(){var on=document.querySelector("#mailView .mfold.on");setFold(on?on.getAttribute("data-f"):"inbox")};
