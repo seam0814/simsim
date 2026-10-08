@@ -18,10 +18,11 @@ async function fullText(url){
     const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),8000);
     const r=await fetch(url,{signal:ctrl.signal,headers:{"User-Agent":"Mozilla/5.0 (newsbot)"}});clearTimeout(t);
     const h=await r.text();
-    const ps=[...h.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map(m=>strip(m[1])).filter(x=>x.length>40 && !/^[^가-힣]*$/.test(x));
-    let txt=ps.slice(0,4).join(" ");
-    if(txt.length<100){const m=h.match(/<meta property=\"og:description\" content=\"([^\"]*)\"/i);if(m)txt=strip(m[1]);}
-    return txt.slice(0,600);
+    let txt="";
+    const m=h.match(/<meta property=["']og:description["'] content=["']([^"']*)["']/i);if(m)txt=strip(m[1]);
+    if(txt.length<40){const m2=h.match(/<meta name=["']description["'] content=["']([^"']*)["']/i);if(m2)txt=strip(m2[1]);}
+    txt=txt.replace(/무단\s*전재.*$/,"").replace(/Copyright.*$/i,"").replace(/저작권자.*$/,"").replace(/ⓒ.*$/i,"").trim();
+    return txt.slice(0,400);
   }catch(e){return "";}
 }
 async function one(f){
