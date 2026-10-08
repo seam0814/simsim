@@ -50,6 +50,8 @@ async function one(f){
     }).filter(x=>x.title&&x.link);
   }catch(e){console.error("fail",f.u,e.message);return [];}
 }
+const GN={"종합":"https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko","경제":"https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko","IT산업":"https://news.google.com/rss/headlines/section/topic/TECHNOLOGY?hl=ko&gl=KR&ceid=KR:ko","스포츠":"https://news.google.com/rss/headlines/section/topic/SPORTS?hl=ko&gl=KR&ceid=KR:ko","연예":"https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT?hl=ko&gl=KR&ceid=KR:ko","세계":"https://news.google.com/rss/headlines/section/topic/WORLD?hl=ko&gl=KR&ceid=KR:ko"};
+async function gfetch(url,cat){try{const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),12000);const r=await fetch(url,{signal:ctrl.signal,headers:{"User-Agent":"Mozilla/5.0 (newsbot)"}});clearTimeout(t);const xml=await r.text();const items=xml.split(/<item[ >]/i).slice(1);return items.map((b,idx)=>{let ti=strip(tag(b,"title"));let src="";const k=ti.lastIndexOf(" - ");if(k>12){src=ti.slice(k+3);ti=ti.slice(0,k);}let link=tag(b,"link");if(!link){const m=b.match(/<link[^>]*>([\s\S]*?)<\/link>/i);link=m?m[1].trim():"";}return {title:ti,link,src:src||"Google뉴스",pubDate:tag(b,"pubDate"),cat,rank:idx};}).filter(x=>x.title&&x.link).slice(0,12);}catch(e){console.error("gfail",cat,e.message);return [];}}
 const all=[];const seen=new Set();
 for(const f of FEEDS){const arr=await one(f);let n=0;for(const it of arr){if(it.link&&!seen.has(it.link)){seen.add(it.link);all.push(it);n++;}}console.log(f.cat,f.s,"+",n);}
 const byCat={};for(const it of all){(byCat[it.cat]=byCat[it.cat]||[]).push(it);}
@@ -58,6 +60,7 @@ items.sort((a,b)=>(new Date(b.pubDate)-new Date(a.pubDate))||0);
 console.log("enriching",items.length,"articles...");
 for(let i=0;i<items.length;i+=12){const batch=items.slice(i,i+12);await Promise.all(batch.map(async it=>{const ft=await fullText(it.link);if(ft&&ft.length>(it.desc||"").length)it.desc=ft;}));}
 items.forEach(it=>{it.desc=clip(it.desc,460)});
-const out={updated:new Date().toISOString(),count:items.length,items:items};
+let hot=[];for(const c in GN){const a=await gfetch(GN[c],c);console.log("G",c,a.length);hot=hot.concat(a);}
+const out={updated:new Date().toISOString(),count:items.length,items:items,hot:hot};
 import("fs").then(fs=>fs.writeFileSync("news.json",JSON.stringify(out)));
 console.log("TOTAL news.json:",items.length);
