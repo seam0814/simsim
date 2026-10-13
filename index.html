@@ -275,6 +275,31 @@
   [data-skin="mail"] .chatbox{border:1px solid #e0e0e0;border-radius:4px}
   [data-skin="mail"] .mrez:hover{background:rgba(15,108,189,.25)}
   @media(max-width:860px){[data-skin="mail"] .mailv{height:auto;padding:4px}[data-skin="mail"] .mside{flex-basis:auto}[data-skin="mail"] .msideHd,[data-skin="mail"] .mfold.dim,[data-skin="mail"] .mapps,[data-skin="mail"] .mlhd .mltabs{display:none}[data-skin="mail"] .mfold{margin:2px}}
+
+  /* ===== 회의실: Teams 스타일 ===== */
+  .troom{display:flex;flex-direction:column;height:calc(100% + 40px);min-height:440px;margin:-20px -28px}
+  .thead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #e0e0e0;background:#fff;flex-wrap:wrap}
+  .ttl{display:flex;align-items:center;gap:10px;min-width:0}.ttl b{font-size:14px;color:#242424}
+  .tic{width:32px;height:32px;border-radius:6px;background:#5b5fc7;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex:0 0 32px}
+  .tsub{font-size:12px;color:#616161;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
+  .tact{display:flex;gap:12px;font-size:12px;color:#616161;align-items:center}.tact a{color:#0f6cbd;cursor:pointer}.tact b{color:#242424;font-weight:600}
+  .tbox{flex:1;overflow-y:auto;background:#f5f5f5;padding:12px 16px 8px;min-height:240px}
+  .tempty{text-align:center;color:#8a8886;font-size:13px;margin-top:60px;line-height:1.8}.tempty b{color:#424242}
+  .tday{display:flex;align-items:center;gap:10px;margin:12px 0 8px;color:#8a8886;font-size:11px}.tday::before,.tday::after{content:"";flex:1;height:1px;background:#e0e0e0}
+  .tsys{text-align:center;font-size:11px;color:#8a8886;margin:6px 0}
+  .tmsg{display:flex;gap:8px;margin-top:10px;align-items:flex-start;max-width:78%}
+  .tmsg.grp{margin-top:2px}
+  .tav{flex:0 0 28px;width:28px;height:28px;border-radius:50%;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center}.tav.sp{background:none}
+  .tcol{min-width:0}
+  .tmeta{font-size:11px;color:#616161;margin:0 0 2px 2px;display:flex;gap:8px}.tmeta b{color:#424242;font-weight:600}
+  .tbub{background:#fff;color:#242424;font-size:13px;line-height:1.5;padding:6px 11px;border-radius:6px;box-shadow:0 1px 1px rgba(0,0,0,.06);word-break:break-word;white-space:pre-wrap;display:inline-block}
+  .tmsg.me{margin-left:auto;flex-direction:row-reverse}.tmsg.me .tav{display:none}.tmsg.me .tcol{text-align:right}.tmsg.me .tmeta{justify-content:flex-end}
+  .tmsg.me .tbub{background:#e0eaf8;text-align:left}
+  .tform{display:flex;gap:6px;padding:10px 16px;background:#fff;border-top:1px solid #e0e0e0}
+  .tform input{flex:1;min-width:0;border:1px solid #d1d1d1;border-bottom:2px solid #0f6cbd;border-radius:4px;padding:8px 10px;font:inherit;font-size:13px;outline:0}
+  .tform button{border:0;background:none;color:#0f6cbd;cursor:pointer;padding:0 8px;border-radius:4px}.tform button:hover{background:#f0f0f0}
+  .tfoot{font-size:11px;color:#8a8886;padding:0 16px 8px;background:#fff}.tfoot a{color:#8a8886;cursor:pointer;text-decoration:underline}
+  @media(max-width:860px){.troom{height:auto}.tbox{min-height:50vh}.tmsg{max-width:90%}.tsub{max-width:200px}}
 </style>
 </head>
 <body>
@@ -636,22 +661,45 @@
       if(rpInt){clearInterval(rpInt);rpInt=null}if(rpUnsub){rpUnsub();rpUnsub=null}
       var sid=mySid(),pref=DB?DB.collection("stats").doc("rpres_"+rid):null;
       function cnt(u){var n=0,now=Date.now();for(var k in u){if(now-u[k]<45000)n++}return n}
-      function beat(){if(!pref)return;var o={};o[sid]=Date.now();pref.set({u:o},{merge:true}).catch(function(){})}
-      function render(){
-        mread.innerHTML='<div class="roomhd"><b>'+esc(name)+'</b><span class="roomnick"><a id="rLink">링크 복사</a> · 정원 <span id="roomcap">?/'+cap+'</span> · 닉 <a id="setNick">'+esc(nickGet())+'</a></span></div>'
-          +'<div class="chatbox" id="rbox"><div class="rnote">첫 메시지를 남겨보세요. (익명·공개)</div></div>'
-          +'<form class="chatform" id="rform"><input id="rmsg" maxlength="200" placeholder="메시지 입력 (Enter 전송)"><button class="btn" type="submit">전송</button></form>'
-          +'<div class="rnote" style="font-size:11px;margin-top:6px">특정인·회사 비방, 개인정보 공유 금지 · <a id="rReport">신고</a></div>';
-        document.getElementById("setNick").onclick=claimNick;
+      function beat(){if(!pref)return;var o={},nn={};o[sid]=Date.now();nn[sid]=nickGet().slice(0,12);pref.set({u:o,n:nn},{merge:true}).catch(function(){})}
+      function prune(u){var del={},now=Date.now(),any=false;for(var k in u)if(now-u[k]>600000){del["u."+k]=firebase.firestore.FieldValue.delete();del["n."+k]=firebase.firestore.FieldValue.delete();any=true}if(any&&pref)pref.update(del).catch(function(){})}
+      function hm(d){return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
+      function dayLabel(d){var t=new Date(),y=new Date(Date.now()-86400000);if(d.toDateString()===t.toDateString())return "오늘";if(d.toDateString()===y.toDateString())return "어제";return (d.getMonth()+1)+"월 "+d.getDate()+"일"}
+      var sysLines=[],seen=null,lastArr=[];
+      function paint(){var box=document.getElementById("rbox");if(!box)return;var me=nickGet(),h="",lastDay="",prev=null,stick=box.scrollHeight-box.scrollTop-box.clientHeight<60;
+        var items=lastArr.map(function(m){var d=(m.createdAt&&m.createdAt.toDate)?m.createdAt.toDate():new Date();return {m:m,d:d}}).concat(sysLines);
+        items.sort(function(x,y){return x.d-y.d});
+        if(!items.length){box.innerHTML='<div class="tempty"><b>'+esc(name)+'</b><br>아직 대화가 없어요. 먼저 인사해 보세요.</div>';return}
+        items.forEach(function(it){var dl=dayLabel(it.d);if(dl!==lastDay){h+='<div class="tday"><span>'+dl+'</span></div>';lastDay=dl;prev=null}
+          if(it.sys){h+='<div class="tsys">'+esc(it.sys)+' · '+hm(it.d)+'</div>';prev=null;return}
+          var m=it.m,nm=m.name||"익명",mine=(m.s&&m.s===sid)||(!m.s&&nm===me),grp=prev&&prev.nm===nm&&it.d-prev.d<300000;
+          h+='<div class="tmsg'+(mine?" me":"")+(grp?" grp":"")+'">'+(mine||grp?'<span class="tav sp"></span>':'<span class="tav" style="background:'+avColor(nm)+'">'+esc(initial(nm))+'</span>')
+            +'<div class="tcol">'+(grp?'':'<div class="tmeta">'+(mine?'':'<b>'+esc(nm)+'</b>')+'<span>'+hm(it.d)+'</span></div>')+'<div class="tbub">'+esc(m.text)+'</div></div></div>';
+          prev={nm:nm,d:it.d}});
+        box.innerHTML=h;if(stick||!paint.done)box.scrollTop=box.scrollHeight;paint.done=true}
+      function people(u,nmap){var now=Date.now(),list=[];for(var k in u)if(now-u[k]<45000)list.push({k:k,n:(nmap&&nmap[k])||"익명"});return list}
+      function render(){paint.done=false;
+        mread.innerHTML='<div class="troom"><div class="thead"><div class="ttl"><span class="tic">'+esc(initial(name))+'</span><div><b>'+esc(name)+'</b><div class="tsub" id="tppl">참여자 불러오는 중…</div></div></div>'
+          +'<div class="tact"><a id="rLink">링크 복사</a><span>정원 <b id="roomcap">?/'+cap+'</b></span><span>닉 <a id="setNick">'+esc(nickGet())+'</a></span></div></div>'
+          +'<div class="tbox" id="rbox"></div>'
+          +'<form class="tform" id="rform"><input id="rmsg" maxlength="200" autocomplete="off" placeholder="새 메시지 입력"><button type="submit" title="보내기"><svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 10l14-6-5 13-2.5-5.5z"/><path d="M9.5 11.5L17 4"/></svg></button></form>'
+          +'<div class="tfoot">특정인·회사 비방, 개인정보 공유 금지 · <a id="rReport">신고</a></div></div>';
+        document.getElementById("setNick").onclick=function(){claimNick();var a=document.getElementById("setNick");if(a)a.textContent=nickGet();beat()};
         document.getElementById("rLink").onclick=function(){var u=roomURL(rid),a=this;function ok(){a.textContent="복사됨!";setTimeout(function(){a.textContent="링크 복사"},1500)}
           try{navigator.clipboard.writeText(u).then(ok,function(){prompt("이 링크를 복사해서 보내세요",u)})}catch(e){prompt("이 링크를 복사해서 보내세요",u)}};
         document.getElementById("rReport").onclick=function(){if(DB)DB.collection("stats").add({k:"report",room:rid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});alert("신고가 접수되었어요.")};
-        document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(document.getElementById("rmsg").value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return}
-          DB.collection("lounge").add({room:rid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});document.getElementById("rmsg").value="";try{track("room_msg")}catch(ee){}};
+        document.getElementById("rform").onsubmit=function(e){e.preventDefault();var inp=document.getElementById("rmsg"),t=(inp.value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return}
+          DB.collection("lounge").add({room:rid,s:sid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});inp.value="";var bx=document.getElementById("rbox");if(bx)setTimeout(function(){bx.scrollTop=bx.scrollHeight},50);try{track("room_msg")}catch(ee){}};
         if(roomUnsub){roomUnsub();roomUnsub=null}
-        if(DB){roomUnsub=DB.collection("lounge").where("room","==",rid).onSnapshot(function(q){var arr=[];q.forEach(function(dc){arr.push(dc.data())});arr.sort(function(a,b){return (a.createdAt&&b.createdAt)?(a.createdAt.seconds-b.createdAt.seconds):0});arr=arr.slice(-60);
-          var box=document.getElementById("rbox");if(!box)return;box.innerHTML=arr.length?arr.map(function(m){var tm="";try{if(m.createdAt&&m.createdAt.toDate){var dd=m.createdAt.toDate();tm=("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)}}catch(e){}return '<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+(tm?'<span class="ctime">'+tm+'</span>':"")+'</div>'}).join(""):'<div class="rnote">첫 메시지를 남겨보세요.</div>';box.scrollTop=box.scrollHeight},function(){})}
-        if(pref){beat();rpInt=setInterval(beat,20000);rpUnsub=pref.onSnapshot(function(d2){var u=(d2.exists&&d2.data().u)||{};var el=document.getElementById("roomcap");if(el)el.textContent=cnt(u)+"/"+cap},function(){})}
+        paint();
+        if(DB){roomUnsub=DB.collection("lounge").where("room","==",rid).onSnapshot(function(q){var arr=[];q.forEach(function(dc){arr.push(dc.data())});arr.sort(function(a,b){return (a.createdAt&&b.createdAt)?(a.createdAt.seconds-b.createdAt.seconds):0});lastArr=arr.slice(-80);paint()},function(){})}
+        if(pref){beat();rpInt=setInterval(beat,20000);var pruned=false;rpUnsub=pref.onSnapshot(function(d2){var dd=(d2.exists&&d2.data())||{},u=dd.u||{},ps=people(u,dd.n||{});
+          if(!pruned){pruned=true;prune(u)}
+          var el=document.getElementById("roomcap");if(el)el.textContent=ps.length+"/"+cap;
+          var names=ps.map(function(p){return p.k===sid?p.n+"(나)":p.n});var pl=document.getElementById("tppl");if(pl)pl.textContent=names.length?names.slice(0,6).join(", ")+(names.length>6?" 외 "+(names.length-6)+"명":""):"참여자 없음";
+          var cur={};ps.forEach(function(p){cur[p.k]=p.n});
+          if(seen){var ch=false;for(var k in cur)if(!seen[k]&&k!==sid){sysLines.push({sys:cur[k]+"님이 들어왔어요",d:new Date()});ch=true}for(var k2 in seen)if(!cur[k2]&&k2!==sid){sysLines.push({sys:seen[k2]+"님이 나갔어요",d:new Date()});ch=true}if(ch)paint()}
+          seen=cur},function(){})}
       }
       if(pref){pref.get().then(function(dc){var u=(dc.exists&&dc.data().u)||{};var c=cnt(u),inR=u[sid]&&(Date.now()-u[sid]<45000);
         if(c>=cap&&!inR){mread.innerHTML='<div class="mempty">이 방은 정원('+cap+'명)이 가득 찼어요.<br>다른 방을 이용해 주세요.</div>';return}
