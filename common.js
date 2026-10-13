@@ -9,12 +9,12 @@
 
   // 등록: path=내부 폴더, url=외부(기존 사이트). cat=카테고리
   var ITEMS=[
-    {path:"omok/", ic:"", title:"오목 (AI·온라인)", desc:"AI 또는 친구와 5목", cat:"사무실에서", pop:true},
-    {path:"minesweeper/", ic:"", title:"지뢰찾기", desc:"고전 지뢰찾기 (엑셀풍)", cat:"사무실에서", pop:true},
-    {path:"reaction/", ic:"", title:"반응속도 테스트", desc:"몇 ms? 점수 자랑하기", cat:"테스트", pop:true},
-    {path:"baseball/", ic:"", title:"숫자야구", desc:"스트라이크·볼 추리", cat:"사무실에서", pop:true},
-    {url:"https://seam0814.github.io/wordplay/", ic:"", title:"온라인 끝말잇기", desc:"친구랑 각자 PC에서 2인", cat:"같이 하기", ext:true, pop:true},
-    {url:"https://seam0814.github.io/typetest/animal/", ic:"", title:"동물상 테스트", desc:"질문으로 보는 내 얼굴상", cat:"테스트", ext:true}
+    {path:"omok/", file:"오목교_현장_배치도.xlsx", ic:"", title:"오목 (AI·온라인)", desc:"AI 또는 친구와 5목", cat:"사무실에서", pop:true},
+    {path:"minesweeper/", file:"리스크_탐지_매트릭스.xlsx", ic:"", title:"지뢰찾기", desc:"고전 지뢰찾기 (엑셀풍)", cat:"사무실에서", pop:true},
+    {path:"reaction/", file:"응답속도_측정결과.xlsx", ic:"", title:"반응속도 테스트", desc:"몇 ms? 점수 자랑하기", cat:"테스트", pop:true},
+    {path:"baseball/", file:"숫자검증_체크시트.xlsx", ic:"", title:"숫자야구", desc:"스트라이크·볼 추리", cat:"사무실에서", pop:true},
+    {url:"https://seam0814.github.io/wordplay/", file:"용어_연결표.xlsx", ic:"", title:"온라인 끝말잇기", desc:"친구랑 각자 PC에서 2인", cat:"같이 하기", ext:true, pop:true},
+    {url:"https://seam0814.github.io/typetest/animal/", file:"인재상_진단설문.docx", ic:"", title:"동물상 테스트", desc:"질문으로 보는 내 얼굴상", cat:"테스트", ext:true}
   ];
   window.ITEMS=ITEMS; window.SITE_NAME='업무 <span>대시보드</span>';
   function h(s){var d=document.createElement("div");d.innerHTML=s.trim();return d.firstChild}
