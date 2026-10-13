@@ -1,0 +1,14 @@
+name: indexnow-briefing
+on:
+  push:
+    branches: [master]
+    paths: ["briefing.json"]
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          D=$(node -e "console.log(require('./briefing.json').days[0].date)")
+          sleep 60
+          curl -s -o /dev/null -w "%{http_code}\n" -H 'Content-Type: application/json' -d "{\"host\":\"seam0814.github.io\",\"key\":\"16ce9f7342f7dc023485a8ec6d9f695e\",\"keyLocation\":\"https://seam0814.github.io/simsim/16ce9f7342f7dc023485a8ec6d9f695e.txt\",\"urlList\":[\"https://seam0814.github.io/simsim/briefing/\",\"https://seam0814.github.io/simsim/briefing/$D/\"]}" https://api.indexnow.org/indexnow
