@@ -58,6 +58,7 @@
   function esc(t){return String(t).replace(/[<>&]/g,function(c){return{"<":"&lt;",">":"&gt;","&":"&amp;"}[c]})}
   var BAD=["씨발","시발","개새끼","병신","좆","지랄","fuck","shit"];
   function clean(t){BAD.forEach(function(w){t=t.split(w).join(new Array(w.length+1).join("*"))});return t}
+  window.cleanText=clean;
   var loungeEl=document.getElementById("lounge");
   if(loungeEl){
     if(FIREBASE_CONFIG.apiKey){

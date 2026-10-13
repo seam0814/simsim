@@ -693,7 +693,7 @@
       if(CURROOM===rid){if(roomUnsub){roomUnsub();roomUnsub=null}if(rpInt){clearInterval(rpInt);rpInt=null}if(rpUnsub){rpUnsub();rpUnsub=null}CURROOM=null;try{history.replaceState(null,"",location.pathname)}catch(e){}}
       paintUnread();setFold("chat");toast("방에서 나갔어요","이 방의 새 메시지 알림이 더 이상 오지 않아요.")}
     function viewing(rid){var f=document.querySelector('#mailView .mfold.on');return CURROOM===rid&&f&&f.getAttribute("data-f")==="chat"&&!document.hidden}
-    function paintUnread(){var tot=0;for(var k in UNREAD)tot+=UNREAD[k]||0;var fb=document.getElementById("chatCnt");if(fb){fb.textContent=tot>99?"99+":tot;fb.style.display=tot?"":"none"}
+    var baseTitle=document.title;function paintUnread(){var tot=0;for(var k in UNREAD)if(!store.get("mute_"+k,"")||MENTION[k])tot+=UNREAD[k]||0;document.title=tot?"받은 편지함 ("+tot+") - Outlook":baseTitle;var fb=document.getElementById("chatCnt");if(fb){fb.textContent=tot>99?"99+":tot;fb.style.display=tot?"":"none"}
       [].forEach.call(document.querySelectorAll(".runread"),function(el){var r=el.getAttribute("data-r"),n=UNREAD[r]||0;el.textContent=(MENTION[r]?"@ ":"")+(n>99?"99+":n);el.style.display=n?"":"none";el.classList.toggle("muted",!!store.get("mute_"+r,"")&&!MENTION[r])})}
     function watchRooms(){if(!DB)return;var want={lobby:{id:"lobby",name:"전체 휴게실"}};myRooms().forEach(function(r){want[r.id]=r});
       for(var k in WATCH)if(!want[k]){WATCH[k]();delete WATCH[k];delete UNREAD[k]}
@@ -828,7 +828,7 @@
           if(!m)return;e.stopPropagation();row.classList.remove("act");if(op==="re")setReply(m);else if(op==="more")moreMenu(m,row);else toggleRx(m._id,op)});
         document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(inp.value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return}
           var why=canSend(t);if(why){toast("잠시만요",why);return}sendLog.push({t:Date.now(),m:t});
-          var doc={room:rid,s:sid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()};if(tagOf())doc.jb=tagOf().slice(0,20);if(replyTo)doc.re=replyTo;
+          if(window.cleanText)t=window.cleanText(t);var doc={room:rid,s:sid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()};if(tagOf())doc.jb=tagOf().slice(0,20);if(replyTo)doc.re=replyTo;
           DB.collection("lounge").add(doc).catch(function(){});var mns=[];(doc.text.match(/@([^\s@]{1,12})/g)||[]).forEach(function(x){mns.push(x.slice(1))});if(pref)pref.set({last:{n:doc.name,t:doc.text.slice(0,40),at:Date.now(),mn:mns},mc:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(function(){});unreadAt=0;inp.value="";setReply(null);tyAt=0;var bx=document.getElementById("rbox");if(bx)setTimeout(function(){bx.scrollTop=bx.scrollHeight},50);try{track("room_msg")}catch(ee){}};
         if(roomUnsub){roomUnsub();roomUnsub=null}
         paint();
