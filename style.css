@@ -95,3 +95,26 @@ html.embed p.sub{font-size:11px !important;margin:0 -10px 8px !important;padding
 html.embed .card{border-radius:0;margin-top:6px;padding:10px}
 html.embed .btn{display:inline-block;width:auto;padding:4px 14px;font-size:12px;border-radius:2px;margin:8px 6px 0 0;font-weight:600}
 html.embed input{font-size:12px !important}
+
+/* ===== Outlook 앱 크롬 (메일 스킨) ===== */
+.olchrome{font-family:"Segoe UI","맑은 고딕","Malgun Gothic",sans-serif;user-select:none}
+.olapp{height:44px;background:#0f6cbd;color:#fff;display:flex;align-items:center;gap:12px;padding:0 12px}
+.olwaf{display:grid;grid-template-columns:repeat(3,4px);gap:3px;padding:6px;border-radius:4px;cursor:pointer}
+.olwaf i{width:4px;height:4px;background:#fff;border-radius:1px;display:block}
+.olwaf:hover,.olright>span:hover{background:rgba(255,255,255,.15)}
+.olname{color:#fff;text-decoration:none;font-weight:600;font-size:15px;margin-right:18px}
+.olsearch{flex:0 1 460px;height:30px;margin:0 auto;background:rgba(255,255,255,.92);border-radius:4px;display:flex;align-items:center;gap:8px;padding:0 10px;color:#605e5c;font-size:13px}
+.olright{display:flex;align-items:center;gap:4px}
+.olright>span{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer}
+.olright .olme{width:28px;height:28px;border-radius:50%;background:#c43e1c;font-size:12px;font-weight:600;margin-left:6px}
+.oltabs{display:flex;gap:2px;padding:0 12px;background:#f5f5f5;font-size:13px;color:#424242}
+.oltabs span{padding:7px 10px 6px;cursor:pointer;border-bottom:2px solid transparent}
+.oltabs span.on{color:#0f6cbd;font-weight:600;border-bottom-color:#0f6cbd}
+.olcmd{display:flex;align-items:center;gap:2px;padding:4px 10px 6px;background:#f5f5f5;border-bottom:1px solid #e0e0e0;font-size:13px;color:#242424;overflow-x:auto;white-space:nowrap}
+.olcmd>span{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:4px;cursor:pointer}
+.olcmd>span svg{color:#0f6cbd}
+.olcmd>span:hover{background:#e6e6e6}
+.olcmd .olnew{background:#0f6cbd;color:#fff;font-weight:600;padding:5px 12px}
+.olcmd .olnew svg{color:#fff}.olcmd .olnew:hover{background:#115ea3}
+.olsep{width:1px;height:20px;background:#d1d1d1;margin:0 4px;display:inline-block}
+@media(max-width:860px){.olsearch span,.oltabs,.olhide{display:none}.olname{margin-right:0}}

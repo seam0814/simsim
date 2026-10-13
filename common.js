@@ -91,9 +91,17 @@
     var skin=/[?&]room=/.test(location.search)?"mail":store.get("skin","mail");document.documentElement.setAttribute("data-skin",skin);
     var bar=document.createElement("div");bar.className="xlchrome";
     if(skin==="mail"){
-      bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">받은 편지함 - Outlook</a><span style="float:right">—  </span></div>'
-        +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;보내기/받기 &nbsp;폴더 &nbsp;보기 &nbsp;도움말</div>'
-        +'<div class="xlformbar"><span class="nb">검색</span><span>받은 편지함</span></div>';
+      var I=function(d){return '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'};
+      var waffle='<span class="olwaf">'+Array(10).join('<i></i>')+'</span>';
+      bar.className="olchrome";
+      bar.innerHTML='<div class="olapp">'+waffle+'<a class="olname" href="'+ROOT+'">Outlook</a>'
+        +'<div class="olsearch">'+I('<circle cx="8.5" cy="8.5" r="5"/><path d="M12.5 12.5l4 4"/>')+'<span>검색</span></div>'
+        +'<div class="olright"><span title="모임">'+I('<rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v4M13 2v4"/>')+'</span><span title="알림">'+I('<path d="M5 14V9a5 5 0 0110 0v5l1.5 1.5h-13z"/><path d="M8.5 17.5a1.6 1.6 0 003 0"/>')+'</span><span title="설정">'+I('<circle cx="10" cy="10" r="2.6"/><path d="M10 2.5v2M10 15.5v2M2.5 10h2M15.5 10h2M4.7 4.7l1.4 1.4M13.9 13.9l1.4 1.4M4.7 15.3l1.4-1.4M13.9 6.1l1.4-1.4"/>')+'</span><span class="olme">나</span></div></div>'
+        +'<div class="oltabs"><span class="on">홈</span><span>보기</span><span>도움말</span></div>'
+        +'<div class="olcmd"><span class="olnew">'+I('<path d="M3 15.5V17h1.5L15 6.5 13.5 5z"/><path d="M12 6.5L13.5 8"/>')+'새 메일</span><i class="olsep"></i>'
+        +'<span>'+I('<path d="M4 6h12M8 6V4h4v2M5.5 6l.8 11h7.4l.8-11"/>')+'삭제</span><span>'+I('<rect x="3" y="4" width="14" height="4" rx="1"/><path d="M4.5 8v8h11V8M8 11h4"/>')+'보관</span><span>'+I('<path d="M10 3l7 13H3z"/><path d="M10 8v4M10 14v.5"/>')+'보고</span><i class="olsep"></i>'
+        +'<span>'+I('<path d="M8 5L3 10l5 5"/><path d="M3 10h8a6 6 0 016 6"/>')+'회신</span><span>'+I('<path d="M10 5l-5 5 5 5M6 5l-5 5 5 5"/><path d="M5 10h7a6 6 0 016 6"/>')+'전체 회신</span><span>'+I('<path d="M12 5l5 5-5 5"/><path d="M17 10H9a6 6 0 00-6 6"/>')+'전달</span><i class="olsep"></i>'
+        +'<span>'+I('<rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3.5 6l6.5 5 6.5-5"/>')+'읽음으로 표시</span><span class="olhide">'+I('<path d="M4 4h12v12H4z"/><path d="M4 8h12"/>')+'범주</span></div>';
     }else{
       bar.innerHTML='<div class="xltitle"><a href="'+ROOT+'" style="color:inherit;text-decoration:none">통합 문서1 - Excel</a><span style="float:right">—  </span></div>'
         +'<div class="xlribbon"><a href="'+ROOT+'" style="color:#333;font-weight:700;text-decoration:none">파일</a> &nbsp;<a href="'+ROOT+'" style="color:inherit;text-decoration:none">홈</a> &nbsp;삽입 &nbsp;페이지 레이아웃 &nbsp;수식 &nbsp;데이터 &nbsp;검토 &nbsp;보기</div>'

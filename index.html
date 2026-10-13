@@ -217,6 +217,64 @@
   .nrank{flex:0 0 28px;font-weight:800;font-size:17px;color:#217346;text-align:center;padding-top:9px}
   .nrank.top{color:#c0504d}
   [data-skin="mail"] .nrank{color:#0f6cbd}
+
+  /* ===== 새 Outlook 스타일 (메일 스킨) ===== */
+  [data-skin="mail"] body{background:#f0f0f0;background-image:none;font-family:"Segoe UI","맑은 고딕","Malgun Gothic",sans-serif}
+  [data-skin="mail"] .mailv{height:calc(100vh - 124px);background:#f0f0f0;gap:6px;padding:6px}
+  [data-skin="mail"] .mside{flex-basis:220px;background:transparent;border:0;padding:4px 0 0}
+  [data-skin="mail"] .msideHd{padding:8px 12px 4px;color:#242424;font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center}
+  [data-skin="mail"] .msideHd.acct{margin-top:10px;border-top:1px solid #e0e0e0;padding-top:12px}
+  [data-skin="mail"] .chev{font-size:9px;color:#616161}
+  [data-skin="mail"] .mfold{margin:1px 6px;padding:6px 10px 6px 14px;border-radius:4px;color:#242424;font-size:13px;border-left:0}
+  [data-skin="mail"] .mfold .fi{display:flex;align-items:center;gap:9px}
+  [data-skin="mail"] .mfold .fi svg{color:#616161;flex:0 0 auto}
+  [data-skin="mail"] .mfold:hover{background:#e6e6e6}
+  [data-skin="mail"] .mfold.on{background:#d6e4f5;color:#0f6cbd;font-weight:600;padding-left:14px;border-left:0;position:relative}
+  [data-skin="mail"] .mfold.on::before{content:"";position:absolute;left:3px;top:8px;bottom:8px;width:3px;border-radius:2px;background:#0f6cbd}
+  [data-skin="mail"] .mfold.on .fi svg{color:#0f6cbd}
+  [data-skin="mail"] .mfold .cnt{background:none;color:#0f6cbd;font-size:12px;font-weight:600;padding:0}
+  [data-skin="mail"] .mfold .cnt2{color:#616161;font-size:12px}
+  [data-skin="mail"] .mfold.dim{cursor:default}
+  [data-skin="mail"] .mpres{display:flex;align-items:center;gap:6px;padding:10px 14px 6px;color:#616161;font-size:12px}
+  [data-skin="mail"] .mpres .dot{width:8px;height:8px;border-radius:50%;background:#13a10e;display:inline-block}
+  [data-skin="mail"] .mskin{border:0;margin:0 6px;padding:6px 14px;border-radius:4px;font-size:12px}
+  [data-skin="mail"] .mskin:hover{background:#e6e6e6}
+  [data-skin="mail"] .mapps{display:flex;justify-content:space-around;border-top:1px solid #e0e0e0;margin-top:8px;padding:8px 6px 4px;color:#616161}
+  [data-skin="mail"] .mapps span{width:32px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:4px;cursor:pointer}
+  [data-skin="mail"] .mapps span:hover{background:#e6e6e6}[data-skin="mail"] .mapps span.on{color:#0f6cbd;background:#d6e4f5}
+  [data-skin="mail"] .mlist{background:#fff;border:1px solid #e0e0e0;border-radius:6px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  [data-skin="mail"] .mlhd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0;font-size:16px;font-weight:600;color:#242424}
+  [data-skin="mail"] .mltabs{display:flex;gap:14px;font-size:13px}
+  [data-skin="mail"] .mltabs b{font-weight:400;color:#616161;padding:4px 0;border-bottom:2px solid transparent;cursor:default}
+  [data-skin="mail"] .mltabs b.on{color:#242424;font-weight:600;border-bottom-color:#0f6cbd}
+  [data-skin="mail"] .mbar{background:#fff;border-bottom:1px solid #e0e0e0;padding:8px 12px}
+  [data-skin="mail"] .msearch{border-radius:4px;background:#f5f5f5;border:1px solid transparent;padding:5px 10px}
+  [data-skin="mail"] .msearch:focus{background:#fff;border-color:#0f6cbd;outline:0}
+  [data-skin="mail"] .mgrp{padding:10px 14px 4px;font-size:12px;font-weight:600;color:#424242;background:#fff;border-bottom:1px solid #f0f0f0}
+  [data-skin="mail"] .mitem{padding:10px 14px 10px 14px;border-bottom:1px solid #f0f0f0;position:relative}
+  [data-skin="mail"] .mitem:hover{background:#f5f5f5}
+  [data-skin="mail"] .mitem.on{background:#ebf3fc}
+  [data-skin="mail"] .mitem.on::before,[data-skin="mail"] .mitem.unread::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:#0f6cbd}
+  [data-skin="mail"] .mitem.unread .nmeta,[data-skin="mail"] .mitem.unread .mfrom{color:#242424;font-weight:600}
+  [data-skin="mail"] .mitem.unread .ntitle,[data-skin="mail"] .mitem.unread .msub{color:#0f6cbd;font-weight:600}
+  [data-skin="mail"] .mav{flex-basis:32px;width:32px;height:32px;font-size:13px;font-weight:600}
+  [data-skin="mail"] .nmeta{font-size:13px;color:#242424}
+  [data-skin="mail"] .ntitle{font-size:13px;font-weight:400;color:#242424;margin-top:1px}
+  [data-skin="mail"] .mprev{font-size:12px;color:#616161}
+  [data-skin="mail"] .nsort{background:#fff;padding:8px 14px}
+  [data-skin="mail"] .mread{background:#fff;border:1px solid #e0e0e0;border-radius:6px;box-shadow:0 1px 2px rgba(0,0,0,.05);padding:20px 28px}
+  [data-skin="mail"] .mread .remail-h{font-size:20px;font-weight:600;color:#242424;margin:6px 0 14px;line-height:1.35}
+  [data-skin="mail"] .rebar{gap:2px;padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid #f0f0f0}
+  [data-skin="mail"] .rebar button{border:0;background:none;color:#242424;border-radius:4px;padding:5px 10px}
+  [data-skin="mail"] .rebar button:hover{background:#f0f0f0}
+  [data-skin="mail"] .rehead{padding-bottom:14px;border-bottom:1px solid #f0f0f0}
+  [data-skin="mail"] .refrom{font-weight:600;color:#242424}
+  [data-skin="mail"] .remail-b{font-size:14px;color:#242424}
+  [data-skin="mail"] .mempty{color:#8a8886}
+  [data-skin="mail"] .roomhd{padding-bottom:10px;border-bottom:1px solid #f0f0f0;font-size:16px;font-weight:600}
+  [data-skin="mail"] .chatbox{border:1px solid #e0e0e0;border-radius:4px}
+  [data-skin="mail"] .mrez:hover{background:rgba(15,108,189,.25)}
+  @media(max-width:860px){[data-skin="mail"] .mailv{height:auto;padding:4px}[data-skin="mail"] .mside{flex-basis:auto}[data-skin="mail"] .msideHd,[data-skin="mail"] .mfold.dim,[data-skin="mail"] .mapps,[data-skin="mail"] .mlhd .mltabs{display:none}[data-skin="mail"] .mfold{margin:2px}}
 </style>
 </head>
 <body>
@@ -264,16 +322,22 @@
 </div>
 <div class="mailv" id="mailView">
   <div class="mside">
-    <div class="msideHd">폴더</div>
-    <div class="mfold on" data-f="inbox">받은 편지함 <span class="cnt">12</span></div>
-    <div class="mfold" data-f="news">뉴스</div>
-    <div class="mfold" data-f="board">게시판</div>
-    <div class="mfold" data-f="chat">회의 <span class="cnt" id="chatCnt" style="display:none"></span></div>
-    <div class="mfold" data-f="game">공유 파일</div>
-    <div class="mpres">접속 <span class="presN">·</span></div>
-    <div class="mskin" id="skinBtn2">엑셀 대시보드 보기</div><div class="mskin" id="wipe" style="color:#c0392b">내 기록·설정 삭제</div><div class="mrez" data-rz="side"></div>
+    <div class="msideHd"><span class="chev">▾</span> 즐겨찾기</div>
+    <div class="mfold on" data-f="inbox"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l2-7h10l2 7v5H3z"/><path d="M3 11h4l1 2h4l1-2h4"/></svg>받은 편지함</span><span class="cnt">12</span></div>
+    <div class="mfold" data-f="news"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="11" height="12" rx="1"/><path d="M14 7h3v8a1 1 0 01-2 0M6 7h5M6 10h5M6 13h3"/></svg>뉴스</span></div>
+    <div class="mfold" data-f="board"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="12" height="14" rx="1.5"/><path d="M7 7h6M7 10h6M7 13h4"/></svg>게시판</span></div>
+    <div class="mfold" data-f="chat"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="7" r="2.5"/><circle cx="13.5" cy="8" r="2"/><path d="M3 16c.5-3 2.3-4.5 4.5-4.5S11.5 13 12 16M12 12.5c1.9-.4 4 .6 4.6 3.5"/></svg>회의</span><span class="cnt" id="chatCnt" style="display:none"></span></div>
+    <div class="mfold" data-f="game"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a1 1 0 011-1h4l2 2h6a1 1 0 011 1v7a1 1 0 01-1 1H4a1 1 0 01-1-1z"/></svg>공유 파일</span></div>
+    <div class="msideHd acct"><span class="chev">▾</span> me@company.co.kr</div>
+    <div class="mfold dim"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l14-6-5 13-2.5-5.5z"/><path d="M9.5 11.5L17 4"/></svg>보낸 편지함</span></div>
+    <div class="mfold dim"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16V4h8l4 4v8z"/><path d="M12 4v4h4"/></svg>임시 보관함</span><span class="cnt2">3</span></div>
+    <div class="mfold dim"><span class="fi"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h12M8 6V4h4v2M5.5 6l.8 11h7.4l.8-11"/></svg>지운 편지함</span></div>
+    <div class="mpres"><i class="dot"></i>온라인 · 접속 <span class="presN">·</span></div>
+    <div class="mskin" id="skinBtn2">엑셀 대시보드 보기</div><div class="mskin" id="wipe" style="color:#c0392b">내 기록·설정 삭제</div>
+    <div class="mapps"><span class="on" title="메일"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3.5 6l6.5 5 6.5-5"/></svg></span><span title="일정"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v4M13 2v4"/></svg></span><span title="사람"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3"/><path d="M4 17c.6-3.4 3-5 6-5s5.4 1.6 6 5"/></svg></span><span title="할 일"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M7 10l2 2 4-4"/></svg></span></div>
+    <div class="mrez" data-rz="side"></div>
   </div>
-  <div class="mlist"><div class="mbar"><input class="msearch" id="msearch" placeholder="검색"><span class="mcmd" id="mrefresh">새로고침</span></div><div class="mitems" id="mitems"></div><div class="mrez" data-rz="list"></div></div>
+  <div class="mlist"><div class="mlhd"><span id="mlTitle">받은 편지함</span><span class="mltabs"><b class="on">중요</b><b>기타</b></span></div><div class="mbar"><input class="msearch" id="msearch" placeholder="검색"><span class="mcmd" id="mrefresh">새로고침</span></div><div class="mitems" id="mitems"></div><div class="mrez" data-rz="list"></div></div>
   <div class="mread" id="mread"></div>
 </div>
 <script>window.SITE_ROOT="./";</script>
@@ -518,7 +582,7 @@
     function row(o){return '<div class="mitem'+(o.unread?" unread":"")+'" '+(o.attr||"")+'>'+(o.noav?"":'<div class="mav" style="background:'+avColor(o.top)+'">'+esc(initial(o.top))+'</div>')+'<div class="mbody"><div class="mfrom">'+esc(o.top)+'<span class="md">'+esc(o.topR||"")+'</span></div><div class="msub">'+esc(o.sub)+'</div>'+(o.prev?'<div class="mprev">'+esc(o.prev)+'</div>':'')+'</div></div>'}
     function clk(cb){mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");cb(x)}})}
     function inbox(){mread.innerHTML='<div class="mempty">왼쪽에서 메일을 선택하세요.</div>';
-      mitems.innerHTML=FAKE.map(function(m,i){return '<div class="mitem'+(m.u?" unread":"")+'" data-k="'+i+'"><div class="mav" style="background:'+avColor(m.f)+'">'+esc(initial(m.f))+'</div><div class="mbody"><div class="nmeta">'+esc(m.f)+' · '+m.d+'</div><div class="ntitle">'+esc(m.s)+'</div><div class="mprev">'+esc(m.b.replace(/\n/g," ").slice(0,44))+'</div></div></div>'}).join("");
+      var lastG="";mitems.innerHTML=FAKE.map(function(m,i){var g=/오전|오후/.test(m.d)?"오늘":m.d==="어제"?"어제":"지난주",gh=g!==lastG?'<div class="mgrp">'+g+'</div>':"";lastG=g;return gh+'<div class="mitem'+(m.u?" unread":"")+'" data-k="'+i+'"><div class="mav" style="background:'+avColor(m.f)+'">'+esc(initial(m.f))+'</div><div class="mbody"><div class="nmeta">'+esc(m.f)+' · '+m.d+'</div><div class="ntitle">'+esc(m.s)+'</div><div class="mprev">'+esc(m.b.replace(/\n/g," ").slice(0,44))+'</div></div></div>'}).join("");
       clk(function(x){x.classList.remove("unread");var m=FAKE[+x.getAttribute("data-k")];
         mread.innerHTML='<div class="rebar"><button type="button">회신</button><button type="button">전체 회신</button><button type="button">전달</button><button type="button">삭제</button><button type="button">보관</button></div>'
           +'<div class="remail-h">'+esc(m.s)+'</div>'
@@ -606,10 +670,11 @@
     function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 파일을 선택하세요.</div>';
       mitems.innerHTML=items.map(function(t,i){var href=t.ext?t.url:("./"+t.path),ext=(fname(t).split(".").pop()||"xlsx");return row({top:"공유 드라이브",topR:ext.toUpperCase(),sub:fname(t),attr:'data-h="'+href+'" data-n="'+esc(fname(t))+'" title="'+esc(t.title)+'"'})}).join("");
       clk(function(x){var n=x.getAttribute("data-n");mread.innerHTML='<div class="attv"><div class="attbar"><span class="attic">'+(/docx$/.test(n)?"W":"X")+'</span><b>'+n+'</b><span class="attm">첨부파일 미리보기 · 읽기 전용</span></div><iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe></div>'})}
-    function setFold(f){if(f!=="chat"&&/[?&]room=/.test(location.search)){try{history.replaceState(null,"",location.pathname)}catch(e){}}folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});var se2=document.getElementById("msearch");if(se2)se2.placeholder=(f==="news"?"뉴스 검색":f==="board"?"게시판 검색":f==="chat"?"방 검색":f==="game"?"파일 검색":"메일 검색");
+    var FT={inbox:"받은 편지함",news:"뉴스",board:"게시판",chat:"회의",game:"공유 파일"};
+    function setFold(f){var tt=document.getElementById("mlTitle");if(tt)tt.textContent=FT[f]||"받은 편지함";if(f!=="chat"&&/[?&]room=/.test(location.search)){try{history.replaceState(null,"",location.pathname)}catch(e){}}folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});var se2=document.getElementById("msearch");if(se2)se2.placeholder=(f==="news"?"뉴스 검색":f==="board"?"게시판 검색":f==="chat"?"방 검색":f==="game"?"파일 검색":"메일 검색");
       if(f==="news")newsList();else if(f==="board")board();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
       var se=document.getElementById("msearch");if(se)se.value="";try{track("mail_fold",{f:f})}catch(e){}}
-    folds.forEach(function(x){x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
+    folds.forEach(function(x){if(!x.getAttribute("data-f"))return;x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
     var sb2=document.getElementById("skinBtn2");if(sb2)sb2.onclick=function(){store.set("skin","excel");location.reload()};
     var se=document.getElementById("msearch");if(se)se.addEventListener("input",function(){var q=this.value.trim().toLowerCase();mitems.querySelectorAll(".mitem").forEach(function(el){el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?"":"none"})});
     var mr=document.getElementById("mrefresh");if(mr)mr.onclick=function(){var on=document.querySelector("#mailView .mfold.on");setFold(on?on.getAttribute("data-f"):"inbox")};
