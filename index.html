@@ -350,6 +350,14 @@
   .ttopic{padding:7px 16px;background:#fff8e6;border-bottom:1px solid #f3e2b3;font-size:12px;color:#5c4400}.ttopic b{color:#835b00;margin-right:6px}
   .tact a{white-space:nowrap}
   .runread.muted{background:#a19f9d}
+
+  /* 반응 툴바/메뉴 잘림 수정: 남의 메시지는 왼쪽 기준(오른쪽으로 펼침), 내 메시지는 오른쪽 기준 */
+  .tops{left:0;right:auto;top:-22px}
+  .tmsg.me .tops{left:auto;right:0}
+  .tmenu{left:0;right:auto}
+  .tmsg.me .tmenu{left:auto;right:0}
+  .tbox{padding-top:26px}
+  .tmsg:first-child .tops{top:auto;bottom:-22px}
 </style>
 </head>
 <body>
