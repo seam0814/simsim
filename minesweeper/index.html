@@ -32,12 +32,12 @@
   .n1{color:#1565c0}.n2{color:#2e7d32}.n3{color:#c62828}.n4{color:#6a1b9a}.n5{color:#8d6e63}.n6{color:#00838f}.n7{color:#333}.n8{color:#777}
 </style>
 </head>
-<body>
+<body data-fx="=SUMPRODUCT(리스크*가중치)">
 <div class="wrap">
   <div id="site-header"></div>
   <div class="toolbar">
-    <span class="diff" id="diff"><button data-w="9" data-h="9" data-m="10" class="on">초급</button><button data-w="16" data-h="16" data-m="40">중급</button><button data-w="20" data-h="14" data-m="55">고급</button></span>
-    <span>판: <b id="size">9×9</b></span><span>지뢰: <b id="total">10</b></span><span>남은: <b id="mines">0</b></span><span>시간: <b id="time">0</b></span><span>상태: <b id="state">진행 중</b></span>
+    <span class="diff" id="diff"><button data-w="9" data-h="9" data-m="10" class="on" data-e="소">초급</button><button data-w="16" data-h="16" data-m="40" data-e="중">중급</button><button data-w="20" data-h="14" data-m="55" data-e="대">고급</button></span>
+    <span><span data-e="범위">판</span>: <b id="size">9×9</b></span><span><span data-e="리스크">지뢰</span>: <b id="total">10</b></span><span><span data-e="미확인">남은</span>: <b id="mines">0</b></span><span><span data-e="경과(초)">시간</span>: <b id="time">0</b></span><span>상태: <b id="state">진행 중</b></span>
     <button class="mini" id="restart">새로고침</button>
   </div>
   <div class="msscroll"><table class="sheet" id="board"></table></div>

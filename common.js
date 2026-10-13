@@ -1,5 +1,8 @@
 (function(){
   var ROOT=window.SITE_ROOT||"./";
+  // 대시보드(iframe) 안에서 열리면 업무 문서 모드: 작은 글씨 + 업무 용어(data-e)
+  var EMB=false;try{EMB=window.self!==window.top}catch(e){EMB=true}
+  window.EMB=EMB;if(EMB)document.documentElement.classList.add("embed");
   (function(){var l=document.createElement("link");l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family=Jua&display=swap";document.head.appendChild(l)})();
   var GA_ID="G-3WT6016LYF",CLARITY_ID="";
   if(GA_ID){var g=document.createElement("script");g.async=true;g.src="https://www.googletagmanager.com/gtag/js?id="+GA_ID;document.head.appendChild(g);window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag("js",new Date());gtag("config",GA_ID)}
@@ -24,6 +27,9 @@
   if(foot){foot.className="sitefoot";var links=ITEMS.map(function(t){var href=t.ext?t.url:ROOT+t.path;return '<a href="'+href+'">'+t.title+'</a>'}).join("");
     foot.appendChild(h('<div class="fnav">'+links+'</div>'));
     foot.appendChild(h('<div>재미로 즐겨요 · 특정인·회사 비방·개인정보 공유 금지(위반 시 작성자 책임) · <a href="'+ROOT+'privacy.html">개인정보처리방침</a></div>'))}
+  if(EMB){[].forEach.call(document.querySelectorAll("[data-e]"),function(el){el.textContent=el.getAttribute("data-e")});
+    var wr=document.querySelector(".wrap"),fx=document.body.getAttribute("data-fx");
+    if(wr&&fx)wr.insertBefore(h('<div class="ebar"><span class="nb">A1</span><span class="fxl">fx</span><span>'+fx+'</span></div>'),wr.firstChild)}
   var grid=document.getElementById("items");
   if(grid){
     function card(t){var href=t.ext?t.url:ROOT+t.path;var tgt=t.ext?' target="_blank" rel="noopener"':'';

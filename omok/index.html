@@ -60,21 +60,21 @@
     <div class="otoolbar">
       <span class="lv" id="lv"><button data-d="1">쉬움</button><button data-d="2" class="on">보통</button><button data-d="3">어려움</button></span>
       <span id="state">내 차례</span>
-      <button class="mini" id="restart">새 대국</button>
+      <button class="mini" id="restart" data-e="초기화">새 대국</button>
       <select id="bgsel" class="mini" style="padding:2px 4px"><option value="office">배경:일반사무</option><option value="sales">배경:영업</option><option value="dev">배경:개발/IT</option><option value="finance">배경:회계</option></select>
     </div>
     <div class="otoolbar" id="netbar">
-      <button class="mini on" id="mAI">AI 대국</button>
-      <button class="mini" id="mNet">친구 대전</button>
+      <button class="mini on" id="mAI" data-e="자동 검토">AI 대국</button>
+      <button class="mini" id="mNet" data-e="공동 편집">친구 대전</button>
       <span id="netctl" style="display:none">
-        <button class="mini" id="mkRoom">방 만들기</button>
+        <button class="mini" id="mkRoom" data-e="공유 링크 생성">방 만들기</button>
         <input id="roomCode" placeholder="코드" maxlength="6" style="width:66px;border:1px solid #d4d4d4;border-radius:3px;padding:2px 5px;font-size:11px">
         <button class="mini" id="joinRoom">참가</button>
         <button class="mini" id="copyRoom" style="display:none">링크복사</button>
       </span>
     </div>
     <table class="ob" id="board"></table>
-    <div style="font-size:10px;color:#999;margin-top:5px">제목줄을 끌어 이동 · Esc=업무화면</div>
+    <div class="hint" style="font-size:10px;color:#999;margin-top:5px">제목줄을 끌어 이동 · Esc=업무화면</div>
   </div>
 </div>
 <script>window.SITE_ROOT="../";</script>

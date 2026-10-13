@@ -82,3 +82,16 @@ details p{color:var(--muted);margin:.5em 0 0}
 #bossv .oltbl td.dt{width:74px;color:#999;font-size:12px;text-align:right}
 #bossv .oltbl tr.unread td.fr,#bossv .oltbl tr.unread td.sj{font-weight:700;color:#000}
 #bossv .oltbl tr:hover td{background:#f5faff}
+
+/* ===== 대시보드 안(iframe) 업무 문서 모드 ===== */
+html.embed body{font-size:12px}
+html.embed .wrap{max-width:none !important;padding:0 10px 16px;min-height:0;margin:0}
+html.embed #site-header,html.embed #site-footer,html.embed .copy,html.embed .disc,html.embed .hint,html.embed .noemb{display:none !important}
+html.embed .ebar{display:flex;gap:8px;align-items:center;margin:0 -10px;padding:3px 10px;background:#fff;border-bottom:1px solid var(--line);font-size:11px;color:#555}
+html.embed .ebar .nb{border:1px solid var(--line);padding:0 8px;color:#444;min-width:44px}
+html.embed .ebar .fxl{color:#999;font-style:italic}
+html.embed h1{font-size:13px !important;margin:0 -10px !important;padding:6px 10px;background:#eef6ef;color:#1b5e20 !important;border-bottom:1px solid var(--line);font-weight:700}
+html.embed p.sub{font-size:11px !important;margin:0 -10px 8px !important;padding:4px 10px;color:#666;border-bottom:1px solid var(--line);background:#fafafa}
+html.embed .card{border-radius:0;margin-top:6px;padding:10px}
+html.embed .btn{display:inline-block;width:auto;padding:4px 14px;font-size:12px;border-radius:2px;margin:8px 6px 0 0;font-weight:600}
+html.embed input{font-size:12px !important}

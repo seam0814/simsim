@@ -10,17 +10,25 @@
 <style>
   #pad{height:260px;border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-family:var(--head);font-size:1.4rem;text-align:center;user-select:none;transition:background .05s}
   .wait{background:#e5484d}.go{background:#1aa86a}.ready{background:#8a8f98}
+  .rlog{display:none}
+  html.embed #pad{height:120px;border-radius:0;font-family:var(--font);font-size:12px;border:1px solid #c6c6c6}
+  html.embed .wait{background:#ffeb9c;color:#9c5700}html.embed .go{background:#c6efce;color:#006100}html.embed .ready{background:#f3f3f3;color:#555}
+  html.embed #result{text-align:left !important;margin-top:6px !important;font-size:12px}
+  html.embed .rlog{display:table;border-collapse:collapse;margin-top:6px;font-size:12px}
+  html.embed .rlog th,html.embed .rlog td{border:1px solid var(--line);padding:2px 10px;height:21px;text-align:right}
+  html.embed .rlog th{background:var(--head);color:#666;font-weight:600;text-align:center}
 </style>
 </head>
-<body>
+<body data-fx="=AVERAGE(C3:C20)">
 <div class="wrap">
   <div id="site-header"></div>
-  <h1> 반응속도 테스트</h1>
-  <p class="sub">초록색으로 바뀌는 순간, 최대한 빨리 클릭(또는 탭)하세요!</p>
+  <h1 data-e="응답속도 측정결과">반응속도 테스트</h1>
+  <p class="sub" data-e="측정 셀이 녹색(양호)으로 바뀌면 즉시 클릭해 응답시간을 기록합니다.">초록색으로 바뀌는 순간, 최대한 빨리 클릭(또는 탭)하세요!</p>
   <div class="card">
     <div id="pad" class="ready">여기를 눌러 시작</div>
     <div id="result" style="text-align:center;margin-top:14px"></div>
-    <button class="btn sec" id="share" style="display:none"> 결과 공유</button>
+    <button class="btn sec noemb" id="share" style="display:none"> 결과 공유</button>
+    <table class="rlog" id="rlog"></table>
   </div>
   <div class="copy">
     <h2>등급 기준</h2>
@@ -34,17 +42,20 @@
 <script>
 (function(){
   var pad=document.getElementById("pad"),res=document.getElementById("result"),shareBtn=document.getElementById("share");
+  var E=!!window.EMB,T=E?{arm:"측정 대기 중… 녹색이 되면 클릭",go:"지금 클릭",early:"조기 입력 — 다시 측정하려면 클릭",again:"다시 측정하려면 클릭",start:"클릭하여 측정 시작"}:{arm:"초록색이 되면 클릭!",go:"지금 클릭!",early:"너무 빨라요! 다시 하려면 클릭",again:"다시 하려면 클릭"},n=0,log=document.getElementById("rlog");
+  if(E){pad.textContent=T.start;log.innerHTML="<tr><th>회차</th><th>응답(ms)</th><th>판정</th></tr>"}
   var state="ready",t0=0,timeout=null,best=parseInt(store.get("react_best","0"))||0;
-  function grade(ms){return ms<=200?"세계급 ":ms<=250?"매우 빠름 ":ms<=300?"평균 이상 ":ms<=400?"보통 ":"느긋 "}
+  function grade(ms){if(window.EMB)return ms<=200?"매우 우수":ms<=250?"우수":ms<=300?"양호":ms<=400?"보통":"미흡";return ms<=200?"세계급 ":ms<=250?"매우 빠름 ":ms<=300?"평균 이상 ":ms<=400?"보통 ":"느긋 "}
   function showBest(){res.innerHTML+=best?('<div style="color:var(--muted);margin-top:6px">최고 기록: '+best+'ms</div>'):""}
-  function arm(){state="wait";pad.className="pad wait";pad.textContent="초록색이 되면 클릭!";
-    timeout=setTimeout(function(){state="go";t0=performance.now();pad.className="pad go";pad.textContent="지금 클릭!";},900+Math.random()*2600);}
+  function arm(){state="wait";pad.className="pad wait";pad.textContent=T.arm;
+    timeout=setTimeout(function(){state="go";t0=performance.now();pad.className="pad go";pad.textContent=T.go;},900+Math.random()*2600);}
   pad.addEventListener("click",function(){
     if(state==="ready"){res.innerHTML="";shareBtn.style.display="none";arm();return}
-    if(state==="wait"){clearTimeout(timeout);state="ready";pad.className="pad ready";pad.textContent="너무 빨라요! 다시 하려면 클릭";return}
-    if(state==="go"){var ms=Math.round(performance.now()-t0);state="ready";pad.className="pad ready";pad.textContent="다시 하려면 클릭";
+    if(state==="wait"){clearTimeout(timeout);state="ready";pad.className="pad ready";pad.textContent=T.early;return}
+    if(state==="go"){var ms=Math.round(performance.now()-t0);state="ready";pad.className="pad ready";pad.textContent=T.again;
       var isBest=!best||ms<best;if(isBest){best=ms;store.set("react_best",best)}
-      res.innerHTML='<div style="font-size:2.2rem;font-family:var(--head);color:var(--accent)">'+ms+'ms</div><div>'+grade(ms)+(isBest?' · 신기록! ':'')+'</div>';showBest();
+      if(E){n++;var tr=document.createElement("tr");tr.innerHTML="<td>"+n+"</td><td>"+ms+"</td><td>"+grade(ms).trim()+(isBest?" (최고)":"")+"</td>";log.appendChild(tr);res.innerHTML="최근 "+ms+"ms · 최고 "+best+"ms"}
+      else{res.innerHTML='<div style="font-size:2.2rem;font-family:var(--head);color:var(--accent)">'+ms+'ms</div><div>'+grade(ms)+(isBest?' · 신기록! ':'')+'</div>';showBest();}
       track("reaction",{ms:ms});shareBtn.style.display="block";shareBtn.onclick=function(){shareCard({emoji:"",title:ms+"ms",lines:[grade(ms),"반응속도 테스트"],share:"내 반응속도 "+ms+"ms ("+grade(ms)+")! 너도 해봐"})};
     }
   });
