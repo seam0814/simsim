@@ -381,8 +381,9 @@
   /* ===== Firebase (좋아요/댓글) ===== */
   var DB=null;
   function startPresence(){try{var sid=Math.random().toString(36).slice(2),ref=DB.collection("stats").doc("presence"),els=document.querySelectorAll(".presN");
-    function beat(){DB.runTransaction(function(tx){return tx.get(ref).then(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now();u[sid]=now;Object.keys(u).forEach(function(k){if(now-u[k]>600000)delete u[k]});tx.set(ref,{k:"presence",u:u},{merge:true})})}).catch(function(){})}
+    function beat(){DB.runTransaction(function(tx){return tx.get(ref).then(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now();u[sid]=now;Object.keys(u).forEach(function(k){if(now-u[k]>600000)delete u[k]});tx.set(ref,{k:"presence",u:u})})}).catch(function(){})}
     beat();setInterval(beat,30000);
+    window.addEventListener("pagehide",function(){try{var o={};o["u."+sid]=firebase.firestore.FieldValue.delete();ref.update(o)}catch(e){}});
     ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});els.forEach(function(e){e.textContent=(cc||1)+"명"})},function(){})}catch(e){}}
   (function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();startPresence();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
   function hashLink(l){var h=0;for(var i=0;i<l.length;i++){h=(h*31+l.charCodeAt(i))|0}return "N"+(h>>>0)}
