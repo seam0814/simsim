@@ -148,6 +148,8 @@
   .mside{flex:0 0 190px;background:#faf9f8;border-right:1px solid #e1dfdd;display:flex;flex-direction:column;padding:6px 0;font-size:13px;position:relative}
   .msideHd{padding:6px 14px;color:#999;font-size:11px}
   .mfold{padding:8px 14px;color:#333;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  #toast{position:fixed;right:16px;bottom:16px;z-index:9000;background:#fff;border:1px solid #c8c8c8;border-left:4px solid #0f6cbd;box-shadow:0 4px 14px rgba(0,0,0,.15);padding:9px 14px;font-size:12px;color:#333;max-width:280px;cursor:pointer;transform:translateY(140%);transition:transform .25s}
+  #toast.on{transform:none}#toast b{display:block;font-size:12px;margin-bottom:2px;color:#0f6cbd}
   .mfold:hover{background:#f0f0f0}
   .mfold.on{background:#eaf2fb;color:#0f6cbd;font-weight:700;border-left:3px solid #0f6cbd;padding-left:11px}
   .mfold .cnt{background:#0f6cbd;color:#fff;border-radius:9px;font-size:10px;padding:0 6px;font-weight:700}
@@ -262,7 +264,7 @@
     <div class="mfold on" data-f="inbox">받은 편지함 <span class="cnt">12</span></div>
     <div class="mfold" data-f="news">뉴스</div>
     <div class="mfold" data-f="board">게시판</div>
-    <div class="mfold" data-f="chat">회의</div>
+    <div class="mfold" data-f="chat">회의 <span class="cnt" id="chatCnt" style="display:none"></span></div>
     <div class="mfold" data-f="game">공유 파일</div>
     <div class="mpres">접속 <span class="presN">·</span></div>
     <div class="mskin" id="skinBtn2">엑셀 대시보드 보기</div><div class="mskin" id="wipe" style="color:#c0392b">내 기록·설정 삭제</div><div class="mrez" data-rz="side"></div>
@@ -386,7 +388,16 @@
     function beat(){DB.runTransaction(function(tx){return tx.get(ref).then(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now();u[sid]=now;Object.keys(u).forEach(function(k){if(now-u[k]>600000)delete u[k]});tx.set(ref,{k:"presence",u:u})})}).catch(function(){})}
     beat();setInterval(beat,30000);
     window.addEventListener("pagehide",function(){try{var o={};o["u."+sid]=firebase.firestore.FieldValue.delete();ref.update(o)}catch(e){}});
-    ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});els.forEach(function(e){e.textContent=(cc||1)+"명"})},function(){})}catch(e){}}
+    var prevC=-1;ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});cc=cc||1;els.forEach(function(e){e.textContent=cc+"명"});
+      var fb=document.getElementById("chatCnt");if(fb){fb.textContent=cc>1?cc+"명":"";fb.style.display=cc>1?"":"none"}
+      if(prevC>0&&cc>prevC)toast("새 참석자","전체 휴게실에 1명이 들어왔어요 (현재 "+cc+"명)");prevC=cc},function(){})}catch(e){}}
+  function toast(t,b){var el=document.getElementById("toast");if(!el){el=document.createElement("div");el.id="toast";document.body.appendChild(el)}
+    el.innerHTML='<b>'+esc(t)+'</b><div>'+esc(b)+'</div>';el.className="on";clearTimeout(el._t);el._t=setTimeout(function(){el.className=""},4500);
+    el.onclick=function(){el.className="";var f=document.querySelector('#mailView .mfold[data-f="chat"]');if(document.documentElement.getAttribute("data-skin")==="mail"&&f)f.click()}}
+  window.__toast=toast;var myMsgAt=0,firstLobby=true;
+  window.addEventListener("lobbymsg",function(e){var m=e.detail||{};if(firstLobby){firstLobby=false;return}
+    if(m.name===store.get("nick",""))return;var inChat=document.querySelector('#mailView .mfold.on[data-f="chat"]');
+    if(document.documentElement.getAttribute("data-skin")==="mail"&&!inChat)toast(m.name||"익명",String(m.text||"").slice(0,40))});
   (function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();startPresence();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
   function hashLink(l){var h=0;for(var i=0;i<l.length;i++){h=(h*31+l.charCodeAt(i))|0}return "N"+(h>>>0)}
   var cmtUnsub=null,likeUnsub=null;
@@ -528,7 +539,7 @@
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
     var CURROOM=null,roomUnsub=null,rpInt=null,rpUnsub=null;
     function mySid(){var s=store.get("sid","");if(!s){s="s"+Math.random().toString(36).slice(2);store.set("sid",s)}return s}
-    var PRESET=[{id:"free",name:"자유수다",desc:"아무 얘기나 편하게",cap:4},{id:"job",name:"이직·연봉 토크",desc:"연봉·이직·면접 정보",cap:4},{id:"work",name:"직장생활 고민",desc:"상사·동료·업무 고민",cap:4},{id:"money",name:"재테크·주식",desc:"투자·부동산·코인",cap:4},{id:"love",name:"연애·결혼",desc:"썸·연애·결혼 수다",cap:4},{id:"lunch",name:"점심·맛집",desc:"오늘 뭐 먹지",cap:4},{id:"oneone",name:"1:1 고민상담",desc:"단둘이 조용히",cap:2}];
+    var PRESET=[{id:"lobby",name:"전체 휴게실",desc:"모두 여기서 · 점심 12~1시가 제일 북적여요",cap:50},{id:"oneone",name:"1:1 고민상담",desc:"단둘이 조용히",cap:2}];
     function nickGet(){var n=store.get("nick","");if(!n){n="익명"+Math.floor(Math.random()*9000+1000);store.set("nick",n)}return n}
     function pinHash(p){var h=0,i;for(i=0;i<p.length;i++)h=(h*31+p.charCodeAt(i))|0;return "h"+(h>>>0)}
     function refreshNick(){var el=document.getElementById("setNick");if(el)el.textContent=store.get("nick","")}
@@ -569,11 +580,13 @@
     function chat(){mread.innerHTML='<div class="mempty">왼쪽에서 방을 선택하세요.</div>';
       function render(extra){var rooms=PRESET.concat(extra||[]);
         mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><span class="ns" id="newRoom" style="margin-left:auto">+ 방 만들기</span></div>'
-          +rooms.map(function(r){var cp=r.cap||4;return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'" data-cap="'+cp+'"><div class="mbody"><div class="mfrom">'+esc(r.name)+' <span class="md">'+(cp===2?"1:1":cp+"인")+'</span></div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
+          +rooms.map(function(r){var cp=r.cap||4;return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'" data-cap="'+cp+'"><div class="mbody"><div class="mfrom">'+esc(r.name)+' <span class="md rcount" data-r="'+esc(r.id)+'">'+(cp===2?"1:1":"")+'</span></div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
+        rooms.forEach(function(r){if(!DB)return;DB.collection("stats").doc("rpres_"+r.id).get().then(function(dc){var u=(dc.exists&&dc.data().u)||{},n=0,now=Date.now();for(var k in u)if(now-u[k]<45000)n++;
+          var el=mitems.querySelector('.rcount[data-r="'+r.id+'"]');if(el&&n)el.innerHTML='<b style="color:#107c41">'+n+'명 대화 중</b>'}).catch(function(){})});
         mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){enterRoom(x.getAttribute("data-room"),x.getAttribute("data-name"),+x.getAttribute("data-cap")||4)}});
         var nr=document.getElementById("newRoom");if(nr)nr.onclick=function(e){e.stopPropagation();createRoom()};}
       render([]);
-      if(DB){DB.collection("stats").where("k","==","room").get().then(function(q){var ex=[];q.forEach(function(dc){var m=dc.data();if(m.name)ex.push({id:m.rid||dc.id,name:m.name,desc:m.desc||"",cap:m.cap||4})});if(ex.length)render(ex)}).catch(function(){})}}
+      if(DB){DB.collection("stats").where("k","==","room").get().then(function(q){var ex=[];q.forEach(function(dc){var m=dc.data();if(m.name&&m.ts&&m.ts.seconds*1000>Date.now()-86400000)ex.push({id:m.rid||dc.id,name:m.name,desc:m.desc||"",cap:m.cap||4})});if(ex.length)render(ex)}).catch(function(){})}}
     function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 파일을 선택하세요.</div>';
       mitems.innerHTML=items.map(function(t,i){var href=t.ext?t.url:("./"+t.path),ext=(fname(t).split(".").pop()||"xlsx");return row({top:"공유 드라이브",topR:ext.toUpperCase(),sub:fname(t),attr:'data-h="'+href+'" data-n="'+esc(fname(t))+'" title="'+esc(t.title)+'"'})}).join("");
       clk(function(x){var n=x.getAttribute("data-n");mread.innerHTML='<div class="attv"><div class="attbar"><span class="attic">'+(/docx$/.test(n)?"W":"X")+'</span><b>'+n+'</b><span class="attm">첨부파일 미리보기 · 읽기 전용</span></div><iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe></div>'})}

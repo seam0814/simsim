@@ -69,17 +69,18 @@
   }
   function lounge(db){
     var nick=store.get("nick","")||("익명"+Math.floor(Math.random()*9999));store.set("nick",nick);
-    loungeEl.innerHTML='<div class="cat"> 사무실 휴게실 <span style="font-weight:400;color:var(--muted);font-size:.8rem">(익명·누구나)</span></div>'
+    loungeEl.innerHTML='<div class="cat"> 전체 휴게실 <span style="font-weight:400;color:var(--muted);font-size:.8rem">(익명·누구나)</span></div>'
       +'<div class="chatbox" id="cbox"></div>'
       +'<form id="cform" class="chatform"><input id="cnick" maxlength="12" value="'+esc(nick)+'"><input id="cmsg" maxlength="200" placeholder="메시지 입력"><button class="btn" type="submit">전송</button></form>';
     db.collection("lounge").orderBy("createdAt").limitToLast(50).onSnapshot(function(q){
-      var h="";q.forEach(function(d){var m=d.data();var tm="";try{if(m.createdAt&&m.createdAt.toDate){var dd=m.createdAt.toDate();tm=("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)}}catch(e){}h+='<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+(tm?'<span class="ctime">'+tm+'</span>':"")+'</div>'});
+      var h="",last=null;q.forEach(function(d){var m=d.data();if(m.room&&m.room!=="lobby")return;last=m;var tm="";try{if(m.createdAt&&m.createdAt.toDate){var dd=m.createdAt.toDate();tm=("0"+dd.getHours()).slice(-2)+":"+("0"+dd.getMinutes()).slice(-2)}}catch(e){}h+='<div class="cmsg"><b>'+esc(m.name||"익명")+'</b> '+esc(m.text)+(tm?'<span class="ctime">'+tm+'</span>':"")+'</div>'});
       var box=document.getElementById("cbox");if(box){box.innerHTML=h||'<p class="disc">첫 메시지를 남겨보세요 </p>';box.scrollTop=box.scrollHeight}
+      if(last)try{window.dispatchEvent(new CustomEvent("lobbymsg",{detail:last}))}catch(e){}
     },function(){});
     document.getElementById("cform").addEventListener("submit",function(e){e.preventDefault();
       var msg=(document.getElementById("cmsg").value||"").trim();if(!msg)return;
       var nm=(document.getElementById("cnick").value||"익명").trim().slice(0,12)||"익명";store.set("nick",nm);
-      db.collection("lounge").add({name:nm,text:clean(msg).slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+      db.collection("lounge").add({room:"lobby",name:nm,text:clean(msg).slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
       document.getElementById("cmsg").value="";track("lounge_msg");
     });
   }
