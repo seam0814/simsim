@@ -102,7 +102,8 @@
     .colhdr .c:nth-child(n+8){display:none}
   }
   .creader{background-image:linear-gradient(#eef2ee 1px,transparent 1px),linear-gradient(90deg,#eef2ee 1px,transparent 1px);background-size:64px 24px}
-  .creader .rsum{font-size:14px;line-height:1.7;color:#333;background:rgba(255,255,255,.9);border-left:3px solid var(--sel);padding:10px 14px;margin-bottom:14px}
+  .creader .rsum,#mread .rsum{font-size:15px;line-height:1.85;color:#2b2b2b;background:rgba(255,255,255,.95);border-left:3px solid var(--sel);padding:14px 18px;margin-bottom:16px;max-width:680px;word-break:keep-all;letter-spacing:-.1px}
+  .rsum p{margin:0 0 12px}.rsum p:last-child{margin-bottom:0}.rsum p:first-child{font-weight:600;color:#1a1a1a}
   .creader .rsum.muted{color:#aaa;border-color:#ccc}
   .cmt{position:relative}
   .cmt .clk{float:right;border:1px solid var(--line);background:#fff;color:#c0392b;font-size:11px;padding:1px 7px;cursor:pointer}
@@ -387,7 +388,8 @@
   function viaR(u){var k=RSS_KEY?("&api_key="+RSS_KEY):"";return timed(fetch("https://api.rss2json.com/v1/api.json?rss_url="+encodeURIComponent(u)+"&count=16"+k).then(function(r){return r.json()}),9000).then(function(d){if(!d||d.status!=="ok"||!d.items||!d.items.length)throw 0;return d.items.map(function(x){return{title:x.title,link:x.link,pubDate:x.pubDate,desc:x.description}})})}
   function viaA(u){return timed(fetch("https://api.allorigins.win/get?url="+encodeURIComponent(u)).then(function(r){return r.json()}),13000).then(function(d){var xml=new DOMParser().parseFromString(d.contents,"text/xml"),its=xml.querySelectorAll("item");if(!its.length)throw 0;var a=[];its.forEach(function(it){a.push({title:(it.querySelector("title")||{}).textContent,link:(it.querySelector("link")||{}).textContent,pubDate:(it.querySelector("pubDate")||{}).textContent,desc:(it.querySelector("description")||{}).textContent})});return a})}
   function get(u){return viaR(u).catch(function(){return viaA(u)})}
-  function fetchNews(){return fetch("./news.json?t="+Math.floor(Date.now()/60000)).then(function(r){return r.json()}).then(function(d){if(!d||!d.items||!d.items.length)throw 0;return d}).catch(function(){return Promise.all(FEEDS.map(function(ff){return get(ff.u).then(function(ls){return ls.map(function(it){it.src=ff.s;return it})}).catch(function(){return[]})})).then(function(res){var all=[],seen={};res.forEach(function(ls){ls.forEach(function(it){if(it&&it.link&&!seen[it.link]){seen[it.link]=1;all.push(it)}})});all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});return {items:all,hot:[]}})})}
+  function fetchNews(){return fetch("./news.json?t="+Math.floor(Date.now()/60000)).then(function(r){return r.json()}).then(function(d){if(!d||!d.items||!d.items.length)throw 0;if(Date.now()-new Date(d.updated)>7200000)return liveNews().then(function(lv){if(!lv.items.length)return d;var seen={};lv.items.forEach(function(x){seen[x.link]=1});lv.items=lv.items.concat(d.items.filter(function(x){return !seen[x.link]}));lv.hot=d.hot||[];return lv},function(){return d});return d}).catch(liveNews)}
+  function liveNews(){return Promise.all(FEEDS.map(function(ff){return get(ff.u).then(function(ls){return ls.map(function(it){it.src=ff.s;return it})}).catch(function(){return[]})})).then(function(res){var all=[],seen={};res.forEach(function(ls){ls.forEach(function(it){if(it&&it.link&&!seen[it.link]){seen[it.link]=1;all.push(it)}})});all.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});return {items:all,hot:[]}})}
   function catLabel(c){return ({"종합":"종합","경제":"경제","IT산업":"IT·산업","스포츠":"스포츠","연예":"연예","세계":"세계"})[c]||c||""}
   function getClicks(){if(!DB)return Promise.resolve({});return DB.collection("stats").doc("newsclicks").get().then(function(d){return (d.exists&&d.data().c)||{}}).catch(function(){return {}})}
   function bumpClick(link){try{if(!DB||!link)return;var o={};o[hashLink(link)]=firebase.firestore.FieldValue.increment(1);DB.collection("stats").doc("newsclicks").set({c:o},{merge:true}).catch(function(){})}catch(e){}}
@@ -422,9 +424,12 @@
     var S=[{n:"퇴근하고파",t:"이거 실화냐 ㄷㄷ",l:42},{n:"익명의직장인",t:"아침부터 이런 뉴스라니...",l:31},{n:"김대리",t:"회사에서 몰래 보는 중 ㅋㅋ",l:25},{n:"5년차이직각",t:"남 일 같지 않네요 하...",l:14},{n:"점심뭐먹지",t:"그래서 결론이 뭔데요",l:6}];
     S.sort(function(a,b){return b.l-a.l});if(nEl)nEl.textContent=S.length;
     if(box)box.innerHTML=S.map(function(m,i){return '<div class="cmt'+(i===0?" best":"")+'">'+(i===0?'<span class="besttag">BEST</span>':"")+'<b>'+esc(m.n)+'</b>'+esc(m.t)+'<button class="clk" type="button">▲ '+m.l+'</button></div>'}).join("")+'<div class="rnote" style="color:#c0392b">※ 미리보기(샘플) 데이터 — 실제 사용자 반응 아님. ?demo=0 으로 끄기.</div>';}
+  function paras(t){var ss=t.replace(/([다요죠음함됨까]\.)\s*(?=[가-힣0-9"“'‘(\[A-Z])/g,"$1\n").replace(/([!?…]|\.(?=\s+["“'‘(\[가-힣A-Z]))\s+/g,"$1\n").split("\n"),out=[],cur="";
+    ss.forEach(function(x){x=x.trim();if(!x)return;cur=cur?cur+" "+x:x;if(cur.length>=110){out.push(cur);cur=""}});if(cur)out.push(cur);
+    return out.map(function(x){return "<p>"+esc(x)+"</p>"}).join("")}
   function articleHTML(it){var sum=stripTags(it.desc);if(sum.length>600)sum=sum.slice(0,600)+"…";
     return '<div class="rtitle">'+esc(it.title)+'</div><div class="rmeta">'+(it.src?esc(it.src)+" · ":"")+ago(it.pubDate)+'</div>'
-      +(sum?'<div class="rsum">'+esc(sum)+'</div>':'<div class="rsum muted">이 기사는 요약이 제공되지 않아요. 원문에서 확인하세요.</div>')
+      +(sum?'<div class="rsum">'+paras(sum)+'</div>':'<div class="rsum muted">이 기사는 요약이 제공되지 않아요. 원문에서 확인하세요.</div>')
       +'<div class="ract"><a class="rorig" href="'+esc(it.link)+'" target="_blank" rel="noopener">원문 전체 보기 ↗</a><button class="likebtn" id="lk">추천 <span id="lkc">·</span></button></div>'
       +'<div class="rrel-h">댓글 <span id="cmtn">0</span></div><div class="cmtbox" id="cmtbox"><div class="rnote">첫 댓글을 남겨보세요.</div></div>'
       +'<form class="cmtform" id="cmtf"><input class="nk" id="cnk" maxlength="12" placeholder="닉네임"><input id="cmi" maxlength="200" placeholder="댓글 달기"><button type="submit">등록</button></form>'
