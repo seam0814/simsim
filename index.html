@@ -554,17 +554,20 @@
     function createRoom(){var name=prompt("방 제목(2~16자)");if(!name)return;name=name.trim().slice(0,16);if(name.length<2)return;var desc=(prompt("방 설명(선택, 40자)")||"").slice(0,40);
       var capS=prompt("정원: 2 = 1:1, 4 = 4인","4");var cap=(capS&&capS.trim()==="2")?2:4;
       var rid="r"+Date.now().toString(36);if(DB)DB.collection("stats").add({k:"room",rid:rid,name:name,desc:desc,cap:cap,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});enterRoom(rid,name,cap);}
-    function enterRoom(rid,name,cap){cap=cap||4;CURROOM=rid;mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
+    function roomURL(rid){return location.origin+location.pathname+"?room="+encodeURIComponent(rid)}
+    function enterRoom(rid,name,cap){cap=cap||4;CURROOM=rid;try{history.replaceState(null,"",roomURL(rid))}catch(e){}mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
       if(rpInt){clearInterval(rpInt);rpInt=null}if(rpUnsub){rpUnsub();rpUnsub=null}
       var sid=mySid(),pref=DB?DB.collection("stats").doc("rpres_"+rid):null;
       function cnt(u){var n=0,now=Date.now();for(var k in u){if(now-u[k]<45000)n++}return n}
       function beat(){if(!pref)return;var o={};o[sid]=Date.now();pref.set({u:o},{merge:true}).catch(function(){})}
       function render(){
-        mread.innerHTML='<div class="roomhd"><b>'+esc(name)+'</b><span class="roomnick">정원 <span id="roomcap">?/'+cap+'</span> · 닉 <a id="setNick">'+esc(nickGet())+'</a></span></div>'
+        mread.innerHTML='<div class="roomhd"><b>'+esc(name)+'</b><span class="roomnick"><a id="rLink">링크 복사</a> · 정원 <span id="roomcap">?/'+cap+'</span> · 닉 <a id="setNick">'+esc(nickGet())+'</a></span></div>'
           +'<div class="chatbox" id="rbox"><div class="rnote">첫 메시지를 남겨보세요. (익명·공개)</div></div>'
           +'<form class="chatform" id="rform"><input id="rmsg" maxlength="200" placeholder="메시지 입력 (Enter 전송)"><button class="btn" type="submit">전송</button></form>'
           +'<div class="rnote" style="font-size:11px;margin-top:6px">특정인·회사 비방, 개인정보 공유 금지 · <a id="rReport">신고</a></div>';
         document.getElementById("setNick").onclick=claimNick;
+        document.getElementById("rLink").onclick=function(){var u=roomURL(rid),a=this;function ok(){a.textContent="복사됨!";setTimeout(function(){a.textContent="링크 복사"},1500)}
+          try{navigator.clipboard.writeText(u).then(ok,function(){prompt("이 링크를 복사해서 보내세요",u)})}catch(e){prompt("이 링크를 복사해서 보내세요",u)}};
         document.getElementById("rReport").onclick=function(){if(DB)DB.collection("stats").add({k:"report",room:rid,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});alert("신고가 접수되었어요.")};
         document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(document.getElementById("rmsg").value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return}
           DB.collection("lounge").add({room:rid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});document.getElementById("rmsg").value="";try{track("room_msg")}catch(ee){}};
@@ -590,7 +593,7 @@
     function gameList(){mread.innerHTML='<div class="mempty">왼쪽에서 파일을 선택하세요.</div>';
       mitems.innerHTML=items.map(function(t,i){var href=t.ext?t.url:("./"+t.path),ext=(fname(t).split(".").pop()||"xlsx");return row({top:"공유 드라이브",topR:ext.toUpperCase(),sub:fname(t),attr:'data-h="'+href+'" data-n="'+esc(fname(t))+'" title="'+esc(t.title)+'"'})}).join("");
       clk(function(x){var n=x.getAttribute("data-n");mread.innerHTML='<div class="attv"><div class="attbar"><span class="attic">'+(/docx$/.test(n)?"W":"X")+'</span><b>'+n+'</b><span class="attm">첨부파일 미리보기 · 읽기 전용</span></div><iframe referrerpolicy="no-referrer" src="'+x.getAttribute("data-h")+'"></iframe></div>'})}
-    function setFold(f){folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});var se2=document.getElementById("msearch");if(se2)se2.placeholder=(f==="news"?"뉴스 검색":f==="board"?"게시판 검색":f==="chat"?"방 검색":f==="game"?"파일 검색":"메일 검색");
+    function setFold(f){if(f!=="chat"&&/[?&]room=/.test(location.search)){try{history.replaceState(null,"",location.pathname)}catch(e){}}folds.forEach(function(x){x.classList.toggle("on",x.getAttribute("data-f")===f)});var se2=document.getElementById("msearch");if(se2)se2.placeholder=(f==="news"?"뉴스 검색":f==="board"?"게시판 검색":f==="chat"?"방 검색":f==="game"?"파일 검색":"메일 검색");
       if(f==="news")newsList();else if(f==="board")board();else if(f==="chat")chat();else if(f==="game")gameList();else inbox();
       var se=document.getElementById("msearch");if(se)se.value="";try{track("mail_fold",{f:f})}catch(e){}}
     folds.forEach(function(x){x.addEventListener("click",function(){setFold(x.getAttribute("data-f"))})});
@@ -611,7 +614,12 @@
     if(msideEl)mdrag(msideEl,"mside_w",140,320);
     if(mlistEl)mdrag(mlistEl,"mlist_w",260,620);
     var wp=document.getElementById("wipe");if(wp)wp.onclick=function(){if(confirm("이 기기에 저장된 닉네임·설정·좋아요/추천 기록을 모두 삭제할까요?")){try{Object.keys(localStorage).forEach(function(k){if(k.indexOf("ss_")===0)localStorage.removeItem(k)})}catch(e){}location.reload()}};
-    setFold("inbox");
+    var deep=(location.search.match(/[?&]room=([^&]+)/)||[])[1];
+    if(deep){deep=decodeURIComponent(deep);setFold("chat");
+      (function go(n){if(!DB&&n>0)return setTimeout(function(){go(n-1)},300);
+        var pr=PRESET.filter(function(r){return r.id===deep})[0];if(pr||!DB){enterRoom(deep,pr?pr.name:"대화방",pr?pr.cap:4);return}
+        DB.collection("stats").where("rid","==",deep).get().then(function(q){var m=null;q.forEach(function(d){m=d.data()});enterRoom(deep,(m&&m.name)||"대화방",(m&&m.cap)||4)}).catch(function(){enterRoom(deep,"대화방",4)})})(30)}
+    else setFold("inbox");
   })();
 
 })();
