@@ -53,12 +53,12 @@
   /* 가운데 뉴스 리더 */
   .creader{flex:1;overflow:auto;padding:16px 20px;background:#fff;display:none}
   .creader.on{display:block}
-  .creader .rtitle{font-size:18px;font-weight:700;line-height:1.45;color:#1c2b1c}
-  .creader .rmeta{font-size:12px;color:#8a8f98;margin:7px 0 14px;border-bottom:1px solid var(--line);padding-bottom:12px}
-  .creader .ract{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
-  .creader .rorig{display:inline-block;background:var(--sel);color:#fff;text-decoration:none;padding:8px 16px;font-size:13px;font-weight:700}
-  .creader .likebtn{cursor:pointer;border:1px solid var(--line);background:#fff;color:#c0392b;font-size:13px;padding:7px 14px;font-weight:700}
-  .creader .likebtn.done{background:#fdeeee}
+  .creader .rtitle,.mread .rtitle{font-size:18px;font-weight:700;line-height:1.45;color:#1c2b1c}
+  .creader .rmeta,.mread .rmeta{font-size:12px;color:#8a8f98;margin:7px 0 14px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .creader .ract,.mread .ract{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .creader .rorig,.mread .rorig{display:inline-block;background:var(--sel);color:#fff;text-decoration:none;padding:8px 16px;font-size:13px;font-weight:700}
+  .creader .likebtn,.mread .likebtn{cursor:pointer;border:1px solid var(--line);background:#fff;color:#c0392b;font-size:13px;padding:7px 14px;font-weight:700}
+  .creader .likebtn.done,.mread .likebtn.done{background:#fdeeee}
   .rrel-h{font-size:12px;font-weight:700;color:#1b5e20;border-left:3px solid var(--sel);padding-left:7px;margin:18px 0 6px}
   .rrel a{display:block;font-size:12.5px;color:#245;text-decoration:none;padding:5px 0;border-bottom:1px solid #f0f0f0;line-height:1.4}
   .rrel a:hover{color:#217346}
@@ -103,6 +103,12 @@
   }
   .creader{background-image:linear-gradient(#eef2ee 1px,transparent 1px),linear-gradient(90deg,#eef2ee 1px,transparent 1px);background-size:64px 24px}
   .creader .rsum,#mread .rsum{font-size:15px;line-height:1.85;color:#2b2b2b;background:rgba(255,255,255,.95);border-left:3px solid var(--sel);padding:14px 18px;margin-bottom:16px;max-width:680px;word-break:keep-all;letter-spacing:-.1px}
+  .bitem{padding:12px 0;border-bottom:1px dashed var(--line)}.bitem:last-of-type{border-bottom:0}
+  .btag{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--sel);padding:1px 7px;margin-right:6px;vertical-align:1px}
+  .bh{font-size:15px;font-weight:700;color:#1a1a1a}.bt{font-size:14.5px;line-height:1.8;color:#333;margin:6px 0 4px;word-break:keep-all}
+  .btip{font-size:13px;color:#555;background:#f4f7f4;padding:5px 10px;border-left:2px solid #9ab89a}.bsrc{font-size:12px;color:#8a8f98;margin-top:5px}.bsrc a{color:#5b7fa6;margin-right:8px}
+  .blead{font-size:14px;color:#444;margin:0 0 6px;line-height:1.7}
+  .nitem.brief .nt,.mitem.brief .ntitle{font-weight:700}.nitem.brief .ni{color:var(--sel);font-weight:700}
   .rsum p{margin:0 0 12px}.rsum p:last-child{margin-bottom:0}.rsum p:first-child{font-weight:600;color:#1a1a1a}
   .creader .rsum.muted{color:#aaa;border-color:#ccc}
   .cmt{position:relative}
@@ -403,11 +409,11 @@
   function render(list){DATA=list;
     var isNew=lastTop&&list[0].link!==lastTop;
     sokEl.innerHTML='<b>'+(isNew?"[NEW] ":"")+'속보</b> '+esc(list[0].title);lastTop=list[0].link;
-    var h="";for(var i=0;i<list.length;i++){var it=list[i];
+    var h=BRIEF?'<div class="nitem brief" data-b="1"><span class="ni">★</span><span class="nt">'+esc(briefDate(BRIEF))+' 출근길 브리핑<div class="nm">직접 정리 · '+BRIEF.items.length+'개 이슈</div></span></div>':"";for(var i=0;i<list.length;i++){var it=list[i];
       h+='<div class="nitem" data-i="'+i+'"><span class="ni">'+(i+1)+'</span><span class="nt">'+esc(it.title)+'<div class="nm">'+(it.src?esc(it.src)+" · ":"")+ago(it.pubDate)+'</div></span></div>';}
     newsEl.innerHTML=h;}
   function load(){var pers=document.getElementById("pers").checked;
-    fetchNews().then(function(nd){var all=(nd.items||[]).slice();if(!all.length)throw 0;
+    Promise.all([fetchNews(),loadBrief()]).then(function(r){var nd=r[0];var all=(nd.items||[]).slice();if(!all.length)throw 0;
       if(pers)all.sort(function(a,b){var d=score(b.title)-score(a.title);return d||((new Date(b.pubDate)-new Date(a.pubDate))||0)});
       render(all.slice(0,16));
     }).catch(function(){newsEl.innerHTML='<div class="nloading">뉴스 불러오는 중…</div>';sokEl.innerHTML='<b>속보</b> 로딩 대기 중…';});}
@@ -424,6 +430,13 @@
     var S=[{n:"퇴근하고파",t:"이거 실화냐 ㄷㄷ",l:42},{n:"익명의직장인",t:"아침부터 이런 뉴스라니...",l:31},{n:"김대리",t:"회사에서 몰래 보는 중 ㅋㅋ",l:25},{n:"5년차이직각",t:"남 일 같지 않네요 하...",l:14},{n:"점심뭐먹지",t:"그래서 결론이 뭔데요",l:6}];
     S.sort(function(a,b){return b.l-a.l});if(nEl)nEl.textContent=S.length;
     if(box)box.innerHTML=S.map(function(m,i){return '<div class="cmt'+(i===0?" best":"")+'">'+(i===0?'<span class="besttag">BEST</span>':"")+'<b>'+esc(m.n)+'</b>'+esc(m.t)+'<button class="clk" type="button">▲ '+m.l+'</button></div>'}).join("")+'<div class="rnote" style="color:#c0392b">※ 미리보기(샘플) 데이터 — 실제 사용자 반응 아님. ?demo=0 으로 끄기.</div>';}
+  var BRIEF=null;
+  function loadBrief(){return fetch("./briefing.json?t="+Math.floor(Date.now()/600000)).then(function(r){return r.json()}).then(function(d){BRIEF=(d&&d.days&&d.days[0])||null;return BRIEF}).catch(function(){return BRIEF})}
+  function briefHTML(b){return '<div class="rtitle">'+esc(b.title)+'</div><div class="rmeta">직접 정리한 요약 · '+esc(b.date)+'</div>'+(b.lead?'<p class="blead">'+esc(b.lead)+'</p>':'')
+    +b.items.map(function(x){return '<div class="bitem"><div><span class="btag">'+esc(x.tag)+'</span><span class="bh">'+esc(x.h)+'</span></div><div class="bt">'+esc(x.t)+'</div>'+(x.tip?'<div class="btip">'+esc(x.tip)+'</div>':'')
+      +'<div class="bsrc">출처 '+x.src.map(function(c){return '<a href="'+esc(c.u).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(c.n)+' ↗</a>'}).join("")+'</div></div>'}).join("")
+    +'<div class="rnote">※ 여러 언론 보도를 바탕으로 우리 말로 새로 정리했어요. 자세한 내용은 출처 링크에서. <a href="./briefing/" target="_blank">지난 브리핑</a></div>'}
+  function briefDate(b){var p=b.date.split("-");return (+p[1])+"/"+(+p[2])}
   function paras(t){var ss=t.replace(/([다요죠음함됨까]\.)\s*(?=[가-힣0-9"“'‘(\[A-Z])/g,"$1\n").replace(/([!?…]|\.(?=\s+["“'‘(\[가-힣A-Z]))\s+/g,"$1\n").split("\n"),out=[],cur="";
     ss.forEach(function(x){x=x.trim();if(!x)return;cur=cur?cur+" "+x:x;if(cur.length>=110){out.push(cur);cur=""}});if(cur)out.push(cur);
     return out.map(function(x){return "<p>"+esc(x)+"</p>"}).join("")}
@@ -459,7 +472,7 @@
       var nm=(document.getElementById("cnk").value||"익명").trim().slice(0,12)||"익명";store.set("nick",nm);
       DB.collection("stats").add({k:"c",link:link,name:nm,text:msg.slice(0,200),likes:0,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
       document.getElementById("cmi").value="";try{track("news_comment")}catch(e){}};}
-  newsEl.addEventListener("click",function(e){var n=e.target.closest(".nitem");if(!n)return;var it=DATA[+n.getAttribute("data-i")];if(it)openReader(it);});
+  newsEl.addEventListener("click",function(e){var n=e.target.closest(".nitem");if(!n)return;if(n.getAttribute("data-b")){if(BRIEF){cwel.classList.remove("on");fr.style.display="none";creader.classList.add("on");cph.textContent="브리핑";toGame.hidden=false;creader.innerHTML=briefHTML(BRIEF);creader.scrollTop=0;try{track("brief_read")}catch(x){}}return;}var it=DATA[+n.getAttribute("data-i")];if(it)openReader(it);});
   load();setInterval(load,180000);
   (function(){var b=document.getElementById("skinBtn");if(!b)return;b.textContent="메일 보기";b.onclick=function(){store.set("skin","mail");location.reload()}})();
 
@@ -496,16 +509,17 @@
           +'<div class="resig">'+esc(m.f)+' 드림\n(주)컴퍼니  ·  본 메일은 수신 전용입니다.</div>'})}
     function newsList(){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
       var mode=store.get("newssort","new");
-      fetchNews().then(function(nd){var list;
+      Promise.all([fetchNews(),loadBrief()]).then(function(r){var nd=r[0];var list;
         if(mode==="hot"){list=(nd.hot||[]).filter(function(x){return x.cat==="종합"});}
         else{list=(nd.items||[]).slice();list.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});}
         list=list.slice(0,40);
         if(!list.length){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요. 잠시 후 다시.</div></div></div>';return}
         var ranked=(mode==="hot");
         var bar='<div class="nsort"><span class="ns'+(mode==="new"?" on":"")+'" data-m="new">최신순</span><span class="ns'+(mode==="hot"?" on":"")+'" data-m="hot">인기순</span></div>';
-        mitems.innerHTML=bar+list.map(function(it,i){return '<div class="mitem" data-i="'+i+'">'+(ranked?'<div class="nrank'+(i<3?" top":"")+'">'+(i+1)+'</div>':'')+'<div class="mbody"><div class="nmeta">'+esc(it.src||"뉴스")+' · '+esc(catLabel(it.cat))+' · '+ago(it.pubDate)+'</div><div class="ntitle">'+esc(it.title)+'</div></div></div>'}).join("");
+        var pin=BRIEF?'<div class="mitem brief unread" data-b="1"><div class="mbody"><div class="nmeta">오늘의 브리핑 · 뉴스레터 · '+esc(briefDate(BRIEF))+'</div><div class="ntitle">'+esc(BRIEF.title)+'</div><div class="mprev">'+esc(BRIEF.items.map(function(x){return x.h}).slice(0,2).join(" / "))+'</div></div></div>':"";
+        mitems.innerHTML=bar+pin+list.map(function(it,i){return '<div class="mitem" data-i="'+i+'">'+(ranked?'<div class="nrank'+(i<3?" top":"")+'">'+(i+1)+'</div>':'')+'<div class="mbody"><div class="nmeta">'+esc(it.src||"뉴스")+' · '+esc(catLabel(it.cat))+' · '+ago(it.pubDate)+'</div><div class="ntitle">'+esc(it.title)+'</div></div></div>'}).join("");
         mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList()}});
-        mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});
+        mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");if(x.getAttribute("data-b")){x.classList.remove("unread");mread.innerHTML=briefHTML(BRIEF);mread.scrollTop=0;try{track("brief_read")}catch(e){}return}window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
     var CURROOM=null,roomUnsub=null,rpInt=null,rpUnsub=null;
     function mySid(){var s=store.get("sid","");if(!s){s="s"+Math.random().toString(36).slice(2);store.set("sid",s)}return s}
