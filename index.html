@@ -513,6 +513,7 @@
     function newsList(){mread.innerHTML='<div class="mempty">기사를 선택하세요.</div>';mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오는 중…</div></div></div>';
       var mode=store.get("newssort","new");
       Promise.all([fetchNews(),loadBrief()]).then(function(r){var nd=r[0];var list;
+        if(BRIEF&&/기사를 선택/.test(mread.textContent)){mread.innerHTML=briefHTML(BRIEF);mread.scrollTop=0}
         if(mode==="hot"){list=(nd.hot||[]).filter(function(x){return x.cat==="종합"});}
         else{list=(nd.items||[]).slice();list.sort(function(a,b){return (new Date(b.pubDate)-new Date(a.pubDate))||0});}
         list=list.slice(0,40);
@@ -521,6 +522,7 @@
         var bar='<div class="nsort"><span class="ns'+(mode==="new"?" on":"")+'" data-m="new">최신순</span><span class="ns'+(mode==="hot"?" on":"")+'" data-m="hot">인기순</span></div>';
         var pin=BRIEF?'<div class="mitem brief unread" data-b="1"><div class="mbody"><div class="nmeta">오늘의 브리핑 · 뉴스레터 · '+esc(briefDate(BRIEF))+'</div><div class="ntitle">'+esc(BRIEF.title)+'</div><div class="mprev">'+esc(BRIEF.items.map(function(x){return x.h}).slice(0,2).join(" / "))+'</div></div></div>':"";
         mitems.innerHTML=bar+pin+list.map(function(it,i){return '<div class="mitem" data-i="'+i+'">'+(ranked?'<div class="nrank'+(i<3?" top":"")+'">'+(i+1)+'</div>':'')+'<div class="mbody"><div class="nmeta">'+esc(it.src||"뉴스")+' · '+esc(catLabel(it.cat))+' · '+ago(it.pubDate)+'</div><div class="ntitle">'+esc(it.title)+'</div></div></div>'}).join("");
+        var bi=mitems.querySelector(".mitem.brief");if(bi&&/출근길 브리핑/.test(mread.textContent)){bi.classList.add("on");bi.classList.remove("unread")}
         mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList()}});
         mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");if(x.getAttribute("data-b")){x.classList.remove("unread");mread.innerHTML=briefHTML(BRIEF);mread.scrollTop=0;try{track("brief_read")}catch(e){}return}window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
