@@ -326,6 +326,13 @@
   .mitem .msub:hover{background:none}
   .mitem .mfrom{align-items:center}
   .mitem .mfrom .md{margin-left:auto}
+
+  .sd{display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid #fff;background:#13a10e;box-sizing:content-box}.sd.away{background:#f4c20d}
+  .tav{position:relative}.tav .sd{position:absolute;right:-2px;bottom:-2px}
+  .tpp{display:inline-flex;align-items:center;gap:4px;margin-right:9px}.tpp .sd{border:0}
+  .tnew{display:flex;align-items:center;gap:10px;margin:12px 0 6px;color:#c50f1f;font-size:11px;font-weight:600}.tnew::before,.tnew::after{content:"";flex:1;height:1px;background:#e8a0a6}
+  .runread{margin-left:6px;background:#0f6cbd;color:#fff;font-size:10px;font-weight:700;border-radius:9px;padding:0 6px;line-height:16px}
+  [data-skin="mail"] .mfold #chatCnt{background:#0f6cbd;color:#fff;border-radius:9px;padding:0 6px;font-size:10px;line-height:16px}
 </style>
 </head>
 <body>
@@ -508,15 +515,11 @@
     beat();setInterval(beat,30000);
     window.addEventListener("pagehide",function(){try{var o={};o["u."+sid]=firebase.firestore.FieldValue.delete();ref.update(o)}catch(e){}});
     var prevC=-1;ref.onSnapshot(function(d){var u=(d.exists&&d.data().u)||{},now=Date.now(),cc=0;Object.keys(u).forEach(function(k){if(now-u[k]<45000)cc++});cc=cc||1;els.forEach(function(e){e.textContent=cc+"명"});
-      var fb=document.getElementById("chatCnt");if(fb){fb.textContent=cc>1?cc+"명":"";fb.style.display=cc>1?"":"none"}
       if(prevC>0&&cc>prevC)toast("새 참석자","전체 휴게실에 1명이 들어왔어요 (현재 "+cc+"명)");prevC=cc},function(){})}catch(e){}}
   function toast(t,b){var el=document.getElementById("toast");if(!el){el=document.createElement("div");el.id="toast";document.body.appendChild(el)}
     el.innerHTML='<b>'+esc(t)+'</b><div>'+esc(b)+'</div>';el.className="on";clearTimeout(el._t);el._t=setTimeout(function(){el.className=""},4500);
     el.onclick=function(){el.className="";var f=document.querySelector('#mailView .mfold[data-f="chat"]');if(document.documentElement.getAttribute("data-skin")==="mail"&&f)f.click()}}
   window.__toast=toast;var myMsgAt=0,firstLobby=true;
-  window.addEventListener("lobbymsg",function(e){var m=e.detail||{};if(firstLobby){firstLobby=false;return}
-    if(m.name===store.get("nick",""))return;var inChat=document.querySelector('#mailView .mfold.on[data-f="chat"]');
-    if(document.documentElement.getAttribute("data-skin")==="mail"&&!inChat)toast(m.name||"익명",String(m.text||"").slice(0,40))});
   (function wait(n){try{if(window.firebase&&firebase.apps&&firebase.apps.length){DB=firebase.firestore();startPresence();return;}}catch(e){}if(n>0)setTimeout(function(){wait(n-1)},300)})(40);
   function hashLink(l){var h=0;for(var i=0;i<l.length;i++){h=(h*31+l.charCodeAt(i))|0}return "N"+(h>>>0)}
   var cmtUnsub=null,likeUnsub=null;
@@ -656,7 +659,24 @@
         mitems.querySelectorAll(".ns").forEach(function(b){b.onclick=function(){store.set("newssort",b.getAttribute("data-m"));newsList()}});
         mitems.querySelectorAll(".mitem").forEach(function(x){x.onclick=function(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});x.classList.add("on");if(x.getAttribute("data-b")){x.classList.remove("unread");mread.innerHTML=briefHTML(BRIEF);mread.scrollTop=0;try{track("brief_read")}catch(e){}return}window.__mailOpenArticle(list[+x.getAttribute("data-i")])}});
       }).catch(function(){mitems.innerHTML='<div class="mitem"><div class="mbody"><div class="mprev">불러오지 못했어요.</div></div></div>'})}
-    var CURROOM=null,roomUnsub=null,rpInt=null,rpUnsub=null;
+    var CURROOM=null,roomUnsub=null,rpInt=null,rpUnsub=null,UNREAD={},WATCH={},lastAct=Date.now();
+    ["mousemove","keydown","click","touchstart"].forEach(function(ev){window.addEventListener(ev,function(){lastAct=Date.now()},{passive:true})});
+    function myStatus(){return (document.hidden||Date.now()-lastAct>300000)?"away":"on"}
+    function myRooms(){try{return JSON.parse(store.get("myrooms","[]"))}catch(e){return []}}
+    function addMyRoom(rid,name,cap){var l=myRooms().filter(function(r){return r.id!==rid});l.unshift({id:rid,name:name,cap:cap});store.set("myrooms",JSON.stringify(l.slice(0,8)));watchRooms()}
+    function viewing(rid){var f=document.querySelector('#mailView .mfold.on');return CURROOM===rid&&f&&f.getAttribute("data-f")==="chat"&&!document.hidden}
+    function paintUnread(){var tot=0;for(var k in UNREAD)tot+=UNREAD[k]||0;var fb=document.getElementById("chatCnt");if(fb){fb.textContent=tot>99?"99+":tot;fb.style.display=tot?"":"none"}
+      [].forEach.call(document.querySelectorAll(".runread"),function(el){var n=UNREAD[el.getAttribute("data-r")]||0;el.textContent=n>99?"99+":n;el.style.display=n?"":"none"})}
+    function watchRooms(){if(!DB)return;var want={lobby:{id:"lobby",name:"전체 휴게실"}};myRooms().forEach(function(r){want[r.id]=r});
+      for(var k in WATCH)if(!want[k]){WATCH[k]();delete WATCH[k];delete UNREAD[k]}
+      Object.keys(want).forEach(function(rid){if(WATCH[rid])return;var prevMc=null,nm=want[rid].name;
+        WATCH[rid]=DB.collection("stats").doc("rpres_"+rid).onSnapshot(function(d){var dd=(d.exists&&d.data())||{},mc=dd.mc||0,rc=parseInt(store.get("rc_"+rid,""),10);
+          if(isNaN(rc)){rc=mc;store.set("rc_"+rid,mc)}
+          if(viewing(rid)){store.set("rc_"+rid,mc);rc=mc}
+          UNREAD[rid]=Math.max(0,mc-rc);paintUnread();
+          if(prevMc!==null&&mc>prevMc&&!viewing(rid)&&dd.last&&dd.last.n!==nickGet())toast(nm+" · "+dd.last.n,String(dd.last.t||""));prevMc=mc},function(){})})}
+    (function w(n){if(DB){watchRooms();return}if(n>0)setTimeout(function(){w(n-1)},500)})(40);
+    document.addEventListener("visibilitychange",function(){if(!document.hidden&&CURROOM&&viewing(CURROOM)){UNREAD[CURROOM]=0;paintUnread()}});
     function mySid(){var s=store.get("sid","");if(!s){s="s"+Math.random().toString(36).slice(2);store.set("sid",s)}return s}
     var PRESET=[{id:"lobby",name:"전체 휴게실",desc:"모두 여기서 · 점심 12~1시가 제일 북적여요",cap:50},{id:"oneone",name:"1:1 고민상담",desc:"단둘이 조용히",cap:2}];
     function nickGet(){var n=store.get("nick","");if(!n){n="익명"+Math.floor(Math.random()*9000+1000);store.set("nick",n)}return n}
@@ -683,15 +703,16 @@
         try{navigator.clipboard.writeText(roomURL(rid)).then(function(){toast("방을 만들었어요","링크가 복사됐어요. 붙여넣기해서 보내세요.")},function(){})}catch(x){}
         enterRoom(rid,name,cap);try{track("room_create")}catch(x){}}}
     function roomURL(rid){return location.origin+location.pathname+"?room="+encodeURIComponent(rid)}
-    function enterRoom(rid,name,cap){cap=cap||4;CURROOM=rid;try{history.replaceState(null,"",roomURL(rid))}catch(e){}mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
+    function enterRoom(rid,name,cap){cap=cap||4;CURROOM=rid;addMyRoom(rid,name,cap);UNREAD[rid]=0;paintUnread();try{history.replaceState(null,"",roomURL(rid))}catch(e){}mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
       if(rpInt){clearInterval(rpInt);rpInt=null}if(rpUnsub){rpUnsub();rpUnsub=null}
       var sid=mySid(),pref=DB?DB.collection("stats").doc("rpres_"+rid):null;
       function cnt(u){var n=0,now=Date.now();for(var k in u){if(now-u[k]<45000)n++}return n}
-      function beat(){if(!pref)return;var o={},nn={};o[sid]=Date.now();nn[sid]=nickGet().slice(0,12);pref.set({u:o,n:nn},{merge:true}).catch(function(){})}
+      function beat(){if(!pref)return;var o={},nn={},st={};o[sid]=Date.now();nn[sid]=nickGet().slice(0,12);st[sid]=myStatus();pref.set({u:o,n:nn,st:st},{merge:true}).catch(function(){})}
+      document.addEventListener("visibilitychange",function(){if(CURROOM===rid)beat()});
       function prune(u){var del={},now=Date.now(),any=false;for(var k in u)if(now-u[k]>600000){del["u."+k]=firebase.firestore.FieldValue.delete();del["n."+k]=firebase.firestore.FieldValue.delete();any=true}if(any&&pref)pref.update(del).catch(function(){})}
       function hm(d){return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
       function dayLabel(d){var t=new Date(),y=new Date(Date.now()-86400000);if(d.toDateString()===t.toDateString())return "오늘";if(d.toDateString()===y.toDateString())return "어제";return (d.getMonth()+1)+"월 "+d.getDate()+"일"}
-      var sysLines=[],seen=null,lastArr=[],RX={},TY={},replyTo=null,sendLog=[],tyAt=0,tyTimer=null;
+      var PRES={},unreadAt=null,mcNow=0,sysLines=[],seen=null,lastArr=[],RX={},TY={},replyTo=null,sendLog=[],tyAt=0,tyTimer=null;
       var rxRef=DB?DB.collection("stats").doc("rx_"+rid):null,tyRef=DB?DB.collection("stats").doc("rty_"+rid):null;
       var JOBS=["","IT·개발","기획·전략","영업·마케팅","디자인","재무·회계","인사·총무","생산·제조","연구·R&D","의료·보건","교육","공무원·공기업","금융","유통·서비스","건설","기타"];
       function blocked(){try{return JSON.parse(store.get("blk","[]"))}catch(e){return []}}
@@ -702,16 +723,17 @@
         var items=lastArr.filter(function(m){return !(m.s&&blk.indexOf(m.s)>=0)}).map(function(m){var d=(m.createdAt&&m.createdAt.toDate)?m.createdAt.toDate():new Date();return {m:m,d:d}}).concat(sysLines);
         items.sort(function(x,y){return x.d-y.d});
         if(!items.length){box.innerHTML='<div class="tempty"><b>'+esc(name)+'</b><br>아직 대화가 없어요. 먼저 인사해 보세요.</div>';return}
-        items.forEach(function(it){var dl=dayLabel(it.d);if(dl!==lastDay){h+='<div class="tday"><span>'+dl+'</span></div>';lastDay=dl;prev=null}
+        var divAt=-1;if(unreadAt>0){var cnt2=0;for(var q=items.length-1;q>=0;q--){if(items[q].m&&!(items[q].m.s===sid)){cnt2++;if(cnt2===unreadAt){divAt=q;break}}}}
+        items.forEach(function(it,ix){if(ix===divAt){h+='<div class="tnew"><span>여기부터 안 읽은 메시지</span></div>';prev=null}var dl=dayLabel(it.d);if(dl!==lastDay){h+='<div class="tday"><span>'+dl+'</span></div>';lastDay=dl;prev=null}
           if(it.sys){h+='<div class="tsys">'+esc(it.sys)+' · '+hm(it.d)+'</div>';prev=null;return}
           var m=it.m,nm=m.name||"익명",mine=(m.s&&m.s===sid)||(!m.s&&nm===me),grp=prev&&prev.nm===nm&&it.d-prev.d<300000&&!m.re;
-          h+='<div class="tmsg'+(mine?" me":"")+(grp?" grp":"")+'" data-id="'+m._id+'">'+(mine||grp?'<span class="tav sp"></span>':'<span class="tav" style="background:'+avColor(nm)+'">'+esc(initial(nm))+'</span>')
+          h+='<div class="tmsg'+(mine?" me":"")+(grp?" grp":"")+'" data-id="'+m._id+'">'+(mine||grp?'<span class="tav sp"></span>':'<span class="tav" style="background:'+avColor(nm)+'">'+esc(initial(nm))+(m.s&&PRES[m.s]?'<i class="sd '+PRES[m.s]+'"></i>':'')+'</span>')
             +'<div class="tcol">'+(grp?'':'<div class="tmeta">'+(mine?'':'<b>'+esc(nm)+'</b>'+(m.jb?'<i>'+esc(m.jb)+'</i>':''))+'<span>'+hm(it.d)+'</span></div>')
             +'<div class="tbw"><div class="tbub">'+(m.re?'<div class="tquote"><b>'+esc(m.re.n||"")+'</b> '+esc(m.re.t||"")+'</div>':'')+esc(m.text)+'</div>'
             +'<div class="tops"><span data-op="re">답장</span><span data-op="공감">공감</span><span data-op="ㅋㅋ">ㅋㅋ</span>'+(mine?'':'<span data-op="more">⋯</span>')+'</div></div>'
             +rxHTML(m._id)+'</div></div>';
           prev={nm:nm,d:it.d}});
-        box.innerHTML=h;if(stick||!paint.done)box.scrollTop=box.scrollHeight;paint.done=true}
+        box.innerHTML=h;var nd=box.querySelector(".tnew");if(!paint.done&&nd)box.scrollTop=Math.max(0,nd.offsetTop-40);else if(stick||!paint.done)box.scrollTop=box.scrollHeight;paint.done=true}
       function find(id){for(var i=0;i<lastArr.length;i++)if(lastArr[i]._id===id)return lastArr[i];return null}
       function toggleRx(id,t){if(!rxRef)return;var cur=(RX[id]||{})[sid],o={};
         if(cur===t){o["r."+id+"."+sid]=firebase.firestore.FieldValue.delete();rxRef.update(o).catch(function(){})}
@@ -757,7 +779,7 @@
         document.getElementById("rform").onsubmit=function(e){e.preventDefault();var t=(inp.value||"").trim();if(!t)return;if(!DB){alert("채팅 연결 준비 중…");return}
           var why=canSend(t);if(why){toast("잠시만요",why);return}sendLog.push({t:Date.now(),m:t});
           var doc={room:rid,s:sid,name:nickGet().slice(0,12),text:t.slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()};if(tagOf())doc.jb=tagOf().slice(0,20);if(replyTo)doc.re=replyTo;
-          DB.collection("lounge").add(doc).catch(function(){});if(pref)pref.set({last:{n:doc.name,t:doc.text.slice(0,40),at:Date.now()}},{merge:true}).catch(function(){});inp.value="";setReply(null);tyAt=0;var bx=document.getElementById("rbox");if(bx)setTimeout(function(){bx.scrollTop=bx.scrollHeight},50);try{track("room_msg")}catch(ee){}};
+          DB.collection("lounge").add(doc).catch(function(){});if(pref)pref.set({last:{n:doc.name,t:doc.text.slice(0,40),at:Date.now()},mc:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(function(){});unreadAt=0;inp.value="";setReply(null);tyAt=0;var bx=document.getElementById("rbox");if(bx)setTimeout(function(){bx.scrollTop=bx.scrollHeight},50);try{track("room_msg")}catch(ee){}};
         if(roomUnsub){roomUnsub();roomUnsub=null}
         paint();
         if(DB){roomUnsub=DB.collection("lounge").where("room","==",rid).onSnapshot(function(q){var arr=[];q.forEach(function(dc){var m=dc.data();m._id=dc.id;arr.push(m)});arr.sort(function(a,b){return (a.createdAt&&b.createdAt)?(a.createdAt.seconds-b.createdAt.seconds):0});lastArr=arr.slice(-80);paint()},function(){});
@@ -767,7 +789,10 @@
         if(pref){beat();rpInt=setInterval(beat,20000);var pruned=false;rpUnsub=pref.onSnapshot(function(d2){var dd=(d2.exists&&d2.data())||{},u=dd.u||{},ps=people(u,dd.n||{});
           if(!pruned){pruned=true;prune(u)}
           var el=document.getElementById("roomcap");if(el)el.textContent=ps.length+"/"+cap;
-          var names=ps.map(function(p){return p.k===sid?p.n+"(나)":p.n});var pl=document.getElementById("tppl");if(pl)pl.textContent=names.length?names.slice(0,6).join(", ")+(names.length>6?" 외 "+(names.length-6)+"명":""):"참여자 없음";
+          var stm=dd.st||{},np={},chg=false;ps.forEach(function(p){np[p.k]=stm[p.k]==="away"?"away":"on"});for(var z in np)if(PRES[z]!==np[z])chg=true;for(var z2 in PRES)if(!np[z2])chg=true;PRES=np;
+          var pl=document.getElementById("tppl");if(pl)pl.innerHTML=ps.length?ps.slice(0,6).map(function(p){return '<span class="tpp"><i class="sd '+np[p.k]+'"></i>'+esc(p.n)+(p.k===sid?"(나)":"")+'</span>'}).join("")+(ps.length>6?'<span class="tpp">외 '+(ps.length-6)+'명</span>':""):"참여자 없음";
+          var mc=dd.mc||0,rc=parseInt(store.get("rc_"+rid,""),10);if(unreadAt===null){unreadAt=isNaN(rc)?0:Math.max(0,mc-rc);chg=true}store.set("rc_"+rid,mc);UNREAD[rid]=0;paintUnread();
+          if(chg)paint();
           var cur={};ps.forEach(function(p){cur[p.k]=p.n});
           if(seen){var ch=false;for(var k in cur)if(!seen[k]&&k!==sid){sysLines.push({sys:cur[k]+"님이 들어왔어요",d:new Date()});ch=true}for(var k2 in seen)if(!cur[k2]&&k2!==sid){sysLines.push({sys:seen[k2]+"님이 나갔어요",d:new Date()});ch=true}if(ch)paint()}
           seen=cur},function(){})}
@@ -779,8 +804,8 @@
     function chat(){mread.innerHTML='<div class="mempty">왼쪽에서 방을 선택하세요.</div>';
       function render(extra){var rooms=PRESET.concat(extra||[]);
         mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><button type="button" class="nrbtn" id="newRoom">+ 방 만들기</button></div>'
-          +rooms.map(function(r){var cp=r.cap||4;return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'" data-cap="'+cp+'"><span class="tic rl" style="background:'+avColor(r.name)+'">'+esc(initial(r.name))+'</span><div class="mbody"><div class="mfrom">'+esc(r.name)+(cp===2?' <em class="r11">1:1</em>':'')+' <span class="md rcount" data-r="'+esc(r.id)+'"><span class="rcap">0/'+cp+'</span></span></div><div class="msub rlast" data-r="'+esc(r.id)+'">'+esc(r.desc||"")+'</div></div></div>'}).join("");
-        rooms.forEach(function(r){if(!DB)return;DB.collection("stats").doc("rpres_"+r.id).get().then(function(dc){var u=(dc.exists&&dc.data().u)||{},n=0,now=Date.now();for(var k in u)if(now-u[k]<45000)n++;
+          +rooms.map(function(r){var cp=r.cap||4;return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'" data-cap="'+cp+'"><span class="tic rl" style="background:'+avColor(r.name)+'">'+esc(initial(r.name))+'</span><div class="mbody"><div class="mfrom">'+esc(r.name)+(cp===2?' <em class="r11">1:1</em>':'')+' <span class="runread" data-r="'+esc(r.id)+'" style="display:none"></span><span class="md rcount" data-r="'+esc(r.id)+'"><span class="rcap">0/'+cp+'</span></span></div><div class="msub rlast" data-r="'+esc(r.id)+'">'+esc(r.desc||"")+'</div></div></div>'}).join("");
+        paintUnread();rooms.forEach(function(r){if(!DB)return;DB.collection("stats").doc("rpres_"+r.id).get().then(function(dc){var u=(dc.exists&&dc.data().u)||{},n=0,now=Date.now();for(var k in u)if(now-u[k]<45000)n++;
           var cp=r.cap||4,el=mitems.querySelector('.rcount[data-r="'+r.id+'"]');if(el)el.innerHTML='<span class="rcap'+(n>=cp?" full":n?" live":"")+'">'+(n>=cp?"가득 참 ":"")+n+'/'+cp+'</span>';
           var ls=(dc.exists&&dc.data().last)||null,lel=mitems.querySelector('.rlast[data-r="'+r.id+'"]');
           if(ls&&lel&&ls.t){var ago2=Math.floor((Date.now()-(ls.at||0))/60000);lel.innerHTML='<b>'+esc(ls.n||"익명")+':</b> '+esc(ls.t)+' <span class="rago">· '+(ago2<1?"방금":ago2<60?ago2+"분 전":ago2<1440?Math.floor(ago2/60)+"시간 전":Math.floor(ago2/1440)+"일 전")+'</span>'}}).catch(function(){})});

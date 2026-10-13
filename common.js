@@ -81,6 +81,7 @@
       var msg=(document.getElementById("cmsg").value||"").trim();if(!msg)return;
       var nm=(document.getElementById("cnick").value||"익명").trim().slice(0,12)||"익명";store.set("nick",nm);
       db.collection("lounge").add({room:"lobby",name:nm,text:clean(msg).slice(0,200),createdAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+      db.collection("stats").doc("rpres_lobby").set({last:{n:nm,t:clean(msg).slice(0,40),at:Date.now()},mc:firebase.firestore.FieldValue.increment(1)},{merge:true}).catch(function(){});
       document.getElementById("cmsg").value="";track("lounge_msg");
     });
   }
