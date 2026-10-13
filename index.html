@@ -206,6 +206,10 @@
   .roomnick{font-size:12px;color:#888}
   .roomnick a,.mread .rnote a{color:#0f6cbd;cursor:pointer;text-decoration:underline}
   .mread #rbox{max-height:none;height:54vh;min-height:300px}
+.nrbtn{margin-left:auto;background:#0f6cbd;color:#fff;border:0;padding:3px 10px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;border-radius:2px}
+  .nrform{max-width:380px;font-size:13px}.nrform>label{display:block;margin:10px 0 4px;color:#444;font-weight:600}
+  .nrform input[type=text],.nrform #nrName,.nrform #nrDesc{display:block;width:100%;margin-top:4px;padding:6px 8px;border:1px solid #c8c8c8;font:inherit;font-weight:400}
+  .nrcap{display:flex;gap:16px;font-weight:400}.nrcap label{cursor:pointer}.nrform .btn{width:auto;display:inline-block;padding:6px 16px;margin-top:14px;font-size:13px}
   .nsort .ns#newRoom,.nsort .ns#newRoom.on{color:#0f6cbd;font-weight:700}
   .ntitle{font-size:14px;font-weight:700;color:#1c2b1c;line-height:1.4;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   [data-skin="mail"] .ntitle{color:#14324f}
@@ -551,9 +555,18 @@
       var ref=DB.collection("stats").doc("nick_"+n),h=pinHash(pin);
       ref.get().then(function(dc){if(dc.exists){if((dc.data().h||"")===h){store.set("nick",n);store.set("nickpin",pin);alert("'"+n+"' 복원 완료!");refreshNick();}else alert("이미 선점된 닉이에요. PIN이 달라요.");}
         else{ref.set({k:"nick",h:h,ts:firebase.firestore.FieldValue.serverTimestamp()}).then(function(){store.set("nick",n);store.set("nickpin",pin);alert("'"+n+"' 선점 완료! 다른 기기에선 같은 닉+PIN으로 복원하세요.");refreshNick();}).catch(function(){});}}).catch(function(){});}
-    function createRoom(){var name=prompt("방 제목(2~16자)");if(!name)return;name=name.trim().slice(0,16);if(name.length<2)return;var desc=(prompt("방 설명(선택, 40자)")||"").slice(0,40);
-      var capS=prompt("정원: 2 = 1:1, 4 = 4인","4");var cap=(capS&&capS.trim()==="2")?2:4;
-      var rid="r"+Date.now().toString(36);if(DB)DB.collection("stats").add({k:"room",rid:rid,name:name,desc:desc,cap:cap,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});enterRoom(rid,name,cap);}
+    function createRoom(){mitems.querySelectorAll(".mitem").forEach(function(y){y.classList.remove("on")});
+      mread.innerHTML='<div class="roomhd"><b>새 대화방 만들기</b></div><form class="nrform" id="nrf">'
+        +'<label>방 제목<input id="nrName" maxlength="16" placeholder="예) 3층 점심팟, 개발팀 수다" required></label>'
+        +'<label>설명 (선택)<input id="nrDesc" maxlength="40" placeholder="어떤 얘기 하는 방인지 한 줄로"></label>'
+        +'<label>정원</label><div class="nrcap"><label><input type="radio" name="nrcap" value="2"> 1:1</label><label><input type="radio" name="nrcap" value="4" checked> 4명</label><label><input type="radio" name="nrcap" value="10"> 10명</label></div>'
+        +'<button class="btn" type="submit">만들고 링크 복사</button><div class="rnote">만든 방은 24시간 동안 목록에 보여요. 링크를 받은 사람은 바로 입장해요.</div></form>';
+      var nm=document.getElementById("nrName");try{nm.focus()}catch(e){}
+      document.getElementById("nrf").onsubmit=function(e){e.preventDefault();var name=(nm.value||"").trim().slice(0,16);if(name.length<2){alert("방 제목은 2자 이상이에요.");return}
+        var desc=(document.getElementById("nrDesc").value||"").trim().slice(0,40),c=document.querySelector('input[name="nrcap"]:checked'),cap=c?+c.value:4;
+        var rid="r"+Date.now().toString(36);if(DB)DB.collection("stats").add({k:"room",rid:rid,name:name,desc:desc,cap:cap,ts:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+        try{navigator.clipboard.writeText(roomURL(rid)).then(function(){toast("방을 만들었어요","링크가 복사됐어요. 붙여넣기해서 보내세요.")},function(){})}catch(x){}
+        enterRoom(rid,name,cap);try{track("room_create")}catch(x){}}}
     function roomURL(rid){return location.origin+location.pathname+"?room="+encodeURIComponent(rid)}
     function enterRoom(rid,name,cap){cap=cap||4;CURROOM=rid;try{history.replaceState(null,"",roomURL(rid))}catch(e){}mitems.querySelectorAll(".mitem").forEach(function(x){x.classList.toggle("on",x.getAttribute("data-room")===rid)});
       if(rpInt){clearInterval(rpInt);rpInt=null}if(rpUnsub){rpUnsub();rpUnsub=null}
@@ -582,7 +595,7 @@
       else render();}
     function chat(){mread.innerHTML='<div class="mempty">왼쪽에서 방을 선택하세요.</div>';
       function render(extra){var rooms=PRESET.concat(extra||[]);
-        mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><span class="ns" id="newRoom" style="margin-left:auto">+ 방 만들기</span></div>'
+        mitems.innerHTML='<div class="nsort"><span class="ns on">방 목록</span><button type="button" class="nrbtn" id="newRoom">+ 방 만들기</button></div>'
           +rooms.map(function(r){var cp=r.cap||4;return '<div class="mitem" data-room="'+esc(r.id)+'" data-name="'+esc(r.name)+'" data-cap="'+cp+'"><div class="mbody"><div class="mfrom">'+esc(r.name)+' <span class="md rcount" data-r="'+esc(r.id)+'">'+(cp===2?"1:1":"")+'</span></div><div class="msub">'+esc(r.desc||"")+'</div></div></div>'}).join("");
         rooms.forEach(function(r){if(!DB)return;DB.collection("stats").doc("rpres_"+r.id).get().then(function(dc){var u=(dc.exists&&dc.data().u)||{},n=0,now=Date.now();for(var k in u)if(now-u[k]<45000)n++;
           var el=mitems.querySelector('.rcount[data-r="'+r.id+'"]');if(el&&n)el.innerHTML='<b style="color:#107c41">'+n+'명 대화 중</b>'}).catch(function(){})});
@@ -615,7 +628,8 @@
     if(mlistEl)mdrag(mlistEl,"mlist_w",260,620);
     var wp=document.getElementById("wipe");if(wp)wp.onclick=function(){if(confirm("이 기기에 저장된 닉네임·설정·좋아요/추천 기록을 모두 삭제할까요?")){try{Object.keys(localStorage).forEach(function(k){if(k.indexOf("ss_")===0)localStorage.removeItem(k)})}catch(e){}location.reload()}};
     var deep=(location.search.match(/[?&]room=([^&]+)/)||[])[1];
-    if(deep){deep=decodeURIComponent(deep);setFold("chat");
+    if(deep==="new"){setFold("chat");createRoom()}
+    else if(deep){deep=decodeURIComponent(deep);setFold("chat");
       (function go(n){if(!DB&&n>0)return setTimeout(function(){go(n-1)},300);
         var pr=PRESET.filter(function(r){return r.id===deep})[0];if(pr||!DB){enterRoom(deep,pr?pr.name:"대화방",pr?pr.cap:4);return}
         DB.collection("stats").where("rid","==",deep).get().then(function(q){var m=null;q.forEach(function(d){m=d.data()});enterRoom(deep,(m&&m.name)||"대화방",(m&&m.cap)||4)}).catch(function(){enterRoom(deep,"대화방",4)})})(30)}

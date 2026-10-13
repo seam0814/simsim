@@ -69,7 +69,7 @@
   }
   function lounge(db){
     var nick=store.get("nick","")||("익명"+Math.floor(Math.random()*9999));store.set("nick",nick);
-    loungeEl.innerHTML='<div class="cat"> 전체 휴게실 <span style="font-weight:400;color:var(--muted);font-size:.8rem">(익명·누구나)</span></div>'
+    loungeEl.innerHTML='<div class="cat"> 전체 휴게실 <span style="font-weight:400;color:var(--muted);font-size:.8rem">(익명·누구나)</span><a href="'+ROOT+'?room=new" style="float:right;font-weight:400;font-size:.8rem;color:var(--sel)">+ 방 만들기</a></div>'
       +'<div class="chatbox" id="cbox"></div>'
       +'<form id="cform" class="chatform"><input id="cnick" maxlength="12" value="'+esc(nick)+'"><input id="cmsg" maxlength="200" placeholder="메시지 입력"><button class="btn" type="submit">전송</button></form>';
     db.collection("lounge").orderBy("createdAt").limitToLast(50).onSnapshot(function(q){
